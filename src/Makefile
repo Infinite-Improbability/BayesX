@@ -9,7 +9,7 @@ LINKLIB = ld -shared
 LIBDIR = ../lib
 BINDIR = ../bin
  
-MCLIBS = -L$(LIBDIR) -lnest3 $(LIBS) 
+MCLIBS = -L$(LIBDIR) -lnest3 $(LIBS)
  
 MOBJECTS = params.o ReadInputs.o constants.o random.o rewind.o matrix_utils.o utilities.o cosmology.o massfunction.o MassModels.o ReadWrite.o GasModels.o Priors.o CheckPars.o like.o nestwrap.o BayesX.o
  

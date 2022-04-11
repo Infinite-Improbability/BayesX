@@ -22,7 +22,7 @@
 
 # Parallel with GNU Compilers
 
-FC = mpif90
+FC = mpifort
 CC = mpicc
 CXX = mpic++
 FFLAGS = -w -O3 -ffree-line-length-none -DMPI
@@ -33,13 +33,24 @@ LIBS = -llapack -lcfitsio
 
 # Serial with GNU Compilers
 
-#FC = gfortran
-#CC = gcc
-#CXX = g++
-#FFLAGS = -w -O3 -ffree-line-length-none
-#CFLAGS = -I. -O3
-#CXXFLAGS = -I. -O3
-#LIBS = -llapack -lcfitsio
+# FC = gfortran
+# CC = gcc
+# CXX = g++
+# FFLAGS = -w -O3 -ffree-line-length-none
+# CFLAGS = -I. -O3
+# CXXFLAGS = -I. -O3
+# LIBS = -llapack -lcfitsio
+
+
+# Serial with GNU Compilers debug flags
+
+# FC = gfortran
+# CC = gcc
+# CXX = g++
+# FFLAGS = -ggdb -ffree-line-length-none
+# CFLAGS = -I. -O3
+# CXXFLAGS = -I. -O3
+# LIBS = -llapack -lcfitsio
 
 
 
@@ -52,13 +63,15 @@ BINDIR = bin
 all: multinest BayesX
 
 multinest:
-	gmake -C multinest all
+	$(MAKE) -C multinest all
       
-BayesX:
-	gmake -C src BayesX
+BayesX: | dirs
+	$(MAKE) -C src BayesX
+
+dirs:
+	mkdir -p $(BINDIR) chains
 
 clean:
-	gmake -C src clean 
-	gmake -C multinest clean
+	$(MAKE) -C src clean 
+	$(MAKE) -C multinest clean
 	-rm BayesX
-

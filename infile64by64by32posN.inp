@@ -17,28 +17,26 @@
 'data/MEKAL/mekal6.dat'
 
 #filARF
-'data/A262datafiles/ARF_630by1.txt'
+'data/simtestdatafiles/ARF_32by1.txt'
 
 #filRMF
-'data/A262datafiles/RMF_630by433.txt'
+'data/simtestdatafiles/RMF_32by32.txt'
 
 #filBG
-'data/A262datafiles/A262BG_256by256by433.txt'
+'data/simtestdatafiles/BG64by64by32.txt'
 
 #filevent
-'data/A262datafiles/A262data_256by256by433.txt'
+'data/simtestdatafiles/data64by64by32.txt'
 
 #XrayTelescope
 'CHA'
 
 #n
-100
-
+64
 #nx
-256
-
+64
 #ny
-256
+64
 
 #Aeffave
 250
@@ -47,10 +45,10 @@
 0.492
 
 #xrayNbin
-630
+32
 
 #xrayNch
-433
+32
 
 #xrayEmin
 0.7
@@ -59,10 +57,10 @@
 7.0
 
 #sexpotime
-110.67421703436d+3 
+300d3
 
 #bexpotime
-450.d+3
+300d3
 
 #NHcol
 2.2d20
@@ -70,19 +68,19 @@
 #xrayBG_model
 8.4d-6
 #x_prior
-3	0.d0	10.0d0
+3	0	4
 
 #y_prior
-3	0.d0	10.0d0
+3	0	4
 
 #cluster_model
 1
 
 #m200_prior
-2	1.d12	5.d14
+2	1d14	6d15
 
 #fgas200_prior
-1	0.01	0.2
+3	0.13	0.02
 
 #a_GNFW_prior
 0	1.062    1.062	
@@ -100,13 +98,13 @@
 1       0.05     0.5
 
 #z_Prior
-0	0.0164	0.0164
+0	0.5	0.5
 
 #mass_function
 2
 
 #nlive
-1000
+100
 
 #eff
 0.8
@@ -118,4 +116,4 @@
 -1
 
 #root
-'chains/outA262'
+'chains/out64by64by32posN'

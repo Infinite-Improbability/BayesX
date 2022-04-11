@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+bin/BayesX
 
 # Precompiled Headers
 *.gch
@@ -32,12 +33,13 @@
 *.app
 
 # Visual Studio Code Config
+# .vscode/*
+# !.vscode/settings.json
+# !.vscode/tasks.json
+# !.vscode/launch.json
+# !.vscode/extensions.json
+# !.vscode/*.code-snippets
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
 
 # Local History for Visual Studio Code
 .history/
@@ -47,3 +49,9 @@
 
 # Vim Backup Files
 *~
+
+# Hide BayesX output files
+out*
+
+# Caches files
+__pycache__/*

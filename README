@@ -227,7 +227,7 @@ B- Derived parameters:
 36- cluster gas mass within within the overdensity radius of r_{200} (M_{g,200}) in M_{\sun}
 37- cluster mass within the overdensity radius of r_{200} (M_{200}) in M_{\sun}
 38- cluster gas mass fraction within the overdensity radius of r_{200} (f_{g,200})
-39- cluster gas temperature at r_{2500} (T_{g,200}) in keV
+39- cluster gas temperature at r_{200} (T_{g,200}) in keV
 40- cluster electron number density at r_{200} (n_{e,200}) in m^{-3}
 41- cluster entropy at r_{200} (K_{e,200}) in keVm^2
 42- cluster electron pressure at r_{200} (P_{e,200}) in keV m^{-3}
