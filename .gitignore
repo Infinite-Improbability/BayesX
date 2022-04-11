@@ -1,3 +1,6 @@
+version https://git-lfs.github.com/spec/v1
+oid sha256:f4436d40b573c826889f4f941f228f4bc68f03619474fd6ade6ad6ef88e18d03
+size 637
 # Prerequisites
 *.d
 
@@ -6,7 +9,6 @@
 *.lo
 *.o
 *.obj
-bin/BayesX
 
 # Precompiled Headers
 *.gch
@@ -32,14 +34,13 @@ bin/BayesX
 *.out
 *.app
 
-# Visual Studio Code Config
-# .vscode/*
+# Visual Studio Code
+.vscode/*
 # !.vscode/settings.json
 # !.vscode/tasks.json
 # !.vscode/launch.json
 # !.vscode/extensions.json
 # !.vscode/*.code-snippets
-.vscode/*
 
 # Local History for Visual Studio Code
 .history/
@@ -47,11 +48,10 @@ bin/BayesX
 # Built Visual Studio Code Extensions
 *.vsix
 
-# Vim Backup Files
+# Vim backups
 *~
 
-# Hide BayesX output files
-out*
-
-# Caches files
-__pycache__/*
+# Project specific
+__pycache__
+bin/BayesX
+chains/*
