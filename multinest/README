@@ -1,8 +1,8 @@
-MultiNest v 3.3
+MultiNest
 Farhan Feroz, Mike Hobson
 f.feroz@mrao.cam.ac.uk
 arXiv:0704.3704, arXiv:0809.3437 & arXiv:1306.2144
-Released Sep 2013
+Released Nov 2019
 
 ---------------------------------------------------------------------------
 
@@ -40,33 +40,34 @@ The subtoutine to begin MultiNest are as follows:
 subroutine nestRun(IS, mmodal, ceff, nlive, tol, efr, ndims, nPar, nCdims, maxModes, updInt, Ztol, root, seed,
 pWrap, feedback, resume, outfile, initMPI, logZero, maxiter, loglike, dumper, context)
 
-logical IS 	 								!do Importance Nested Sampling (INS)?
-logical mmodal 	 								!do mode separation?
-integer nlive 	 								!number of live points
-logical ceff									!run in constant efficiency mode
-double precision tol 		 						!evidence tolerance factor
-double precision efr 		 						!sampling efficiency
-integer ndims	 								!number of dimensions
-integer nPar	 								!total no. of parameters
-integer nCdims									!no. of parameters on which clustering should be performed (read below)
-integer maxModes								!maximum no. of modes (for memory allocation)
-integer updInt									!iterations after which the output files should be written
-double precision Ztol								!null log-evidence (read below)
-character(LEN=100) root  							!root for MultiNest output files
-integer seed 		 							!random no. generator seed, -ve value for seed from the sys clock
-integer pWrap[ndims]								!wraparound parameters?
-logical feedback								!need update on sampling progress?
-logical resume									!resume from a previous run?
-logical outfile									!write output files?
-logical initMPI									!initialize MPI routines?, relevant only if compiling with MPI
-										!set it to F if you want your main program to handle MPI initialization
-double precision logZero							!points with loglike < logZero will be ignored by MultiNest
-integer maxiter									!max no. of iterations, a non-positive value means infinity. MultiNest will terminate if either it 
-										!has done max no. of iterations or convergence criterion (defined through tol) has been satisfied
-loglike(Cube,ndims,nPar,lnew) 							!subroutine which gives lnew=loglike(Cube(ndims))
-dumper(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,c)	!subroutine called after every updInt*10 iterations with the posterior 
-										!distribution, parameter constraints, max loglike & log evidence values
-integer context									!not required by MultiNest, any additional information user wants to pass
+logical IS 	 						!do Importance Nested Sampling (INS)?
+logical mmodal 	 						!do mode separation?
+integer nlive 	 						!number of live points
+logical ceff							!run in constant efficiency mode
+double precision tol 		 				!evidence tolerance factor
+double precision efr 		 				!sampling efficiency
+integer ndims	 						!number of dimensions
+integer nPar	 						!total no. of parameters
+integer nCdims							!no. of parameters on which clustering should be performed (read below)
+integer maxModes						!maximum no. of modes (for memory allocation)
+integer updInt							!iterations after which the output files should be written
+double precision Ztol						!null log-evidence (read below)
+character(LEN=1000) root  					!root for MultiNest output files
+integer seed 		 					!random no. generator seed, -ve value for seed from the sys clock
+integer pWrap[ndims]						!wraparound parameters?
+logical feedback						!need update on sampling progress?
+logical resume							!resume from a previous run?
+logical outfile							!write output files?
+logical initMPI							!initialize MPI routines?, relevant only if compiling with MPI
+								!set it to F if you want your main program to handle MPI initialization
+double precision logZero					!points with loglike < logZero will be ignored by MultiNest
+integer maxiter							!max no. of iterations, a non-positive value means infinity. MultiNest will terminate if either it 
+								!has done max no. of iterations or convergence criterion (defined through tol) has been satisfied
+loglike(Cube,ndims,nPar,lnew) 					!subroutine which gives lnew=loglike(Cube(ndims))
+dumper(nSamples,nlive,nPar,physLive,posterior,
+	paramConstr,maxloglike,logZ,INSlogZ,logZerr,c)		!subroutine called after every updInt*10 iterations with the posterior 
+								!distribution, parameter constraints, max loglike & log evidence values
+integer context							!not required by MultiNest, any additional information user wants to pass
       
 --------------------------------------------------------------------------- 
 
@@ -81,7 +82,7 @@ Return the log-likelihood in lnew.
 
 ---------------------------------------------------------------------------
 
-dumper routine: dumper(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,logZerr,context)
+dumper routine: dumper(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context)
 
 This routine is called after every updInt*10 iterations & at the end of the sampling allowing the posterior 
 distribution & parameter constraints to be passed on to the user in the memory. The argument are as follows:
@@ -98,7 +99,8 @@ paramConstr(1, 4*nPar):
      paramConstr(1, nPar*2+1) to paramConstr(1, 3*nPar) = best-fit (maxlike) parameters
      paramConstr(1, nPar*4+1) to paramConstr(1, 4*nPar) = MAP (maximum-a-posteriori) parameters
 maxLogLike					    	= maximum loglikelihood value
-logZ						     	= log evidence value
+logZ						     	= log evidence value from the default (non-INS) mode
+INSlogZ						     	= log evidence value from the INS mode
 logZerr						     	= error on log evidence value
 context							not required by MultiNest, any additional information user wants to pass
 
@@ -178,10 +180,10 @@ Ztol value, then Ztol should be set to a very large negative number (e.g. -1.d90
 
 Progress Monitoring:
 
-MultiNest produces [root]physlive.dat & [root]ev.dat files after every updInt iterations which can be used to
+MultiNest produces [root]phys_live.dat & [root]ev.dat files after every updInt iterations which can be used to
 monitor the progress. The format & contents of  these two files are as follows:
 
-[root]physlive.dat:
+[root]phys_live.dat:
 This file contains the current set of live points. It has nPar+2 columns. The first nPar columns are the ndim
 parameter values along with the (nPar-ndim)  additional parameters that are being passed by the likelihood
 routine for MultiNest to save along with the ndim parameters. The nPar+1 column is the log-likelihood value &
@@ -226,7 +228,7 @@ There are nmode+1 (nmode = number of modes) rows in this file. First row has the
 posterior. After the first line there is one row per mode with nPar*4+2 values in each line in this file. 
 Each row has the following values in its column mean parameter values, standard deviations of the parameters, 
 bestfit (maxlike) parameter values, MAP (maximum-a-posteriori) parameter values, local log-evidence, maximum 
-loglike value. If IS = T (i.e. INS being used), firs row has an additional value right at the end, INS 
+loglike value. If IS = T (i.e. INS being used), first row has an additional value right at the end, INS 
 log-evidence estimate.
 
 ---------------------------------------------------------------------------
@@ -236,6 +238,30 @@ INS Output Files:
 In INS mode (when IS = T), MultiNest will produce 3 additional binary files: [root]IS.iterinfo, IS.points, IS.ptprob
 These files are used for resuming job with IS (Importance Nested sampling) mode set to T. They can be quite
 large and can be deleted once the job has finished.
+
+---------------------------------------------------------------------------
+
+Birth contour files:
+
+MultiNest produces [root]phys_live-birth.txt & [root]dead-birth.txt files after every updInt iterations 
+which can be used to reconstruct a full nested sampling run, as well as simulate dynamic nested sampling. 
+The format & contents of  these two files are as follows:
+
+[root]phys_live-birth.txt:
+This file contains the current set of live points. It has nPar+3 columns. The first nPar columns are the ndim
+parameter values along with the (nPar-ndim)  additional parameters that are being passed by the likelihood
+routine for MultiNest to save along with the ndim parameters. The nPar+1 column is the log-likelihood value. 
+The nPar+2 column is the log-likelihood value that the point was born at & the last column is the node 
+no. (used for clustering). This is identical to the [root]phys_live-birth.dat file, except for an additional 
+column including the birth contours
+
+[root]dead-birth.txt:
+This file contains the set of rejected points. It has nPar+4 columns. The first nPar columns are the ndim
+parameter values along with the (nPar-ndim)  additional parameters that are being passed by the likelihood
+routine for MultiNest to save along with the ndim parameters. The nPar+1 column is the log-likelihood value,
+the nPar+2 column is the log-likelihood value that the point was born at and the nPar+2 column is the 
+log(prior mass) & the last column  is the node no. (used for clustering).  This is identical to the 
+[root]ev.dat file, except for an additional column including the birth contours.
 
 ---------------------------------------------------------------------------
 

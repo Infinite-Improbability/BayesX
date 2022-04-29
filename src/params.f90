@@ -270,7 +270,7 @@ MODULE params
    LOGICAL                         :: n_IS = .false.
    INTEGER                         :: n_updint = 100
    REAL*8                   :: n_tol = 0.5
-   CHARACTER(LEN=100)         :: n_root = ''
+   CHARACTER(LEN=1000)      :: n_root = ''
    INTEGER, DIMENSION(:), ALLOCATABLE        :: n_pWrap
    LOGICAL                                        :: n_fb = .TRUE.
    INTEGER                                        :: n_maxModes = 20
