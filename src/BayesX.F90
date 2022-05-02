@@ -80,6 +80,7 @@ PROGRAM BayesX
       WRITE (*, *)
       eflag = Initialise(index)
       if (eflag == 0) then
+         call write_paramnames
          IF (edim > 15) n_pWrap = 1
          CALL srand(n_rseed)
 
