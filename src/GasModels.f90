@@ -277,12 +277,14 @@ CONTAINS
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
-                     CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     call interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(rmin),result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (rr > rlimit) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
-                     CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(xrayr),result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
                   xrayCmap(i, xrayxpix, xrayypix) = (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)*(xraycell*xraycell*sec2min*sec2min)
@@ -626,12 +628,14 @@ CONTAINS
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
-                     CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(rmin),result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr > rlimit) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
-                     CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(xrayr),result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
                   xrayCmap(i, xrayxpix, xrayypix) = &
@@ -2798,13 +2802,15 @@ CONTAINS
                   REAL*8               :: result
 
                   IF (rr < rmin) THEN
-                     CALL interp1d(logX_emiss1D, logr, n, phlog10(rmin), result)
+                     !CALL interp1d(logX_emiss1D, logr, n, phlog10(rmin), result)
+                     CALL interp1d_even(logX_emiss1D,logr,n,phlog10(rmin),result)
 
                   ELSEIF (rr > rmax) THEN
                      Xrayemissfunc1 = 0.d0
                      RETURN
                   ELSE
-                     CALL interp1d(logX_emiss1D, logr, n, phlog10(rr), result)
+                     !CALL interp1d(logX_emiss1D, logr, n, phlog10(rr), result)
+                     CALL interp1d_even(logX_emiss1D,logr,n,phlog10(rr),result)
                   END IF
 
                   Xrayemissfunc1 = 10.0**result
