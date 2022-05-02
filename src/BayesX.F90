@@ -64,7 +64,7 @@ PROGRAM BayesX
    if (eflag == 0) then
       eflag = getinputs(infile)
    end if
-   write (*, *) filion
+   !write (*, *) filion
 
    if (eflag == 0) then
       LENx = xraynx*xrayny*xrayNch
