@@ -62,7 +62,7 @@ MODULE params
 
    INTEGER, PARAMETER                                 ::  nx = 256, ny = 256
    INTEGER                                              ::  n
-   INTEGER, PARAMETER                                  ::      aux_dim = 136
+   INTEGER, PARAMETER                                  ::      aux_dim = 32 ! 136
    REAL*8                                               ::  aux(NAtoms, aux_dim)
    REAL*8, DIMENSION(:), ALLOCATABLE               ::  r, logr
    REAL*8                                               ::  uu, loguu

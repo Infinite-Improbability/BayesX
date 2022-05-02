@@ -335,18 +335,18 @@ CONTAINS
          aux(k, 31) = Ke200
          aux(k, 32) = Pe200
 
-         i = 0
-         DO m = 33, 129, 8
-            i = i + 1
-            aux(k, m) = rgx(i)
-            aux(k, m + 1) = M_DMx(i)
-            aux(k, m + 2) = Mg_DMx(i)
-            aux(k, m + 3) = fg_DMx(i)
-            aux(k, m + 4) = Tgx(i)
-            aux(k, m + 5) = n_ex(i)
-            aux(k, m + 6) = Kex(i)
-            aux(k, m + 7) = Pex(i)
-         END DO
+         !i = 0
+         !DO m = 33, 129, 8
+         !   i = i + 1
+         !   aux(k, m) = rgx(i)
+         !   aux(k, m + 1) = M_DMx(i)
+         !   aux(k, m + 2) = Mg_DMx(i)
+         !   aux(k, m + 3) = fg_DMx(i)
+         !   aux(k, m + 4) = Tgx(i)
+         !   aux(k, m + 5) = n_ex(i)
+         !   aux(k, m + 6) = Kex(i)
+         !   aux(k, m + 7) = Pex(i)
+         !END DO
          DEALLOCATE (rgx, Tgx, n_ex, Kex, Pex)
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
@@ -686,18 +686,18 @@ CONTAINS
          aux(k, 31) = Ke200
          aux(k, 32) = Pe200
 
-         i = 0
-         DO m = 33, 129, 8
-            i = i + 1
-            aux(k, m) = rgx(i)
-            aux(k, m + 1) = M_DMx(i)
-            aux(k, m + 2) = Mg_DMx(i)
-            aux(k, m + 3) = fg_DMx(i)
-            aux(k, m + 4) = Tgx(i)
-            aux(k, m + 5) = n_ex(i)
-            aux(k, m + 6) = Kex(i)
-            aux(k, m + 7) = Pex(i)
-         END DO
+         !i = 0
+         !DO m = 33, 129, 8
+         !   i = i + 1
+         !   aux(k, m) = rgx(i)
+         !   aux(k, m + 1) = M_DMx(i)
+         !   aux(k, m + 2) = Mg_DMx(i)
+         !   aux(k, m + 3) = fg_DMx(i)
+         !   aux(k, m + 4) = Tgx(i)
+         !   aux(k, m + 5) = n_ex(i)
+         !   aux(k, m + 6) = Kex(i)
+         !   aux(k, m + 7) = Pex(i)
+         !END DO
          DEALLOCATE (rgx, Tgx, n_ex, Kex, Pex)
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
