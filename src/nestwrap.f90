@@ -16,7 +16,7 @@ CONTAINS
    SUBROUTINE getLogLike(Cube, n_dim, nPar, lnew, context)
 
       INTEGER                        :: n_dim, nPar, context
-      REAL*8                         ::  lnew, Cube(nPar)
+      double precision               ::  lnew, Cube(nPar)
       INTEGER                        ::  i
 
       CALL FUserbuild(1.d0, i, lnew, i, i, i, Cube, i)
@@ -30,7 +30,7 @@ CONTAINS
 
 ! dumper, called after every updInt*10 iterations
 
-   SUBROUTINE dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, logZerr, context)
+   SUBROUTINE dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context)
 
       IMPLICIT NONE
 
@@ -42,6 +42,7 @@ CONTAINS
       DOUBLE PRECISION, POINTER               :: paramConstr(:)        ! array with mean, sigmas, maxlike & MAP parameters
       DOUBLE PRECISION                        :: maxLogLike        ! max loglikelihood value
       DOUBLE PRECISION                        :: logZ                ! log evidence
+      DOUBLE PRECISION                        :: INSlogZ                ! importance sampling log evidence
       DOUBLE PRECISION                        :: logZerr                ! error on log evidence
       INTEGER                                 :: context         ! not required by MultiNest, any additional information user wants to pass
 

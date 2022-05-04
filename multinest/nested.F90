@@ -1,5 +1,5 @@
-! Do nested sampling algorithm to calculate Bayesian evidence
-! Aug 2013
+!Do nested sampling algorithm to calculate Bayesian evidence
+! Jul 2015
 ! Farhan Feroz
 
 module Nested
@@ -33,9 +33,9 @@ module Nested
   integer maxIter
   logical fback,resumeFlag,dlive,genLive,dino
   !output files name
-  character(LEN=100)physname,broot,rname,resumename,livename,evname,IS_Files(3)
+  character(LEN=1000)physname,broot,rname,resumename,livename,physbirthname,evname,evbirthname,IS_Files(3)
   !output file units
-  integer u_ev,u_resume,u_phys,u_live,u_IS(3)
+  integer u_ev,u_ev_birth,u_resume,u_phys,u_live,u_phys_birth,u_IS(3)
   double precision gZ,ginfo !total log(evidence) & info
   integer count,sCount
   logical, dimension(:), allocatable :: pWrap
@@ -43,6 +43,7 @@ module Nested
   logical debug, prior_warning, resume, outfile
   !importance sampling
   logical :: IS = .true.
+  logical bogus
 
 contains
   
@@ -55,7 +56,7 @@ contains
 	integer nest_ndims,nest_nlive,nest_updInt,context,seed,i
 	integer maxClst,nest_nsc,nest_totPar,nest_nCdims,nest_pWrap(*),nest_maxIter
 	logical nest_IS,nest_mmodal,nest_fb,nest_resume,nest_ceff,nest_outfile,initMPI
-	character(LEN=100) nest_root
+	character(LEN=1000) nest_root
 	double precision nest_tol,nest_ef,nest_Ztol,nest_logZero
 	
 	INTERFACE
@@ -68,10 +69,10 @@ contains
 	
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, logZerr
+			double precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 	
@@ -90,6 +91,7 @@ contains
 	mpi_nthreads=1
 	my_rank=0
 #endif
+	bogus = .false.
 	nest_nsc=50
       	nlive=nest_nlive
 	Ztol=nest_Ztol
@@ -131,10 +133,14 @@ contains
       		resumename = trim(rname)//'resume.dat'
       		physname = trim(rname)//'phys_live.points'
       		livename = trim(rname)//'live.points'
+      		physbirthname = trim(rname)//'phys_live-birth.txt'
       		evname = trim(rname)//'ev.dat'
+      		evbirthname = trim(rname)//'dead-birth.txt'
       		u_ev=55
+      		u_ev_birth=550
 		u_phys=57
       		u_live=59
+      		u_phys_birth=590
 		u_resume=61
 		
 		if( IS ) then
@@ -213,9 +219,9 @@ contains
 		endif
       
 		write(*,*)"*****************************************************"
-		write(*,*)"MultiNest v3.3"
+		write(*,*)"MultiNest v3.12"
       		write(*,*)"Copyright Farhan Feroz & Mike Hobson"
-      		write(*,*)"Release Sep 2013"
+      		write(*,*)"Release Nov 2019"
 		write(*,*)
       		write(*,'(a,i4)')" no. of live points = ",nest_nlive
       		write(*,'(a,i4)')" dimensionality = ",nest_ndims
@@ -230,6 +236,8 @@ contains
 		if(.not.resumeFlag .and. outfile) then
 			open(unit=u_ev,file=evname,status='replace')
 			close(u_ev)
+			open(unit=u_ev_birth,file=evbirthname,status='replace')
+			close(u_ev_birth)
 		endif
 	endif
 	
@@ -250,11 +258,12 @@ contains
 	
 	integer context
 	double precision, allocatable :: p(:,:), phyP(:,:) !live points
-	double precision, allocatable :: l(:) !log-likelihood
+	double precision, allocatable :: l(:), l0(:) !log-likelihood
 	double precision vnow1!current vol
 	double precision ltmp(totPar+2)
-	character(len=100) fmt
+	character(len=1000) fmt
 	integer np,i,j,k,ios
+	logical flag
 
 	
 	INTERFACE
@@ -267,15 +276,15 @@ contains
 	
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, logZerr
+			double precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 	
 	
-	allocate( p(ndims,nlive+1), phyP(totPar,nlive+1), l(nlive+1) )
+	allocate( p(ndims,nlive+1), phyP(totPar,nlive+1), l(nlive+1), l0(nlive+1) )
 
 	if(my_rank==0) then
 		np=ndims
@@ -283,7 +292,7 @@ contains
 		numlike=0
 		vnow1=1.d0
 
-		write(fmt,'(a,i5,a)')  '(',np+1,'E28.18)'
+		write(fmt,'(a,i5,a)')  '(',np+1,'E28.18E3)'
 	
 		genLive=.true.
 	
@@ -309,7 +318,7 @@ contains
 			if( .not.genLive ) then
 				j = 0
 				open(unit=u_ev,file=evname,status='old') 
-				write(fmt,'(a,i2.2,a)')  '(',totPar+2,'E28.18,i3)'
+				write(fmt,'(a,i2.2,a)')  '(',totPar+2,'E28.18E3,i3)'
 				do
 					read(55,*,IOSTAT=ios) ltmp(1:totPar+2),k
 				
@@ -346,8 +355,9 @@ contains
 		if(my_rank==0 .and. fback) write(*,*) 'generating live points'
 		
 		call gen_initial_live(p,phyP,l,loglike,dumper,context)
+        l0=logZero
 	
-		if(my_rank==0) then
+		if(my_rank==0 .and. .not.bogus) then
 			globff=nlive
 			numlike=nlive
 	  		if(fback) write(*,*) 'live points generated, starting sampling'
@@ -358,12 +368,16 @@ contains
 	call MPI_BARRIER(MPI_COMM_WORLD,errcode)
 #endif
 	
-	call clusteredNest(p,phyP,l,loglike,dumper,context)
+	if( .not.bogus ) call clusteredNest(p,phyP,l,l0,loglike,dumper,context)
 	
-	if(my_rank==0) then
-		write(*,*)"ln(ev)=",gZ,"+/-",sqrt(ginfo/dble(nlive))
-		write(*,'(a,i12)')' Total Likelihood Evaluations: ', numlike
-		write(*,*)"Sampling finished. Exiting MultiNest"
+	if( my_rank==0 ) then
+		if( .not.bogus ) then
+			write(*,*)"ln(ev)=",gZ,"+/-",sqrt(ginfo/dble(nlive))
+			write(*,'(a,i12)')' Total Likelihood Evaluations: ', numlike
+			write(*,*)"Sampling finished. Exiting MultiNest"
+		else
+			write(*,*)"Exit signal received"
+		endif
 		setBlk=.false.
 	endif
 	
@@ -379,9 +393,9 @@ contains
     
     	integer i,j,iostatus,idum,k,m,nptPerProc,nGen,nstart,nend,context
     	double precision, allocatable :: pnewP(:,:), phyPnewP(:,:), lnewP(:)
-    	double precision p(ndims,nlive+1), phyP(totPar,nlive+1), l(nlive+1)
+    	double precision p(ndims,nlive+1), phyP(totPar,nlive+1), l(nlive+1), ldum
     	integer id
-    	character(len=100) fmt,fmt2
+    	character(len=1000) fmt,fmt1,fmt2
 #ifdef MPI
 	double precision, allocatable ::  tmpl(:), tmpp(:,:), tmpphyP(:,:)
 	integer q
@@ -397,12 +411,13 @@ contains
 	
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, logZerr
+			double precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
+	
 	
 	allocate( pnewP(ndims,10), phyPnewP(totPar,10), lnewP(10) )
 #ifdef MPI
@@ -415,8 +430,9 @@ contains
     			open(unit=u_resume,file=resumename,form='formatted',status='replace')
     			write(u_resume,'(l2)')genLive
     			close(u_resume)
-    			write(fmt,'(a,i5,a)')  '(',ndims+1,'E28.18)'
-    			write(fmt2,'(a,i5,a)')  '(',totPar+1,'E28.18,i4)'
+    			write(fmt,'(a,i5,a)')  '(',ndims+1,'E28.18E3)'
+    			write(fmt1,'(a,i5,a)')  '(',totPar+2,'E28.18E3,i4)'
+    			write(fmt2,'(a,i5,a)')  '(',totPar+1,'E28.18E3,i4)'
 		endif
 
     		id=0
@@ -429,7 +445,7 @@ contains
 				open(unit=u_live,file=livename,status='old')
 				do
 	      				i=i+1
-					read(u_live,*,IOSTAT=iostatus) p(:,i),l(i)
+					read(u_live,*,IOSTAT=iostatus) p(:,i),l(i),ldum
 	            			if(iostatus<0) then
 	            				i=i-1
 	                  			if(i>nlive) then
@@ -455,9 +471,11 @@ contains
 				endif
 	    	
 	      			open(unit=u_live,file=livename,form='formatted',status='old',position='append')
+	      			open(unit=u_phys_birth,file=physbirthname,form='formatted',status='old',position='append')
 	    			open(unit=u_phys,file=physname,form='formatted',status='old',position='append')
 	    		else
 	      			open(unit=u_live,file=livename,form='formatted',status='replace')
+	      			open(unit=u_phys_birth,file=physbirthname,form='formatted',status='replace')
 	    			open(unit=u_phys,file=physname,form='formatted',status='replace')
 				
 				if( IS ) then
@@ -497,6 +515,7 @@ contains
 #endif
 		if( outfile ) then
 			close(u_live)
+			close(u_phys_birth)
 			close(u_phys)
 		endif
 		
@@ -524,6 +543,7 @@ contains
 			phyPnewP(1:ndims,j)=pnewP(1:ndims,j)
 			lnewP(j)=logZero
 			call loglike(phyPnewP(:,j),ndims,totPar,lnewP(j),context)
+			if( lnewP(j) == HUGE(1d0) ) bogus = .true.
                   	if(lnewP(j)>logZero) exit
 		enddo
 		if(k==nptPerProc .or. j==10) then
@@ -563,6 +583,7 @@ contains
 					do q = 1 , i
 						if( nend + 1 <= nlive ) then
 							l(nend + 1) = tmpl(q)
+							if( tmpl(q) == HUGE(1d0) ) bogus = .true.
 							p(1 : ndims, nend + 1) = tmpp(1 : ndims, q)
 							phyP(1 : totPar, nend + 1) = tmpphyP(1 : totPar, q)
 							nend = nend + 1
@@ -571,16 +592,22 @@ contains
 				enddo
 #endif
 				
-				if( outfile ) then
+				if( outfile .and. .not.bogus ) then
 					!now write this batch to the files
 					do m=nstart,nend
 						write(u_live,fmt) p(1:ndims,m),l(m)
+						write(u_phys_birth,fmt1) phyP(:,m),l(m),logzero,1
             					write(u_phys,fmt2) phyP(:,m),l(m),1
 					enddo
 				endif
 			endif
 		endif
-		if(k==nptPerProc) exit
+
+#ifdef MPI
+		call MPI_BCAST(bogus,1,MPI_LOGICAL,0,MPI_COMM_WORLD,errcode)
+#endif
+
+		if(k==nptPerProc .or. bogus) exit
 	enddo
 	
 	
@@ -592,6 +619,7 @@ contains
 	
 	if( outfile ) then
     		close(u_live)
+    		close(u_phys_birth)
    		close(u_phys)
 	endif
 	genLive=.false.
@@ -621,7 +649,7 @@ contains
 
 !----------------------------------------------------------------------
   
-  subroutine clusteredNest(p,phyP,l,loglike,dumper,context)
+  subroutine clusteredNest(p,phyP,l,l0,loglike,dumper,context)
   	
 	implicit none
 	
@@ -631,7 +659,7 @@ contains
 	integer context
 	double precision p(ndims,nlive+1) !live points
 	double precision phyP(totPar,nlive+1) !physical live points
-	double precision l(nlive+1) !log-likelihood
+	double precision l(nlive+1),l0(nlive+1) !log-likelihood
 	
 	
 	!work variables
@@ -646,9 +674,9 @@ contains
 	double precision gZOld !global evidence & info
 	logical eswitch,peswitch,cSwitch !whether to do ellipsoidal sampling or not
 	logical remFlag, acpt, flag, flag2
-	integer funit1, funit2 !file units
-	character(len=100) fName1, fName2 !file names
-	character(len=100) fmt,fmt1
+	integer funit1, funit2, funit3 !file units
+	character(len=1000) fName1, fName2, fName3 !file names
+	character(len=1000) fmt,fmt1,fmt2
 	
 	!diagnostics for determining when to do eigen analysis
 	integer neVol
@@ -689,6 +717,7 @@ contains
 	
 	!rejected point info
 	double precision lowlike !lowest log-like
+	double precision lowl0
 	double precision, allocatable :: lowp(:), lowphyP(:) !point with the lowlike
 	integer indx(1) !point no. of lowlike
 	
@@ -709,7 +738,7 @@ contains
 	integer IS_counter(7)
 	integer :: IS_nstore = 10000, IS_nMC = 1000
 	double precision :: IS_Z(2)
-	logical :: IS_CheckAll = .false., IS_betterMC = .true.
+	logical :: IS_CheckAll = .false., IS_betterMC = .true., IS_GetVolInsidePrior = .true.
 	      
 	INTERFACE
     		!the likelihood function
@@ -721,16 +750,16 @@ contains
 	
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, logZerr
+			double precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 	
 	
 	allocate( eswitchff(maxCls), escount(maxCls), dmin(maxCls) )
-	allocate( evData(updInt,totPar+3) )
+	allocate( evData(updInt,totPar+4) )
 	allocate( ic_sc(maxCls), ic_npt(maxCls) )
 	allocate( ic_done(0:maxCls) )
 	allocate( ic_climits(maxCls,ndims,2), ic_volFac(maxCls) )
@@ -747,8 +776,18 @@ contains
 	ic_volFac(:)=1d0
 	
 	if(my_rank==0) then
-		!memory allocation
 		if( IS ) then
+			if( IS_GetVolInsidePrior ) then
+				IS_GetVolInsidePrior = .false.
+				do i = 1, ndims
+					if( .not.pWrap(i) ) then
+						IS_GetVolInsidePrior = .true.
+						exit
+					endif
+				enddo
+			endif
+			
+			!memory allocation
 			allocate(IS_allpts(nlive+IS_nstore,ndims+6), IS_iterinfo(nlive+IS_nstore/10,5), IS_V(maxeCls))
 			IS_allpts = 0d0
 			IS_iterinfo = 0d0
@@ -785,7 +824,7 @@ contains
 		sc_evec(maxeCls,ndims,ndims), eveck(maxeCls,ndims,ndims), kfack(maxeCls), &
 		effk(maxeCls), volk(maxeCls), &
  		sc_node(maxeCls),nodek(maxeCls),sck(maxCls))
-		allocate(pt(ndims,nlive), aux(ndims+totPar+4-nCdims,nlive))
+		allocate(pt(ndims,nlive), aux(ndims+totPar+5-nCdims,nlive))
 		allocate(ic_fNode(maxCls),ic_nsc(maxCls),ic_nBrnch(maxCls), &
 		ic_brnch(maxCls,maxCls,2),ic_reme(maxCls),ic_rFlag(maxCls),ic_z(maxCls),ic_zold(maxCls),ic_info(maxCls), &
 		ic_vnow(maxCls),ic_hilike(maxCls),ic_inc(maxCls),ic_chk(maxCls),ic_llimits(maxCls,ndims,2))
@@ -915,9 +954,11 @@ contains
 			
     			!read physical-live file
 			open(unit=u_phys,file=physname,status='old')
+			open(unit=u_phys_birth,file=physbirthname,status='old')
 			i=0
 			do
       				i=i+1
+				read(u_phys_birth,*,IOSTAT=iostatus) phyP(1:totPar,i),d1,l0(i),j
 				read(u_phys,*,IOSTAT=iostatus) phyP(1:totPar,i),d1,j
             			if(iostatus<0) then
             				i=i-1
@@ -941,6 +982,7 @@ contains
 				endif
 			enddo
 			close(u_phys)
+			close(u_phys_birth)
 			
 			!read the IS files
 			if( IS ) then
@@ -1061,25 +1103,25 @@ contains
 	                        	!write the resume file
 	                        	funit1=u_resume
 					fName1=resumename
-	                        	write(fmt,'(a,i5,a)')  '(',totPar+1,'E28.18,i4)'
+	                        	write(fmt,'(a,i5,a)')  '(',totPar+1,'E28.18E3,i4)'
 					open(unit=funit1,file=fName1,form='formatted',status='replace')
 					write(funit1,'(l2)').false.
 					write(funit1,'(4i12)')globff,numlike,ic_n,nlive
-					write(funit1,'(2E28.18)')gZ,ginfo
+					write(funit1,'(2E28.18E3)')gZ,ginfo
 					write(funit1,'(l2)')eswitch
 	            			!write branching info
 		            		do i=1,ic_n
 	            				write(funit1,'(i4)')ic_nBrnch(i)
 						if(ic_nBrnch(i)>0) then
-							write(fmt,'(a,i5,a)')  '(',2*ic_nBrnch(i),'E28.18)'
+							write(fmt,'(a,i5,a)')  '(',2*ic_nBrnch(i),'E28.18E3)'
 							write(funit1,fmt)ic_brnch(i,1:ic_nBrnch(i),1),ic_brnch(i,1:ic_nBrnch(i),2)
 						endif
 					enddo
 					!write the node info
 					do i=1,ic_n
-						write(funit1,'(2l2,2i6)')ic_done(i),ic_reme(i),ic_fNode(i),ic_npt(i)
-						write(funit1,'(3E28.18)')ic_vnow(i),ic_Z(i),ic_info(i)
-						if(ceff) write(funit1,'(1E28.18)')ic_eff(i,4)
+						write(funit1,'(2l2,i6,i12)')ic_done(i),ic_reme(i),ic_fNode(i),ic_npt(i)
+						write(funit1,'(3E28.18E3)')ic_vnow(i),ic_Z(i),ic_info(i)
+						if(ceff) write(funit1,'(1E28.18E3)')ic_eff(i,4)
 					enddo
 	                  		close(funit1)
 				endif
@@ -1160,10 +1202,11 @@ contains
 !				endif
 				
 				!aux information to be re-arranged with the live points
-				naux=ndims+totPar+1-nCdim
+				naux=ndims+totPar+2-nCdim
 				aux(1,1:nlive)=l(1:nlive)
-				aux(2:totPar+1,1:nlive)=phyP(1:totPar,1:nlive)
-				aux(totPar+2:naux,1:nlive)=p(nCdim+1:ndims,1:nlive)
+				aux(2,1:nlive)=l0(1:nlive)
+				aux(3:totPar+2,1:nlive)=phyP(1:totPar,1:nlive)
+				aux(totPar+3:naux,1:nlive)=p(nCdim+1:ndims,1:nlive)
 				
 				!save old no. of modes
 				i=ic_n
@@ -1183,8 +1226,9 @@ contains
 				if(modeFound) then			
 					!re-arrange info
 					l(1:nlive)=aux(1,1:nlive)
-					phyP(1:totPar,1:nlive)=aux(2:totPar+1,1:nlive)
-					p(nCdim+1:ndims,1:nlive)=aux(totPar+2:naux,1:nlive)
+					l0(1:nlive)=aux(2,1:nlive)
+					phyP(1:totPar,1:nlive)=aux(3:totPar+2,1:nlive)
+					p(nCdim+1:ndims,1:nlive)=aux(totPar+3:naux,1:nlive)
 					
 					if(nCdims<ndims .or. .true.) then
 						ic_sc(i+1:ic_n)=1
@@ -1384,7 +1428,7 @@ contains
 						flag=.false.
 						
 						!aux information to be re-arranged with the live points
-						naux=totPar+2
+						naux=totPar+3
 						!rescaling
 						do i3=1,ndims
 							!rescale back into unit hypercube
@@ -1402,7 +1446,8 @@ contains
 							pt(i3,1:ic_npt(i1))=(pt(i3,1:ic_npt(i1))-ic_llimits(i1,i3,1))/d4
 						enddo
 						aux(1,1:ic_npt(i1))=l(m+1:m+ic_npt(i1))
-						aux(2:totPar+1,1:ic_npt(i1))=phyP(1:totPar,m+1:m+ic_npt(i1))
+						aux(2,1:ic_npt(i1))=l0(m+1:m+ic_npt(i1))
+						aux(3:totPar+2,1:ic_npt(i1))=phyP(1:totPar,m+1:m+ic_npt(i1))
 						lowlike=minval(l(m+1:m+ic_npt(i1)))
 						aux(naux,1:ic_npt(i1))=(l(m+1:m+ic_npt(i1))-lowlike)/(ic_hilike(i1)-lowlike)
 						
@@ -1508,7 +1553,8 @@ contains
 						!aux information to be re-arranged with the live points
 						p(:,m+1:m+ic_npt(i1))=pt(:,1:ic_npt(i1))
 						l(m+1:m+ic_npt(i1))=aux(1,1:ic_npt(i1))
-						phyP(1:totPar,m+1:m+ic_npt(i1))=aux(2:totPar+1,1:ic_npt(i1))
+						l0(m+1:m+ic_npt(i1))=aux(2,1:ic_npt(i1))
+						phyP(1:totPar,m+1:m+ic_npt(i1))=aux(3:totPar+2,1:ic_npt(i1))
 					else
 						sck(i1)=ic_sc(i1)
 						meank(n+1:n+sck(i1),:)=sc_mean(q+1:q+sck(i1),:)
@@ -1561,6 +1607,7 @@ contains
 		call MPI_BCAST(eswitch,1,MPI_LOGICAL,0,MPI_COMM_WORLD,errcode)
 		call MPI_BCAST(flag2,1,MPI_LOGICAL,0,MPI_COMM_WORLD,errcode)
 		call MPI_BCAST(modeFound,1,MPI_LOGICAL,0,MPI_COMM_WORLD,errcode)
+		call MPI_BCAST(lowlike,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,errcode)
 		
 		if(modeFound) then
 			call MPI_BCAST(ic_n,1,MPI_INTEGER,0,MPI_COMM_WORLD,errcode)
@@ -1581,12 +1628,35 @@ contains
 		endif
 #endif
 
-		if( IS .and. flag2 .and. eswitch .and. my_rank == 0 ) then
+		if( IS .and. (flag2 .or. mod(ff,100)==0) .and. eswitch .and. my_rank == 0 ) then
 			!estimate the total ellipsoidal volume taking the overlap into account
 			
 			nd_i = 0 !no. of ellipsoids traversed
 			nd_j = 0 !no. of points traversed
+			flag = .false.
 			do i = 1, ic_n
+				IS_V(i) = 0d0
+				if( IS_GetVolInsidePrior ) then
+					do k = nd_i+1, nd_i+ic_sc(i)
+						j1 = max(5, int( ( dble(IS_nMC) * dble(ic_npt(i)) / dble(nlive) ) * ( dble(sc_vol(k)) / dble(totVol(i)) ) ))
+						m = 0
+						do i3 = 1, j1
+							d1=sc_kfac(k)*sc_eff(k)
+							call genPtInEll(ndims, sc_mean(k,:), d1, sc_tMat(k,:,:), my_rank, pnew(1:ndims))
+							do i2 = 1, ndims
+								if( .not.pWrap(i2) .and. ( pnew(i2) < 0d0 .or. pnew(i2) > 1d0 ) ) then
+									m = m+1
+									flag = .true.
+									exit
+								endif
+							enddo
+						enddo
+						IS_V(i) = IS_V(i) + sc_vol(k)*(1d0 - dble(m)/dble(j1))
+					enddo
+				else
+					IS_V(i) = totVol(i)
+				endif
+				
 				if( ic_sc(i) <= 1 .or. ic_done(i) ) then
 					j1 = 1
 					m = 1
@@ -1629,56 +1699,60 @@ contains
 					enddo
 				endif
 				
-				IS_V(i) = ( totVol(i) / ic_volFac(i) ) * dble(j1) / dble(m)
+				IS_V(i) = ( IS_V(i) / ic_volFac(i) ) * dble(j1) / dble(m)
 				
 				nd_j = nd_j+ic_npt(i)
 				nd_i = nd_i+ic_sc(i)
 			enddo
 			
+			if( IS_GetVolInsidePrior .and. .not.flag ) IS_GetVolInsidePrior = .false.
 			
-			lowlike = minval(l(1:nlive))
-			flag = .false.	!found the very first point which is inside the ellipsoidal bound?
-			j1 = IS_counter(2)
-			if( IS_CheckAll ) j1 = 1
-			do j = j1, IS_counter(1)
-				d1 = huge(1d0)
-				if( IS_CheckAll .or. IS_allpts(j,ndims+3) == 1d0 ) then
-					IS_allpts(j,ndims+3) = 0d0
-					
-					nd_i = 0 !no. of ellipsoids traversed
-					do i = 1, ic_n
-						if( ic_done(i) .or. totvol(i) == 0d0 .or. ic_npt(i) == 0 .or. ( multimodal .and. .not.isAncestor(int(IS_allpts(j,ndims+6)), i, ic_fnode(1:i)) ) ) then
-							nd_i = nd_i+ic_sc(i)
-							cycle
-						endif
+			
+			if( flag2 ) then
+				lowlike = minval(l(1:nlive))
+				flag = .false.	!found the very first point which is inside the ellipsoidal bound?
+				j1 = IS_counter(2)
+				if( IS_CheckAll ) j1 = 1
+				do j = j1, IS_counter(1)
+					d1 = huge(1d0)
+					if( IS_CheckAll .or. IS_allpts(j,ndims+3) == 1d0 ) then
+						IS_allpts(j,ndims+3) = 0d0
 						
-						!apply current limits to this point
-						call ApplyLimits(0, ic_climits(i,:,:), IS_allpts(j,1:ndims), pt(1,1:ndims))
-						
-						do k = nd_i+1, nd_i+ic_sc(i)
-							!check if this point is inside the ellipsoid
-							call ScaleFactor(1, ndims , pt(1,1:ndims), sc_mean(k,:), sc_invcov(k,:,:), d2)
-							if( d2  < sc_kfac(k)*sc_eff(k) .and. d2/(sc_kfac(k)*sc_eff(k)) < d1 ) then
-								d1 = d2/(sc_kfac(k)*sc_eff(k))
-									
-								IS_allpts(j,ndims+3) = 1d0
-								IS_allpts(j,ndims+4) = dble(k)	!ellipsoid ID
-								IS_allpts(j,ndims+5) = d2	!Mahalanobis distance of this point
-									
-								if( .not.flag ) then
-									flag = .true.
-									IS_counter(2) = j
-								endif
+						nd_i = 0 !no. of ellipsoids traversed
+						do i = 1, ic_n
+							if( ic_done(i) .or. totvol(i) == 0d0 .or. ic_npt(i) == 0 .or. ( multimodal .and. .not.isAncestor(int(IS_allpts(j,ndims+6)), i, ic_fnode(1:i)) ) ) then
+								nd_i = nd_i+ic_sc(i)
+								cycle
 							endif
+							
+							!apply current limits to this point
+							call ApplyLimits(0, ic_climits(i,:,:), IS_allpts(j,1:ndims), pt(1,1:ndims))
+							
+							do k = nd_i+1, nd_i+ic_sc(i)
+								!check if this point is inside the ellipsoid
+								call ScaleFactor(1, ndims , pt(1,1:ndims), sc_mean(k,:), sc_invcov(k,:,:), d2)
+								if( d2  < sc_kfac(k)*sc_eff(k) .and. d2/(sc_kfac(k)*sc_eff(k)) < d1 ) then
+									d1 = d2/(sc_kfac(k)*sc_eff(k))
+										
+									IS_allpts(j,ndims+3) = 1d0
+									IS_allpts(j,ndims+4) = dble(k)	!ellipsoid ID
+									IS_allpts(j,ndims+5) = d2	!Mahalanobis distance of this point
+										
+									if( .not.flag ) then
+										flag = .true.
+										IS_counter(2) = j
+									endif
+								endif
+							enddo
+							
+							nd_i = nd_i+ic_sc(i)
 						enddo
-						
-						nd_i = nd_i+ic_sc(i)
-					enddo
-				endif
-			enddo
-			
-			!not a single point inside the current ellipsoidal decomposition
-			if( .not.flag ) IS_counter(2) = IS_counter(1)+1
+					endif
+				enddo
+				
+				!not a single point inside the current ellipsoidal decomposition
+				if( .not.flag ) IS_counter(2) = IS_counter(1)+1
+			endif
 		endif
 
 		nd_i=0 !no. of ellipsoids traversed
@@ -1716,6 +1790,7 @@ contains
 		      			lowlike=l(indx(1))
 					lowp(:)=p(:,indx(1))
 					lowphyP(:)=phyP(:,indx(1))
+                    lowl0 = l0(indx(1))
 					
 					!set the limits
 					do i3=1,ndims
@@ -1764,6 +1839,8 @@ contains
 									pnewa(nd,1,:)=pnew(:)
 									phyPnewa(nd,1,:)=phyPnew(:)
 								endif
+								
+								if( lnew == HUGE(1d0) ) bogus = .true.
 							endif
 #ifdef MPI
 							call MPI_BARRIER(MPI_COMM_WORLD,errcode)
@@ -1781,6 +1858,7 @@ contains
 										call MPI_RECV(pnewa(nd,i2+1,1:ndims),ndims,MPI_DOUBLE_PRECISION,i2,i2,MPI_COMM_WORLD,mpi_status,errcode)
 										call MPI_RECV(phyPnewa(nd,i2+1,1:totPar),totPar,MPI_DOUBLE_PRECISION,i2,i2,MPI_COMM_WORLD,mpi_status,errcode)
 									endif
+									if( lnewa(nd,i2+1) == HUGE(1d0) ) bogus = .true.
 								enddo
 							endif
 							call MPI_BARRIER(MPI_COMM_WORLD,errcode)
@@ -1840,15 +1918,17 @@ contains
 #ifdef MPI
 						call MPI_BARRIER(MPI_COMM_WORLD,errcode)
 						call MPI_BCAST(acpt,1,MPI_LOGICAL,0,MPI_COMM_WORLD,errcode)
+						call MPI_BCAST(bogus,1,MPI_LOGICAL,0,MPI_COMM_WORLD,errcode)
 #endif
 	                        	
-						if(acpt) exit
+						if(acpt .or. bogus) exit
 					enddo
 				
 	                        	if(my_rank==0) then      	
 	                  			p(:,indx(1))=pnew(:)
 	                  			phyP(:,indx(1))=phyPnew(:)
 	                  			l(indx(1))=lnew
+                                l0(indx(1)) = lowlike
 						if(lnew>ic_hilike(nd)) ic_hilike(nd)=lnew
 						
 						!set the limits
@@ -1918,6 +1998,7 @@ contains
 								endif
 								
 								lnewa(nd,1)=lnew
+								if( lnew == HUGE(1d0) ) bogus = .true.
 						
 								if(lnew>logZero) then
 									sEll(nd,1)=i-nd_i
@@ -1950,11 +2031,13 @@ contains
 										call MPI_RECV(pnewa(nd,i2+1,1:ndims),ndims,MPI_DOUBLE_PRECISION,i2,i2,MPI_COMM_WORLD,mpi_status,errcode)
 										call MPI_RECV(phyPnewa(nd,i2+1,1:totPar),totPar,MPI_DOUBLE_PRECISION,i2,i2,MPI_COMM_WORLD,mpi_status,errcode)
 									endif
+									
+									if( lnewa(nd,i2+1) == HUGE(1d0) ) bogus = .true.
 								enddo
 							endif
 							call MPI_BARRIER(MPI_COMM_WORLD,errcode)
 #endif
-							if( IS .and. my_rank == 0 ) then
+							if( IS .and. my_rank == 0 .and. .not.bogus ) then
 								i3 = IS_counter(1)
 								do i2=1, mpi_nthreads
 									if( lnewa(nd,i2) > logZero ) then
@@ -1987,7 +2070,7 @@ contains
 							endif
 						endif
 					
-						if(my_rank==0) then
+						if(my_rank==0 .and. .not.bogus) then
 							!check if any of them is inside the hard edge
 	                        			do j1=rIdx(nd),mpi_nthreads
 								numlike=numlike+1
@@ -2048,7 +2131,10 @@ contains
 #ifdef MPI
 						call MPI_BARRIER(MPI_COMM_WORLD,errcode)
 						call MPI_BCAST(acpt,1,MPI_LOGICAL,0,MPI_COMM_WORLD,errcode)
+						call MPI_BCAST(bogus,1,MPI_LOGICAL,0,MPI_COMM_WORLD,errcode)
 #endif
+					
+						if( bogus ) exit
 					
 	                        		if(acpt) then
 							if(my_rank==0) then
@@ -2071,6 +2157,8 @@ contains
 							exit
 	            				endif
 	      				enddo
+					
+					if( bogus ) exit
 
 				
 					if(my_rank==0) then
@@ -2154,6 +2242,7 @@ contains
 							p(:,indx(1):nd_j+ic_npt(nd)-1)=p(:,indx(1)+1:nd_j+ic_npt(nd))
 							phyP(:,indx(1):nd_j+ic_npt(nd)-1)=phyP(:,indx(1)+1:nd_j+ic_npt(nd))
 							l(indx(1):nd_j+ic_npt(nd)-1)=l(indx(1)+1:nd_j+ic_npt(nd))
+							l0(indx(1):nd_j+ic_npt(nd)-1)=l0(indx(1)+1:nd_j+ic_npt(nd))
 						endif
 						sc_npt(q)=sc_npt(q)-1
 						
@@ -2237,10 +2326,12 @@ contains
 						p(:,n1+1:nd_j+ic_npt(nd))=p(:,n1:nd_j+ic_npt(nd)-1)
 						phyP(:,n1+1:nd_j+ic_npt(nd))=phyP(:,n1:nd_j+ic_npt(nd)-1)
 						l(n1+1:nd_j+ic_npt(nd))=l(n1:nd_j+ic_npt(nd)-1)
+						l0(n1+1:nd_j+ic_npt(nd))=l0(n1:nd_j+ic_npt(nd)-1)
 						!insert the new point
 						p(:,n1)=pnew(:)
 						phyP(:,n1)=phyPnew(:)
 						l(n1)=lnew
+						l0(n1)=lowlike
 						!increment no. of points in sub-cluster i
 						sc_npt(i)=sc_npt(i)+1
 					endif
@@ -2264,8 +2355,9 @@ contains
 					j1=mod(sff-1,updInt)+1
 					evData(j1,1:totPar)=lowphyP(1:totPar)
 					evData(j1,totPar+1)=lowlike
-					evData(j1,totPar+2)=log(h)
-					evData(j1,totPar+3)=dble(nd)
+					evData(j1,totPar+2)=lowl0
+					evData(j1,totPar+3)=log(h)
+					evData(j1,totPar+4)=dble(nd)
 					
 					lowlike=minval(l(nd_j+1:nd_j+ic_npt(nd)))
 				
@@ -2295,39 +2387,49 @@ contains
 							allocate( evDataTemp(k) )
 							evDataTemp=evDataAll
 							deallocate( evDataAll )
-							allocate( evDataAll(k+j1*(totPar+3)) )
+							allocate( evDataAll(k+j1*(totPar+4)) )
 							evDataAll(1:k)=evDataTemp(1:k)
 							deallocate( evDataTemp )
 						else
 							deallocate( evDataAll )
-							allocate( evDataAll(j1*(totPar+3)) )
+							allocate( evDataAll(j1*(totPar+4)) )
 						endif
 						do i=1,j1
-    							evDataAll(k+1:k+totPar+3) = evData(i,1:totPar+3)
-							k=k+totPar+3
+    							evDataAll(k+1:k+totPar+4) = evData(i,1:totPar+4)
+							k=k+totPar+4
 						enddo
 					else
 						!write the evidence file
 						funit1=u_ev
 						fName1=evname
+						funit2=u_ev_birth
+						fName2=evbirthname
 						open(unit=funit1,file=fName1,form='formatted',status='old', position='append')
-	    					write(fmt,'(a,i5,a)')  '(',totPar+2,'E28.18,i5)'	
+						open(unit=funit2,file=fName2,form='formatted',status='old', position='append')
+	    					write(fmt,'(a,i5,a)')  '(',totPar+2,'E28.18E3,i5)'	
+	    					write(fmt1,'(a,i5,a)')  '(',totPar+3,'E28.18E3,i5)'	
 						do i=1,j1
-	    						write(funit1,fmt) evData(i,1:totPar+2),int(evData(i,totPar+3))
+	    						write(funit1,fmt) evData(i,1:totPar+1),evData(i,totPar+3),int(evData(i,totPar+4))
+	    						write(funit2,fmt1) evData(i,1:totPar+3),int(evData(i,totPar+4))
 						enddo
 						!close the files
 						close(funit1)
+                        close(funit2)
 					
 		                		!write the live file
 						funit1=u_phys
 						fName1=physname
 						funit2=u_live
 						fName2=livename
+						funit3=u_phys_birth
+						fName3=physbirthname
 						open(unit=funit1,file=fName1,form='formatted',status='replace')
 						open(unit=funit2,file=fName2,form='formatted',status='replace')
+						open(unit=funit3,file=fName3,form='formatted',status='replace')
 	                		
-						write(fmt,'(a,i5,a)')  '(',totPar+1,'E28.18,i4)'
-	                			write(fmt1,'(a,i5,a)')  '(',ndims+1,'E28.18)'
+						write(fmt,'(a,i5,a)')  '(',totPar+1,'E28.18E3,i4)'
+	                			write(fmt1,'(a,i5,a)')  '(',ndims+1,'E28.18E3)'
+                        write(fmt2,'(a,i5,a)')  '(',totPar+2,'E28.18E3,i4)'
 						k=0
 						do i=1,ic_n
 							do j=1,ic_npt(i)
@@ -2335,11 +2437,13 @@ contains
 								write(funit1,fmt) phyP(1:totPar,k),l(k),i
 								lPts(1:ndims) = ic_climits(i,1:ndims,1)+(ic_climits(i,1:ndims,2)-ic_climits(i,1:ndims,1))*p(1:ndims,k)
 								write(funit2,fmt1) lPts(1:ndims),l(k)
+								write(funit3,fmt2) phyP(1:totPar,k),l(k),l0(k),i
 							enddo
 	                			enddo
 						!close the files
 						close(funit1)
 						close(funit2)
+						close(funit3)
 						
                   	
 	                  			!write the resume file
@@ -2349,23 +2453,23 @@ contains
 	                	  	
 						write(funit1,'(l2)')genLive
 						write(funit1,'(4i12)')globff,numlike,ic_n,nlive
-						write(funit1,'(2E28.18)')gZ,ginfo
+						write(funit1,'(2E28.18E3)')gZ,ginfo
 						write(funit1,'(l2)')eswitch
 					
 	            				!write branching info
 		            			do i=1,ic_n
 	            					write(funit1,'(i4)')ic_nBrnch(i)
 							if(ic_nBrnch(i)>0) then
-								write(fmt,'(a,i5,a)')  '(',2*ic_nBrnch(i),'E28.18)'
+								write(fmt,'(a,i5,a)')  '(',2*ic_nBrnch(i),'E28.18E3)'
 								write(funit1,fmt)ic_brnch(i,1:ic_nBrnch(i),1), ic_brnch(i,1:ic_nBrnch(i),2)
 							endif
 						enddo
 					
 						!write the node info
 						do i=1,ic_n
-							write(funit1,'(2l2,2i6)')ic_done(i),ic_reme(i),ic_fNode(i), ic_npt(i)
-							write(funit1,'(3E28.18)')ic_vnow(i),ic_Z(i),ic_info(i)
-							if(ceff) write(funit1,'(1E28.18)')ic_eff(i,4)
+							write(funit1,'(2l2,i6,i12)')ic_done(i),ic_reme(i),ic_fNode(i),ic_npt(i)
+							write(funit1,'(3E28.18E3)')ic_vnow(i),ic_Z(i),ic_info(i)
+							if(ceff) write(funit1,'(1E28.18E3)')ic_eff(i,4)
 						enddo
 	                  			close(funit1)
 						
@@ -2449,6 +2553,8 @@ contains
 			
 			if( ic_done(0) ) exit
 		enddo
+		
+		if( bogus ) exit
 		
 		if(my_rank==0) then
 			!update the total volume
@@ -2738,7 +2844,7 @@ contains
 	write(*,'(a,i14)')   	     'Replacements:                     ',nacc
 	write(*,'(a,i14)')   	     'Total Samples:                    ',nlike
 	write(*,'(a,F14.6)')	     'Nested Sampling ln(Z):            ',logZ
-	if( IS ) write(*,'(a,F14.6,a,F10.6)')'Importance Nested Sampling ln(Z): ',IS_Z(1), ' +/-', IS_Z(2)
+	if( IS ) write(*,'(a,F14.6)')'Importance Nested Sampling ln(Z): ',IS_Z(1)
 	if(dswitch) write(*,'(a,i5)')'Total No. of Live Points:         ',nlive
     
   end subroutine gfeedback
@@ -2785,8 +2891,8 @@ contains
 	double precision, allocatable :: meanw(:,:),meank(:,:),evalk(:,:),eveck(:,:,:),invcovk(:,:,:),tmatk(:,:,:),kfack(:)
 	
 	
-	allocate( order(nCdim), nptx(npt/(ndim+1)+1), nodex(npt/(ndim+1)+1) )
-	allocate( gList(npt/(ndim+1)+1), lList(npt/(ndim+1)+1), toBeChkd(npt/(ndim+1)+1), overlapk(npt/(ndim+1)+1,npt/(ndim+1)+1) )
+	allocate( order(nCdim), nptx(npt/(nCdim+1)+1), nodex(npt/(nCdim+1)+1) )
+	allocate( gList(npt/(nCdim+1)+1), lList(npt/(nCdim+1)+1), toBeChkd(npt/(nCdim+1)+1), overlapk(npt/(nCdim+1)+1,npt/(nCdim+1)+1) )
 	allocate( ptk(nCdim,npt), auxk(naux,npt), ptx(nCdim,npt), auxx(naux,npt), mMean(nCdim), lMean(nCdim), mStdErr(nCdim), &
 	lStdErr(nCdim), mean1(nCdim), mean2(nCdim), mean1w(nCdim), mean2w(nCdim), eval1(nCdim), evec1(nCdim,nCdim), &
 	invcov1(nCdim,nCdim), invcov2(nCdim,nCdim) )
