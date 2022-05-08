@@ -127,7 +127,7 @@ contains
             read (funit, *) Gas_PriorType(1, 5), Gas_Prior(1, 5, 1), Gas_Prior(1, 5, 2)
          elseif (tag == '#c500_GNFW_prior') then
             read (funit, *) Gas_PriorType(1, 6), Gas_Prior(1, 6, 1), Gas_Prior(1, 6, 2)
-         elseif (tag == '#alpha_model2_prior') then
+         elseif ((tag == '#alpha_model2_prior').and.(GasModel==2)) then
             read (funit, *) Gas_PriorType(1, 7), Gas_Prior(1, 7, 1), Gas_Prior(1, 7, 2)
          elseif (tag == '#z_Prior') then
             read (funit, *) z_PriorType(1), z_Prior(1, 1), z_Prior(1, 2)

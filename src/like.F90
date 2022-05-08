@@ -73,6 +73,7 @@ CONTAINS
       DO i = 1, tot_dim
          CALL Rescale_nest(Cube(i), i, i1)
       END DO
+
       list = 0
       list(NAtoms) = 1
       DO i = 2, NAtoms
@@ -106,10 +107,10 @@ CONTAINS
       k = 0
       DO i = 1, tot_dim
          CALL PClass(i, j)
-         !IF(j/=0) THEN
+         IF(j/=0) THEN
          k = k + 1
          Cube1(k) = Cube(i)
-         !ENDIF
+         ENDIF
       END DO
 
       DO i = 1, NAtoms
@@ -188,7 +189,8 @@ CONTAINS
 
 !       set the total number of parameters
 
-      n_totPar = tot_dim + aux_dim*NAtoms
+      !n_totPar = tot_dim + aux_dim*NAtoms
+      n_totPar = edim + aux_dim*NAtoms
       ALLOCATE (n_pWrap(edim))
       n_pWrap = 0
       zdmin = 1d10
@@ -269,7 +271,7 @@ CONTAINS
                return
             END IF
             IF (Gas_Prior(i, 1, 1) < Mmin) Mmin = Gas_Prior(i, 1, 1)
-            IF (Gas_Prior(i, 1, 1) > Mmax) Mmax = Gas_Prior(i, 1, 2)
+            IF (Gas_Prior(i, 1, 2) > Mmax) Mmax = Gas_Prior(i, 1, 2)
          END IF
       END DO
 

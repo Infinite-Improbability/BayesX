@@ -70,6 +70,37 @@ CONTAINS
 
 !-----------------------------------------------------------------------
 
+   subroutine interp1d_even(f,x,n,x0,f0)
+
+   ! Subroutine to interpolate a value f0 from a function f using linear
+   ! interpolation, on an evenly spaced grid
+
+      implicit none
+
+      integer n
+      double precision f(n),x(n)
+      double precision x0,f0
+      double precision xmin,xmax,dx,wx
+      integer i1
+
+      xmin=x(1)
+      xmax=x(n)
+      dx=x(2)-x(1)
+
+      if(x0.ge.xmin.and.x0.le.xmax) then
+         i1= int((x0-xmin)/dx)+1
+         wx=(x0-x(i1))/dx
+         f0=(1-wx)*f(i1)+wx*f(i1+1)
+      else
+         write(*,*) 'x = ', x0, '  is out of table range' 
+         stop
+      endif
+      return
+
+   end subroutine interp1d_even
+
+!-----------------------------------------------------------------------
+
    SUBROUTINE locate(xx, n, x, j)
 
       IMPLICIT NONE

@@ -277,12 +277,14 @@ CONTAINS
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
-                     CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     call interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(rmin),result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (rr > rlimit) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
-                     CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(xrayr),result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
                   xrayCmap(i, xrayxpix, xrayypix) = (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)*(xraycell*xraycell*sec2min*sec2min)
@@ -335,18 +337,18 @@ CONTAINS
          aux(k, 31) = Ke200
          aux(k, 32) = Pe200
 
-         i = 0
-         DO m = 33, 129, 8
-            i = i + 1
-            aux(k, m) = rgx(i)
-            aux(k, m + 1) = M_DMx(i)
-            aux(k, m + 2) = Mg_DMx(i)
-            aux(k, m + 3) = fg_DMx(i)
-            aux(k, m + 4) = Tgx(i)
-            aux(k, m + 5) = n_ex(i)
-            aux(k, m + 6) = Kex(i)
-            aux(k, m + 7) = Pex(i)
-         END DO
+         !i = 0
+         !DO m = 33, 129, 8
+         !   i = i + 1
+         !   aux(k, m) = rgx(i)
+         !   aux(k, m + 1) = M_DMx(i)
+         !   aux(k, m + 2) = Mg_DMx(i)
+         !   aux(k, m + 3) = fg_DMx(i)
+         !   aux(k, m + 4) = Tgx(i)
+         !   aux(k, m + 5) = n_ex(i)
+         !   aux(k, m + 6) = Kex(i)
+         !   aux(k, m + 7) = Pex(i)
+         !END DO
          DEALLOCATE (rgx, Tgx, n_ex, Kex, Pex)
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
@@ -626,12 +628,14 @@ CONTAINS
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
-                     CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(rmin),result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr > rlimit) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
-                     CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(xrayr),result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
                   xrayCmap(i, xrayxpix, xrayypix) = &
@@ -686,18 +690,18 @@ CONTAINS
          aux(k, 31) = Ke200
          aux(k, 32) = Pe200
 
-         i = 0
-         DO m = 33, 129, 8
-            i = i + 1
-            aux(k, m) = rgx(i)
-            aux(k, m + 1) = M_DMx(i)
-            aux(k, m + 2) = Mg_DMx(i)
-            aux(k, m + 3) = fg_DMx(i)
-            aux(k, m + 4) = Tgx(i)
-            aux(k, m + 5) = n_ex(i)
-            aux(k, m + 6) = Kex(i)
-            aux(k, m + 7) = Pex(i)
-         END DO
+         !i = 0
+         !DO m = 33, 129, 8
+         !   i = i + 1
+         !   aux(k, m) = rgx(i)
+         !   aux(k, m + 1) = M_DMx(i)
+         !   aux(k, m + 2) = Mg_DMx(i)
+         !   aux(k, m + 3) = fg_DMx(i)
+         !   aux(k, m + 4) = Tgx(i)
+         !   aux(k, m + 5) = n_ex(i)
+         !   aux(k, m + 6) = Kex(i)
+         !   aux(k, m + 7) = Pex(i)
+         !END DO
          DEALLOCATE (rgx, Tgx, n_ex, Kex, Pex)
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
@@ -2798,13 +2802,15 @@ CONTAINS
                   REAL*8               :: result
 
                   IF (rr < rmin) THEN
-                     CALL interp1d(logX_emiss1D, logr, n, phlog10(rmin), result)
+                     !CALL interp1d(logX_emiss1D, logr, n, phlog10(rmin), result)
+                     CALL interp1d_even(logX_emiss1D,logr,n,phlog10(rmin),result)
 
                   ELSEIF (rr > rmax) THEN
                      Xrayemissfunc1 = 0.d0
                      RETURN
                   ELSE
-                     CALL interp1d(logX_emiss1D, logr, n, phlog10(rr), result)
+                     !CALL interp1d(logX_emiss1D, logr, n, phlog10(rr), result)
+                     CALL interp1d_even(logX_emiss1D,logr,n,phlog10(rr),result)
                   END IF
 
                   Xrayemissfunc1 = 10.0**result

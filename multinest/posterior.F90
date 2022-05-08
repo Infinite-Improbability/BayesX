@@ -25,7 +25,7 @@ contains
   	
 	double precision Ztol !null evidence
 	integer nIter !globff (total no. replacements)
-	character(LEN=100)root !base root
+	character(LEN=1000)root !base root
 	integer nLpt !no. of live points
 	integer ndim !dimensionality
 	integer nCdim !no. of parameters to cluster on
@@ -38,8 +38,8 @@ contains
 	logical IS !importance sampling?
 	double precision IS_Z(2) !importance sampling log(Z) estimate & its standard deviation
 	logical ic_reme(ic_n)
-  	character(len=100) evfile,livefile,postfile,resumefile
-      	character(len=100) sepFile,statsFile,postfile4,strictSepFile,summaryFile
+  	character(len=1000) evfile,livefile,postfile,resumefile
+      	character(len=1000) sepFile,statsFile,postfile4,strictSepFile,summaryFile
   	character(len=32) fmt,fmt2
       	logical l1
       	double precision d1,d2,urv
@@ -55,15 +55,15 @@ contains
 	
 	! parameters for dumper
 	double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-	double precision maxLogLike, logZ, logZerr
+	double precision maxLogLike, logZ, INSlogZ, logZerr
 	integer nSamples
 	
 	INTERFACE
 		!the user dumper function
-    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, logZerr, context_pass)
+    		subroutine dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context_pass)
 			integer nSamples, nlive, nPar, context_pass
 			double precision, pointer :: physLive(:,:), posterior(:,:), paramConstr(:)
-			double precision maxLogLike, logZ, logZerr
+			double precision maxLogLike, logZ, INSlogZ, logZerr
 		end subroutine dumper
 	end INTERFACE
 	
@@ -161,9 +161,10 @@ contains
 			endif
 		else
 			i=i+1
-			if(i*(nPar+3)>size(evDataAll)) exit
-			ltmp(1:nPar+2)=evDataAll((i-1)*(nPar+3)+1:i*(nPar+3)-1)
-			i1=int(evDataAll(i*(nPar+3)))
+			if(i*(nPar+4)>size(evDataAll)) exit
+			ltmp(1:nPar+1)=evDataAll((i-1)*(nPar+4)+1:(i-1)*(nPar+4)+nPar+1)
+			ltmp(nPar+2)=evDataAll((i-1)*(nPar+4)+nPar+3)
+			i1=int(evDataAll(i*(nPar+4)))
 		endif
 		
 		nPtPerNode(i1)=nPtPerNode(i1)+1
@@ -363,7 +364,9 @@ contains
 	logZerr=sqrt(ginfoloc/dble(nLpt))
 	
 	! call the dumper
-	call dumper(nSamples, nLpt, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, logZerr, context)
+	INSlogZ = logZ
+	if( IS ) INSlogZ = IS_Z(1)
+	call dumper(nSamples, nLpt, nPar, physLive, posterior, paramConstr, maxLogLike, logZ, INSlogZ, logZerr, context)
 
       	deallocate(branchp,evdatp,wt)
       	deallocate(nbranchp,nPtPerNode)
@@ -458,7 +461,7 @@ contains
 	integer i,j,k,indx(1),nliveP
 	double precision d1,d2,d3,mean(nCls,nPar),sigma(nCls,nPar),maxLike(nPar),MAP(nPar)
 	double precision old_slocZ,sinfo,slocZ
-	character*30 fmt,stfmt
+	character*32 fmt,stfmt
 
 	nliveP=sum(locNpt(1:nCls))
 	write(stfmt,'(a,i4,a)')  '(',nPar*4+2,'E28.18)'
