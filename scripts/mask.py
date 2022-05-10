@@ -73,11 +73,9 @@ for el in ellipses:
     elM = el.generate_matrix(args.overdraw)
 
     # Get indices to place the ellipse on the mask matrix
-    radius = elM.shape[1] // 2
+    radius = elM.shape[1] / 2
     x0, y0 = coord2index(el.x-radius, el.y-radius)
     x1, y1 = coord2index(el.x+radius, el.y+radius)
-    x1 += 1
-    y1 += 1
 
     # If the ellipse goes off the edge of the region crop it
     if x0 < 0: # Left
