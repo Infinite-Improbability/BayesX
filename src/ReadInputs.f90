@@ -54,6 +54,9 @@ contains
          elseif (tag == '#filevent') then
             read (funit, *) filevent
             filevent = trim(filevent)
+         elseif (tag == '#filemask') then
+            read (funit, *) filemask
+            filemask =  trim(filemask)
          elseif (tag == '#XrayTelescope') then
             read (funit, *) XrayTelescope
             XrayTelescope = trim(XrayTelescope)

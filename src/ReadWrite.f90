@@ -122,6 +122,7 @@ CONTAINS
       OPEN (unit=15, file=filRMF, status='old')
       OPEN (unit=20, file=filBG, status='old')
       OPEN (unit=25, file=filevent, status='old')
+      OPEN (unit=30, file=filemask, status='old')
 
       DO j = 1, xrayNbin
          READ (5, *) ARF(j)
@@ -137,7 +138,10 @@ CONTAINS
       DO i = 1, LENx
          READ (20, *) xrayBG_obs(i)
          READ (25, *) xrayCobs(i)
+      END DO
 
+      DO i = 1, LENm
+         READ (30, *) xrayMask(i)
       END DO
 
       RETURN

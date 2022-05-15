@@ -148,17 +148,19 @@ CONTAINS
 
       IMPLICIT NONE
 
-      INTEGER                         ::  i, j, m
+      INTEGER                         ::  i, j, m, maskIndex
       REAL*8                           ::   XRAYLhood, sum
 
       sum = 0.0d0
 
       DO m = 1, LENx
-         IF (xrayCpred(m) .EQ. 0d0) THEN
+         maskIndex = CEILING(m/xrayNch)
 
+         IF (xrayMask(maskIndex) .EQ. 1) THEN
+            XRAYLhood = 0 ! Log(1), assumes probabilities normalised to unity and this function returns log(prob)
+         ELSE IF (xrayCpred(m) .EQ. 0d0) THEN
             sum = sum + (xrayCobs(m)*DLOG(xrayBG(m)) - xrayBG(m)) + (xrayBG_obs(m)*DLOG(bexpotime*xrayBG(m)/sexpotime) - (bexpotime*xrayBG(m)/sexpotime))
          ELSE
-
             sum = sum + (xrayCobs(m)*DLOG(xrayCpred(m)) - xrayCpred(m)) + (xrayBG_obs(m)*DLOG(bexpotime*xrayBG(m)/sexpotime) - (bexpotime*xrayBG(m)/sexpotime))
          END IF
       END DO

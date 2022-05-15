@@ -156,7 +156,7 @@ MODULE params
    INTEGER         ::  indexy, init, lun, ierr, nl, nlx
    CHARACTER(LEN=256)   ::  filion = '', filrec = '', filkar = '', filcon = '', fillin = ''
    CHARACTER(LEN=256)   :: filcaf = ''
-   CHARACTER(LEN=256)   ::  filARF = '', filRMF = '', filevent = '', filBG = ''
+   CHARACTER(LEN=256)   ::  filARF = '', filRMF = '', filevent = '', filBG = '', filemask=''
    CHARACTER(LEN=72)    ::  comment
    INTEGER, PARAMETER  ::  NOEL = 15
    INTEGER, PARAMETER  ::  NL_MAX = 5500
@@ -188,6 +188,7 @@ MODULE params
    INTEGER                          ::  xrayNch
    INTEGER                          :: LENx
    INTEGER                             :: xLENi
+   INTEGER                          :: LENm
    REAL*8                          :: xrayEmin
    REAL*8                          :: xrayEmax
    REAL*8                          :: xrayDeltaE
@@ -206,6 +207,7 @@ MODULE params
    REAL*8, DIMENSION(:), ALLOCATABLE       :: xrayBG
    REAL*8, DIMENSION(:, :, :), ALLOCATABLE   :: xrayCmap
    REAL*8, DIMENSION(:), ALLOCATABLE :: xrayCpred
+   INTEGER, DIMENSION(:), ALLOCATABLE :: xrayMask
    INTEGER, DIMENSION(:), ALLOCATABLE :: xrayCobs, xrayBG_obs
    REAL*8                    :: XRAYLhood0
 !Hydrogen Column Density
