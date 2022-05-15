@@ -1,3 +1,4 @@
+import matplotlib
 import numpy as np
 from matplotlib import pyplot
 import os, sys
@@ -9,12 +10,16 @@ try:
 except IndexError:
   mode=''
 
-while mode not in ['evts', 'bg']:
-  mode=input('Enter mode (evts/bg): ')
+while mode not in ['evts', 'bg', 'mask']:
+  mode=input('Enter mode (evts/bg/mask): ')
 
 if mode=='evts':
   data1=np.loadtxt('13996_evts_07_7keV.txt', usecols=(10,11,40))
   outfilename='13996data_256by256by433.txt'
+elif mode=='mask':
+  # Doesn't work yet!
+  data1 = np.load('mask.npz')['arr_0']
+  outfilename='mask_binned.txt'
 else:
   data1=np.loadtxt('13996_bg_07_7keV.txt', usecols=(6,7,10)) #  For the background file
   outfilename='13996BG_256by256by433.txt'

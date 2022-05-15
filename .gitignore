@@ -54,3 +54,7 @@ bin/BayesX
 chains/*
 ComaData/*
 mask.txt
+mask.npy
+mask.npz
+mask.txt.gz
+mask_binned.txt
