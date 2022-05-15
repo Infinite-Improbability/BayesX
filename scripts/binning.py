@@ -80,7 +80,7 @@ for ii in range(m):
 
     if mode == 'mask':
         # [x, y, energy] single energy channel, 1 if masked, 0 otherwise
-        PI_counts[i, j, 0] = PI_chan[ii]
+        PI_counts[i, j, 0] = max(PI_counts[i, j, 0], PI_chan[ii])
     else:
         # Increments counts in array [x, y, energy]
         PI_counts[i, j, vr] += 1
