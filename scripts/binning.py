@@ -5,7 +5,8 @@ import os
 import sys
 
 # Needs tidying up and generalizing.  Currently works on Coma data.
-matplotlib.use('TkAgg')
+
+#matplotlib.use('TkAgg')
 
 try:
     mode = sys.argv[1]
@@ -26,15 +27,11 @@ else:
         6, 7, 10))  # For the background file
     outfilename = '13996BG_256by256by433.txt'
 
-sky_x = data1[:, 0] # spatial coordinate
-sky_y = data1[:, 1] # spatial coordinate
-PI_chan = data1[:, 2] # energy channel?
+sky_x = data1[:, 0]  # spatial coordinate
+sky_y = data1[:, 1]  # spatial coordinate
+PI_chan = data1[:, 2]  # energy channel?
 
 del data1
-
-PI_chan_min = int(np.min(PI_chan))
-PI_chan_max = int(np.max(PI_chan))
-PI_IDs = np.arange(PI_chan_min, PI_chan_max+1)
 
 x_point = 4096.5
 y_point = 4096.5
@@ -46,8 +43,14 @@ nbins = 256  # 1024
 cellsize = 10.
 xyrange = cellsize*(nbins - 1.)/2.
 
-# PI_counts=np.zeros((PI_chan_max,nbins,nbins))
-PI_counts = np.zeros((nbins, nbins, PI_chan_max))
+if mode == 'mask':
+    PI_counts = np.zeros((nbins, nbins, 1))
+    PI_chan_min = 1
+else:
+    PI_chan_min = int(np.min(PI_chan))
+    PI_chan_max = int(np.max(PI_chan))
+    PI_IDs = np.arange(PI_chan_min, PI_chan_max+1)
+    PI_counts = np.zeros((nbins, nbins, PI_chan_max))
 
 # Could also use scipy.stats.binned_statistic here but it's not too slow as is
 icentre = nbins/2
@@ -58,8 +61,7 @@ for ii in range(m):
     u = dx[ii]
     v = dy[ii]
     # Get data for point
-    # Why subtract 1?
-    # Needs modification for masks
+    # Subtracting 1 is probably to account for 0 indexing
     vr = int(PI_chan[ii])-1
     # Get bin indices
     signx = 1.
@@ -75,8 +77,13 @@ for ii in range(m):
         continue
     if((j < 0) | (j >= nbins)):
         continue
-    # Increments counts in array [x, y, energy]
-    PI_counts[i, j, vr] += 1
+
+    if mode == 'mask':
+        # [x, y, energy] single energy channel, 1 if masked, 0 otherwise
+        PI_counts[i, j, 0] = PI_chan[ii]
+    else:
+        # Increments counts in array [x, y, energy]
+        PI_counts[i, j, vr] += 1
 
 # Select inner 256x256 pixels for output
 npix_out = 256
