@@ -1,2 +1,0 @@
-. text !filter !merge !diff
-data/** filter=lfs diff=lfs merge=lfs -text
