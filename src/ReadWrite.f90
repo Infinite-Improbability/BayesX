@@ -138,9 +138,6 @@ CONTAINS
       DO i = 1, LENx
          READ (20, *) xrayBG_obs(i)
          READ (25, *) xrayCobs(i)
-      END DO
-
-      DO i = 1, LENm
          READ (30, *) xrayMask(i)
       END DO
 

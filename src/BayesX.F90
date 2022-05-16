@@ -68,12 +68,11 @@ PROGRAM BayesX
 
    if (eflag == 0) then
       LENx = xraynx*xrayny*xrayNch
-      LENm = xraynx*xrayny
       xrayDeltaE = (xrayEmax - xrayEmin)/xrayNbin
 
       allocate (photar(xrayNbin), xrayE1(xrayNbin), xrayE2(xrayNbin), xrayFluxCoeff(xrayNbin), xrayFlux(xrayNbin), &
                 xraypredFlux(xrayNch), Arf(xrayNbin), Rmf(xrayNbin, xrayNch), TRM(xrayNbin, xrayNch), xrayBG(LENx), &
-                xrayCobs(LENx), xrayBG_obs(LENX), xrayMask(LENm), xrayCmap(xrayNch, xraynx, xrayny), xrayCpred(LENx), r(n), T(n), Rhogas(n), logr(n))
+                xrayCobs(LENx), xrayBG_obs(LENX), xrayMask(LENx), xrayCmap(xrayNch, xraynx, xrayny), xrayCpred(LENx), r(n), T(n), Rhogas(n), logr(n))
 
       index = 1
       if (myID == 0) CALL Welcome

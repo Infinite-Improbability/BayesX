@@ -148,21 +148,23 @@ CONTAINS
 
       IMPLICIT NONE
 
-      INTEGER                         ::  i, j, m, maskIndex
+      INTEGER                         ::  i, j, m
       REAL*8                           ::   XRAYLhood, sum
 
       sum = 0.0d0
 
       DO m = 1, LENx
-         maskIndex = CEILING(m/xrayNch)
 
-         IF (xrayMask(maskIndex) .EQ. 1) THEN
-            XRAYLhood = 0 ! Log(1), assumes probabilities normalised to unity and this function returns log(prob)
-         ELSE IF (xrayCpred(m) .EQ. 0d0) THEN
-            sum = sum + (xrayCobs(m)*DLOG(xrayBG(m)) - xrayBG(m)) + (xrayBG_obs(m)*DLOG(bexpotime*xrayBG(m)/sexpotime) - (bexpotime*xrayBG(m)/sexpotime))
-         ELSE
-            sum = sum + (xrayCobs(m)*DLOG(xrayCpred(m)) - xrayCpred(m)) + (xrayBG_obs(m)*DLOG(bexpotime*xrayBG(m)/sexpotime) - (bexpotime*xrayBG(m)/sexpotime))
+         IF (xrayMask(m) .EQ. 0) THEN
+
+            IF (xrayCpred(m) .EQ. 0d0) THEN
+               sum = sum + (xrayCobs(m)*DLOG(xrayBG(m)) - xrayBG(m)) + (xrayBG_obs(m)*DLOG(bexpotime*xrayBG(m)/sexpotime) - (bexpotime*xrayBG(m)/sexpotime))
+            ELSE
+               sum = sum + (xrayCobs(m)*DLOG(xrayCpred(m)) - xrayCpred(m)) + (xrayBG_obs(m)*DLOG(bexpotime*xrayBG(m)/sexpotime) - (bexpotime*xrayBG(m)/sexpotime))
+            END IF
+            
          END IF
+
       END DO
       XRAYLhood = sum + XRAYLhood0
       ! WRITE(*,*)' XRAYLhood =', XRAYLhood
@@ -305,20 +307,24 @@ CONTAINS
          log_Cobs_factorial = 0d0
          log_BGobs_factorial = 0d0
 
-         IF (xrayBG_obs(i) .EQ. 0) THEN
-            log_BGobs_factorial = 0d0
-         ELSE
-            DO j = 1, xrayBG_obs(i)
-               log_BGobs_factorial = log_BGobs_factorial + LOG(REAL(j))
-            END DO
-         END IF
+         IF (xrayMask(i) .EQ. 0) THEN
 
-         IF (xrayCobs(i) .EQ. 0) THEN
-            log_Cobs_factorial = 0d0
-         ELSE
-            DO j = 1, xrayCobs(i)
-               log_Cobs_factorial = log_Cobs_factorial + LOG(REAL(j))
-            END DO
+            IF (xrayBG_obs(i) .EQ. 0) THEN
+               log_BGobs_factorial = 0d0
+            ELSE
+               DO j = 1, xrayBG_obs(i)
+                  log_BGobs_factorial = log_BGobs_factorial + LOG(REAL(j))
+               END DO
+            END IF
+
+            IF (xrayCobs(i) .EQ. 0) THEN
+               log_Cobs_factorial = 0d0
+            ELSE
+               DO j = 1, xrayCobs(i)
+                  log_Cobs_factorial = log_Cobs_factorial + LOG(REAL(j))
+               END DO
+            END IF
+
          END IF
 
          XRAYLhood0 = XRAYLhood0 - log_Cobs_factorial - log_BGobs_factorial

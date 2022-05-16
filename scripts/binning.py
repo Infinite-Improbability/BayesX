@@ -6,7 +6,7 @@ import sys
 
 # Needs tidying up and generalizing.  Currently works on Coma data.
 
-#matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 
 try:
     mode = sys.argv[1]
@@ -22,6 +22,10 @@ if mode == 'evts':
 elif mode == 'mask':
     data1 = np.load('mask.npz')['arr_0']
     outfilename = 'mask_binned.txt'
+    PI_chan_max = int(input('Enter number of energy channels: '))
+    # This should case the energy mask file to match the structure of the binned data
+    # The file is accordingly PI_chan_max times longer, but we avoid having to expand the
+    # mask across all channels in BayesX, which could confusion in the future.
 else:
     data1 = np.loadtxt('13996_bg_07_7keV.txt', usecols=(
         6, 7, 10))  # For the background file
@@ -29,7 +33,9 @@ else:
 
 sky_x = data1[:, 0]  # spatial coordinate
 sky_y = data1[:, 1]  # spatial coordinate
-PI_chan = data1[:, 2]  # energy channel?
+# For data this is energy channel
+# For mask this is 1 (masked) or 0 (unmasked)
+PI_chan = data1[:, 2]
 
 del data1
 
@@ -44,13 +50,12 @@ cellsize = 10.
 xyrange = cellsize*(nbins - 1.)/2.
 
 if mode == 'mask':
-    PI_counts = np.zeros((nbins, nbins, 1))
     PI_chan_min = 1
 else:
     PI_chan_min = int(np.min(PI_chan))
     PI_chan_max = int(np.max(PI_chan))
-    PI_IDs = np.arange(PI_chan_min, PI_chan_max+1)
-    PI_counts = np.zeros((nbins, nbins, PI_chan_max))
+
+PI_counts = np.zeros((nbins, nbins, PI_chan_max)) # [x, y, channel]
 
 # Could also use scipy.stats.binned_statistic here but it's not too slow as is
 icentre = nbins/2
@@ -60,8 +65,8 @@ for ii in range(m):
     # Get cell coordinates, relative to centre
     u = dx[ii]
     v = dy[ii]
-    # Get data for point
-    # Subtracting 1 is probably to account for 0 indexing
+    # Get energy channel and convert to index by subtracting 1
+    # Not used for masking.
     vr = int(PI_chan[ii])-1
     # Get bin indices
     signx = 1.
@@ -72,17 +77,20 @@ for ii in range(m):
         signy = -1
     i = int(np.floor(u/cellsize + signx*0.5) + icentre)
     j = int(np.floor(v/cellsize + signy*0.5) + jcentre)
-    # If bin indices out of range, abort
+    # If bin indices out of range then abort
     if((i < 0) | (i >= nbins)):
         continue
     if((j < 0) | (j >= nbins)):
         continue
 
     if mode == 'mask':
-        # [x, y, energy] single energy channel, 1 if masked, 0 otherwise
-        PI_counts[i, j, 0] = max(PI_counts[i, j, 0], PI_chan[ii])
+        # Masks all channels at spatial coordinates, 1 if masked, 0 otherwise
+        # For masking, PI_chan[ii] = 1 implies that region (u,v) is masked.
+        # We take the maximum compared with existing value so we can't accidentally overwrite the mask
+        # The entire bin is masked if any pixel in it is masked.
+        PI_counts[i, j, :] = np.maximum(PI_counts[i, j, :], PI_chan[ii])
     else:
-        # Increments counts in array [x, y, energy]
+        # Increments count for point
         PI_counts[i, j, vr] += 1
 
 # Select inner 256x256 pixels for output

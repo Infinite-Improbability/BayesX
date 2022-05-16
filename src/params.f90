@@ -188,7 +188,6 @@ MODULE params
    INTEGER                          ::  xrayNch
    INTEGER                          :: LENx
    INTEGER                             :: xLENi
-   INTEGER                          :: LENm
    REAL*8                          :: xrayEmin
    REAL*8                          :: xrayEmax
    REAL*8                          :: xrayDeltaE
