@@ -120,9 +120,12 @@ print('Preparing array for export.')
 x = np.tile(np.arange(args.xMin, args.xMax), size[1])   # [1,2,3,1,2,3,...]
 y = np.repeat(np.arange(args.yMin, args.yMax), size[0])  # [1,1,1,2,2,2,...]
 mask1D = np.column_stack((x, y, np.ravel(mask)))
+# Don't need to export umasked regions
+mask1D = mask1D[mask1D[:,2] == 1]
 
 filename_parts = args.outputFile.name.strip().split('.')
 file_type = filename_parts[-1]
+
 
 if file_type == 'gz':
     file_type = filename_parts[-2]
