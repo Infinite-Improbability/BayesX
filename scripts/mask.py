@@ -23,11 +23,12 @@ parser.add_argument('-o', '--outputFile', help="""Path to output file. File exte
                                                 with compression in the latter case. This is slowest and large. Best for human readable output.
                                                 '.npy' will export to an uncompressed numpy .npy file. This is the fastest option but large.
                                                 '.npz' (default) will export to a compressed numpy .npz file. This is slower than .npy but much smaller.
+                                                '.matxt' will export entire mask matrix to text file. This is intended for debugging purposes and is not formatted for the binning script.
                                                 """,
                     type=argparse.FileType('wb'), default='mask.npz')
 args = parser.parse_args()
 
-size = (int(args.xMax-args.xMin), int(args.yMax-args.yMin))
+size = (int(args.yMax-args.yMin), int(args.xMax-args.xMin))
 # TODO: Custom step size support. Currently assumes step of 1.
 
 
@@ -65,6 +66,8 @@ def coord2index(x, y, referenceCoordinates=(args.xMin, args.yMin)):
 
     Intended to handle input coordinates that don't align with matrix coordinates due to origin position.
     Aligns referenceCoordinates to index [0,0]. Reference coordinates should be (xMin, yMin.)
+
+    x-axis points down.
     """
 
     # Adds zero index to each coordinate and rounds
@@ -82,7 +85,7 @@ for filePath in args.maskFiles:
             # Currently assuming pixel coordinates. In theory this isn't guaranteed.
             x, y, r1, r2, angle = [
                 float(el.strip(' )')) for el in line.split('(')[1].split(',')]
-            ellipses.append(Ellipse(x, y, r1, r2, angle))
+            ellipses.append(Ellipse(x, y, r1, r2, angle * np.pi / 180))
 
 # Print ellipses on a matrix
 print("Generating mask array.")
@@ -105,20 +108,20 @@ for el in ellipses:
     if y0 < 0:  # Top
         elM = elM[-y0:, :]
         y0 = 0
-    if x1 > size[0]:  # Right
-        elM = elM[:, :-(x1-size[0])]
-        x1 = size[0]
-    if y1 > size[1]:  # Bottom
-        elM = elM[:-(y1-size[1]), :]
-        y1 = size[1]
+    if x1 > size[1]:  # Right
+        elM = elM[:, :-(x1-size[1])]
+        x1 = size[1]
+    if y1 > size[0]:  # Bottom
+        elM = elM[:-(y1-size[0]), :]
+        y1 = size[0]
 
     # Add matrix on mask by numpy.logical_or
     mask[y0:y1, x0:x1] = mask[y0:y1, x0:x1] | elM
 
 print('Preparing array for export.')
 # Rearrange for export
-x = np.tile(np.arange(args.xMin, args.xMax), size[1])   # [1,2,3,1,2,3,...]
-y = np.repeat(np.arange(args.yMin, args.yMax), size[0])  # [1,1,1,2,2,2,...]
+x = np.tile(np.arange(args.xMin, args.xMax), size[0])   # [1,2,3,1,2,3,...]
+y = np.repeat(np.arange(args.yMin, args.yMax), size[1])  # [1,1,1,2,2,2,...]
 mask1D = np.column_stack((x, y, np.ravel(mask)))
 # Don't need to export umasked regions
 mask1D = mask1D[mask1D[:,2] == 1]
@@ -135,8 +138,59 @@ if file_type == 'txt':
 elif file_type == 'npy':
     print('Exporting to .npy file.'.format(file_type))
     np.save(args.outputFile, mask1D)
+elif file_type == 'matxt':
+    print('Exporting entire mask matrix to text file.')
+    np.savetxt(args.outputFile, mask, fmt='%.1d')
 else:
     print('Exporting to compressed .npz file.')
     np.savez_compressed(args.outputFile, mask1D)
 
 print('File saved as {}.'.format(args.outputFile.name))
+
+
+# Visual output
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    print("Couldn't import matplotlib, exiting without plotting.")
+    exit()
+
+# Trim to masked region
+for i in range(0, size[0]):
+    if mask[i,:].any():
+        mask = mask[i:, :]     
+        break
+for j in range(1, size[0]):
+    if mask[-j,:].any():
+        j -= 1
+        mask = mask[:-j, :]
+        break
+for k in range(0, size[1]):
+    if mask[:,k].any():
+        mask = mask[:, k:]
+        break
+for l in range(1, size[1]):
+    if mask[:,-l].any():
+        mask = mask[:, :-l]
+        break
+
+# Convert indices to coordinates
+yMin = i + args.yMin
+yMax = args.yMax - j
+xMin = k + args.xMin
+xMax = args.xMax - l
+
+# Get ellipse centres
+ox = []
+oy = []
+
+for el in ellipses:
+    ox.append(el.x)
+    oy.append(el.y)
+
+fig, ax = plt.subplots()
+
+im = ax.imshow(mask, extent=(xMin, xMax, yMin, yMax), origin='lower')
+# ax.scatter(ox, oy, marker='+')
+
+plt.show()
