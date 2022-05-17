@@ -156,7 +156,7 @@ MODULE params
    INTEGER         ::  indexy, init, lun, ierr, nl, nlx
    CHARACTER(LEN=256)   ::  filion = '', filrec = '', filkar = '', filcon = '', fillin = ''
    CHARACTER(LEN=256)   :: filcaf = ''
-   CHARACTER(LEN=256)   ::  filARF = '', filRMF = '', filevent = '', filBG = '', filemask=''
+   CHARACTER(LEN=256)   ::  filARF = '', filRMF = '', filevent = '', filBG = '', filmask=''
    CHARACTER(LEN=72)    ::  comment
    INTEGER, PARAMETER  ::  NOEL = 15
    INTEGER, PARAMETER  ::  NL_MAX = 5500
