@@ -191,6 +191,6 @@ for el in ellipses:
 fig, ax = plt.subplots()
 
 im = ax.imshow(mask, extent=(xMin, xMax, yMin, yMax), origin='lower')
-# ax.scatter(ox, oy, marker='+')
+ax.scatter(ox, oy, marker='+')
 
 plt.show()
