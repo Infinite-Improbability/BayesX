@@ -100,20 +100,20 @@ for el in ellipses:
 
     # If the ellipse goes off the edge of the region crop it
     if x0 < 0:  # Left
-        elM = elM[-x0:, :]
+        elM = elM[:, -x0:]
         x0 = 0
     if y0 < 0:  # Top
-        elM = elM[:, -y0:]
+        elM = elM[-y0:, :]
         y0 = 0
     if x1 > size[0]:  # Right
-        elM = elM[:-(x1-size[0]), :]
+        elM = elM[:, :-(x1-size[0])]
         x1 = size[0]
     if y1 > size[1]:  # Bottom
-        elM = elM[:, :-(y1-size[1])]
+        elM = elM[:-(y1-size[1]), :]
         y1 = size[1]
 
     # Add matrix on mask by numpy.logical_or
-    mask[x0:x1, y0:y1] = mask[x0:x1, y0:y1] | elM
+    mask[y0:y1, x0:x1] = mask[y0:y1, x0:x1] | elM
 
 print('Preparing array for export.')
 # Rearrange for export
