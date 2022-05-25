@@ -132,6 +132,10 @@ contains
             read (funit, *) Gas_PriorType(1, 6), Gas_Prior(1, 6, 1), Gas_Prior(1, 6, 2)
          elseif ((tag == '#alpha_model2_prior').and.(GasModel==2)) then
             read (funit, *) Gas_PriorType(1, 7), Gas_Prior(1, 7, 1), Gas_Prior(1, 7, 2)
+         elseif ((tag == '#rs_poly_prior').and.(GasModel==3)) then
+            read (funit, *) Gas_PriorType(1, 1), Gas_Prior(1, 1, 1), Gas_Prior(1, 1, 2)
+         elseif ((tag == '#c500_poly_prior').and.(GasModel==3)) then
+            read (funit, *) Gas_PriorType(1, 2), Gas_Prior(1, 2, 1), Gas_Prior(1, 2, 2)
          elseif (tag == '#z_Prior') then
             read (funit, *) z_PriorType(1), z_Prior(1, 1), z_Prior(1, 2)
          elseif (tag == '#mass_function') then

@@ -25,6 +25,8 @@ CONTAINS
       REAL*8, PARAMETER           ::  eps = 1d-4
       REAL*8                       ::  result
       REAL*8                       ::  angfactor
+
+      real*8 :: Gamma0, GammaR, t0_poly, polyF, ne_poly, polyF_2500, ne2500_poly, ne200_poly, ne_rx
 !-----------------------------------------------------------------------
 
       IF (znow) THEN
@@ -43,7 +45,7 @@ CONTAINS
          c_GNFW = GasPars(k, 5)
          c500_GNFW = GasPars(k, 6)
 
-         IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0) THEN
+     IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0) THEN
             flag = 1
             RETURN
          END IF
@@ -141,7 +143,7 @@ CONTAINS
                      (1.0 + ((r2500_DM/rp_GNFW)**(a_GNFW)))* &
                      (((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
                      *(m_sun*Mpc2m*Mpc2m)*(J2keV)
-         CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+       CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e2500 = n_e2500*1.d+6
          Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0))
          Pe2500 = n_e2500*Tg2500_DM
@@ -178,7 +180,7 @@ CONTAINS
                      (1.0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
                      (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
                      *(m_sun*Mpc2m*Mpc2m)*(J2keV)
-            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+          CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             n_ex(m) = n_ex(m)*1.d+6
             Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
             Pex(m) = n_ex(m)*Tgx(m)
@@ -198,7 +200,7 @@ CONTAINS
                      (1.0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
                      (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
                      *(m_sun*Mpc2m*Mpc2m)*(J2keV)
-            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+          CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             n_ex(m) = n_ex(m)*1.d+6
             Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
             Pex(m) = n_ex(m)*Tgx(m)
@@ -278,16 +280,16 @@ CONTAINS
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
-                     call interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(rmin),result)
+                     call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (rr > rlimit) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
-	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(xrayr),result)
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
-                  xrayCmap(i, xrayxpix, xrayypix) = (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)*(xraycell*xraycell*sec2min*sec2min)
+                 xrayCmap(i, xrayxpix, xrayypix) = (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)*(xraycell*xraycell*sec2min*sec2min)
                END DO
             END DO
          END DO
@@ -466,7 +468,7 @@ CONTAINS
                      (1.0d0 + ((r2500_DM/rp_GNFW)**(a_GNFW)))* &
                      (((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
                      (m_sun*Mpc2m*Mpc2m)*(J2keV)
-         CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+       CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
 
          n_e2500 = n_e2500*1.d+6
          Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0))
@@ -629,13 +631,13 @@ CONTAINS
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
-	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(rmin),result)
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr > rlimit) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
-	             CALL interp1d_even(predX_S2D(1:n,i),logr,n,phlog10(xrayr),result)
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
                   xrayCmap(i, xrayxpix, xrayypix) = &
@@ -689,6 +691,329 @@ CONTAINS
          aux(k, 30) = n_e200
          aux(k, 31) = Ke200
          aux(k, 32) = Pe200
+
+         !i = 0
+         !DO m = 33, 129, 8
+         !   i = i + 1
+         !   aux(k, m) = rgx(i)
+         !   aux(k, m + 1) = M_DMx(i)
+         !   aux(k, m + 2) = Mg_DMx(i)
+         !   aux(k, m + 3) = fg_DMx(i)
+         !   aux(k, m + 4) = Tgx(i)
+         !   aux(k, m + 5) = n_ex(i)
+         !   aux(k, m + 6) = Kex(i)
+         !   aux(k, m + 7) = Pex(i)
+         !END DO
+         DEALLOCATE (rgx, Tgx, n_ex, Kex, Pex)
+         DEALLOCATE (rhogasx, n_Hx, ne_nHx)
+         DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
+
+         ! Polytropic model based on A&A 627, A19 (2019)
+         ! https://doi.org/10.1051/0004-6361/201834875
+      ELSEIF (GasModel == 3) THEN
+         rs_DM = GasPars(k, 1)
+         c500_DM = GasPars(k, 2)
+
+         ! TODO: Unit comments
+
+         !          null run
+         IF (c500_DM == 0.d0) THEN
+            flag = 2
+            RETURN
+         END IF
+
+         r500_DM = c500_DM*rs_DM
+         r200_DM = r500_DM*1.5d0 ! Taken from Gas Model 1
+         c200_DM = r200_DM/rs_DM
+
+         Gamma0 = 0.25
+         GammaR = 0.14
+         T0_poly = 1.76
+
+         rhos_DM = (200.d0/3.d0)*((c200_DM)**3.d0)* &
+                   (rhocritz/(DLOG(1.d0 + c200_DM) - (1.d0/(1.d0 + c200_DM))))
+
+         ! Consider x = r/r500 at r=r500 s.t. x=1
+         polyF = polyEstimateF(1.d0, c500_DM, Gamma0, GammaR, T0_poly)
+
+         ne_poly = polyF**(1/Gamma0)
+
+         MT500_DM = calcDMmass(rs_DM, rhos_DM, r500_DM)
+         
+         MT200_DM = calcDMmass(rs_DM, rhos_DM, r200_DM)
+
+
+         !Pei_GNFW = (mu_m/mu_e)*G*(mass_coeff_Einasto/(4.d0*pi))*Mg200_DM/ &
+         !           EinastoDM_GNFWgasvol(r200_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+         !Pei_GNFW_keV = Pei_GNFW*(m_sun/Mpc2m)*(J2keV)       !keVm-3
+
+         ! Moved down
+         !Mg200_DM = MT200_DM*fg200_DM     !M_sun
+
+         ! IF (Pei_GNFW .LE. 0d0) THEN
+         !    WRITE (*, *) c200_DM, MT200_DM, fg200_DM
+         !    WRITE (*, *) Mg200_DM, r200_DM, r_2_DM
+         !    WRITE (*, *) rho_2_DM, rp_GNFW
+         !    WRITE (*, *) 'error Pei_GNFW= ', Pei_GNFW
+         !    STOP
+         ! END IF
+
+         ALLOCATE (n_H(n))
+         ALLOCATE (ne_nH(n), n_e(n))
+         ALLOCATE (X_emiss2D(n, xrayNbin))
+         ALLOCATE (logX_emiss1D(n))
+         ALLOCATE (X_S1D(n))
+         ALLOCATE (X_S2D(n, xrayNbin))
+
+         xfluxsec1 = 1.0/((4.0*pi)*((1.0 + z(k))**4))
+
+         xfluxsec2 = (3.031d-15)
+
+         xfluxsec5 = (pi*pi)/(60.0*60.0*180.0*180.0)
+
+         DO i = 1, xrayNbin
+            xrayFluxCoeff(i) = 0.
+            xrayFlux(i) = 0.
+            xrayE1(i) = 0.
+            xrayE2(i) = 0.
+         END DO
+
+         xrayE1(1) = xrayEmin
+         xrayE2(1) = xrayEmin + xrayDeltaE
+
+         DO i = 2, xrayNbin
+            xrayE1(i) = xrayE1(i - 1) + xrayDeltaE
+            xrayE2(i) = xrayE2(i - 1) + xrayDeltaE
+         END DO
+
+         CALL xsphab(xrayE1, xrayNbin, N_H_col, photar)
+
+         Rhogas500 = ne_poly*mu_e
+
+         ! T500 as in eq (10) of Ghirardini et al. (2019) to match polytropic paper
+         Tg500_DM = 8.85*(MT500_DM/(h*10.**15*m_sun))**(2./3.)*(mu_m/0.6) ! TODO: Missing E(z)^(2/3)
+
+         ! TODO: n_e500 values appear to get calculated by the following, which feels odd given we've calculated it already
+         CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayE1, xrayE2, &
+                              xrayNbin, xrayDeltaE, xrayFluxCoeff)
+         n_e500 = n_e500*1.d+6
+         Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
+         Pe500 = n_e500*Tg500_DM
+
+         ! Mg500_DM = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+         !            EinastoDM_GNFWgasvol( &
+         !            r500_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+         ! MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
+         ! fg500_DM = Mg500_DM/MT500_DM
+
+         r2500_DM = r200_DM/3.5d0
+         c2500_DM = r2500_DM/rs_DM
+
+         polyF_2500 = polyEstimateF(r2500_DM/r500_DM, c500_DM, Gamma0, GammaR, T0_poly)
+         ne2500_poly = polyF_2500**(1/Gamma0)
+         Rhogas2500 = ne2500_poly*mu_e
+         Tg2500_DM = exp(log(T0) + Gamma0*log(ne2500_poly) + GammaR*log(r2500_DM/r500_DM))*Tg500_DM
+
+       CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+
+         n_e2500 = n_e2500*1.d+6
+         ! Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0)) ! TODO: Verify
+
+         ! Pe2500 = n_e2500*Tg2500_DM
+
+         ! Mg2500_DM = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+         ! EinastoDM_GNFWgasvol( &
+         ! r2500_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+         !MT2500_DM = (4.d0*pi/3.d0)*(2500.d0*rhocritz)*(r2500_DM*r2500_DM*r2500_DM)
+         !fg2500_DM = Mg2500_DM/MT2500_DM
+
+         ne200_poly = polyEstimateF(r200_DM/r500_DM, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
+         Rhogas200 = ne200_poly*mu_e
+         Tg200_DM = exp(log(T0) + Gamma0*log(ne200_poly) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+
+         CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+         n_e200 = n_e200*1.d+6
+
+         ! Ke200 = Tg200_DM/(n_e200**(2.0/3.0))
+         ! Pe200 = n_e200*Tg200_DM
+
+         ALLOCATE (rgx(13))
+         ALLOCATE (rhogasx(13), n_Hx(13))
+         ALLOCATE (ne_nHx(13), n_ex(13))
+         ALLOCATE (Tgx(13), Kex(13), Pex(13))
+         ALLOCATE (M_DMx(13), Mg_DMx(13), fg_DMx(13))
+
+         rx_incre = 0.03
+         DO m = 1, 7
+            rx_incre = rx_incre + 0.01
+
+            rgx(m) = rx_incre*r500_DM
+            ne_rx = polyEstimateF(rx_incre, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
+            Rhogasx(m) = ne_rx*mu_e
+            Tgx(m) = exp(log(T0) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+
+            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
+                                 ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
+                                 xrayDeltaE, xrayFluxCoeff)
+            n_ex(m) = n_ex(m)*1.d+6
+            ! Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+            ! Pex(m) = n_ex(m)*Tgx(m)
+            ! Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+            !             EinastoDM_GNFWgasvol( &
+            !             rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+            ! M_DMx(m) = mass_coeff_Einasto*INCOG(Gamma_coeff1, Gamma_coeff2)
+            ! fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
+         END DO
+
+         rx_incre = 0.1
+         DO m = 8, 13
+            rx_incre = rx_incre + 0.05
+
+            rgx(m) = rx_incre*r500_DM
+            ne_rx = polyEstimateF(rx_incre, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
+            Rhogasx(m) = ne_rx*mu_e
+            Tgx(m) = exp(log(T0) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+
+            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
+                                 ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
+                                 xrayDeltaE, xrayFluxCoeff)
+            n_ex(m) = n_ex(m)*1.d+6
+            ! Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+            ! Pex(m) = n_ex(m)*Tgx(m)
+            ! Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+            !             EinastoDM_GNFWgasvol( &
+            !             rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+            ! M_DMx(m) = mass_coeff_Einasto*INCOG(Gamma_coeff1, Gamma_coeff2)
+            ! fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
+         END DO
+
+         DO m = 1, n
+            ne_rx = polyEstimateF(r(m)/r500_DM, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
+            Rhogas(m) = ne_rx*mu_e
+            T(m) = exp(log(T0) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+
+            CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), &
+                                 xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+            X_emiss2D(m, 1:xrayNbin) = xrayFluxCoeff(1:xrayNbin)
+         END DO
+
+         DEALLOCATE (n_H, n_e, ne_nH)
+         DO i = 1, xrayNbin
+            DO m = 1, n
+               logX_emiss1D(m) = phlog10(X_emiss2D(m, i)* &
+                                         xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m)
+               !      write(*,*)logX_emiss1D(m)
+            END DO
+
+            DO m = 1, n
+               uu = r(m)
+               rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
+               !      write(*,*)rlimit1
+               IF (rlimit1 > 0d0) THEN
+                  CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
+               END IF
+               X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
+            END DO
+         END DO
+         !     write(*,*)'test'
+         DO i = 1, xrayNbin
+            DO m = 1, n
+               X_S2D(m, i) = X_S2D(m, i)*xfluxsec1*xfluxsec5*photar(i)
+            END DO
+         END DO
+         DEALLOCATE (X_emiss2D, logX_emiss1D, X_S1D)
+         !=======================================================================
+         ! Calculating the telescope predicted output counts for each pixel in each channel
+
+         ALLOCATE (predX_S2D(n, xrayNch))
+
+         DO m = 1, n
+            DO i = 1, xrayNch
+               predX_S2D(m, i) = 0.0
+               DO j = 1, xrayNbin
+                  predX_S2D(m, i) = predX_S2D(m, i) + TRM(j, i)*X_S2D(m, j)
+               END DO
+            END DO
+         END DO
+         !  write(*,*) predX_S2D(1 ,1)
+         DEALLOCATE (X_S2D)
+
+         angfactor = sec2rad*D
+         xrayx0 = GeoPars(k, 1)
+         xrayy0 = GeoPars(k, 2)
+         xrayCmap = 0d0
+         xrayCpred = 0d0
+
+         DO xrayxpix = 1, xraynx
+            DO xrayypix = 1, xrayny
+               xrayxx = xraytrans(1) + xrayxpix*xraytrans(2)
+               xrayyy = xraytrans(4) + xrayypix*xraytrans(6)
+               xraydx(1) = xrayxx - xrayx0
+               xraydx(2) = xrayyy - xrayy0
+               xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
+               DO i = 1, xrayNch
+                  IF (xrayr < rmin) THEN
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
+                     xrayCmap(i, xrayxpix, xrayypix) = result
+                  ELSEIF (xrayr > rlimit) then
+                     xrayCmap(i, xrayxpix, xrayypix) = 0.
+                  ELSE
+                     !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
+                     xrayCmap(i, xrayxpix, xrayypix) = result
+                  END IF
+                  xrayCmap(i, xrayxpix, xrayypix) = &
+                     (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)* &
+                     (xraycell*xraycell*sec2min*sec2min)
+               END DO
+            END DO
+         END DO
+         DEALLOCATE (predX_S2D)
+
+         xLENi = 0
+
+         DO xrayxpix = 1, xraynx
+            DO xrayypix = 1, xrayny
+               DO i = 1, xrayNch
+                  xLENi = xLENi + 1
+                  xrayCpred(xLENi) = xrayCmap(i, xrayxpix, xrayypix) + xrayBG(xLENi)
+               END DO
+            END DO
+         END DO
+         !Store derived parameters
+         aux(k, 1) = D              !angular diameter distance in Mpc
+         aux(k, 2) = rs_DM
+         aux(k, 3) = rhos_DM
+         aux(k, 4) = 0!rp_GNFW
+         aux(k, 5) = 0!Pei_GNFW_keV
+         aux(k, 6) = r2500_DM
+         aux(k, 7) = c2500_DM
+         aux(k, 8) = 0!Mg2500_DM
+         aux(k, 9) = MT2500_DM
+         aux(k, 10) = 0!fg2500_DM
+         aux(k, 11) = Tg2500_DM
+         aux(k, 12) = n_e2500
+         aux(k, 13) = 0!Ke2500
+         aux(k, 14) = 0!Pe2500
+         aux(k, 15) = r500_DM
+         aux(k, 16) = c500_DM
+         aux(k, 17) = 0!Mg500_DM
+         aux(k, 18) = MT500_DM
+         aux(k, 19) = 0!fg500_DM
+         aux(k, 20) = Tg500_DM
+         aux(k, 21) = n_e500
+         aux(k, 22) = 0!Ke500
+         aux(k, 23) = 0!Pe500
+         aux(k, 24) = r200_DM
+         aux(k, 25) = c200_DM
+         aux(k, 26) = 0!Mg200_DM
+         aux(k, 27) = MT200_DM
+         aux(k, 28) = 0!fg200_DM
+         aux(k, 29) = 0!Tg200_DM
+         aux(k, 30) = n_e200
+         aux(k, 31) = 0!Ke200
+         aux(k, 32) = 0!Pe200
 
          !i = 0
          !DO m = 33, 129, 8
@@ -765,6 +1090,31 @@ CONTAINS
                           ((b_GNFW - c_GNFW)/a_GNFW)))
    END FUNCTION GNFWmodel3D
 
+!================================================================================================
+   FUNCTION polyEstimateF(x, c500, Gamma0, GammaR, T0)
+
+      implicit none
+      real*8 :: x, c500, Gamma0, GammaR, gammaFrac, v1, mu1, h1, T0, dvdx, dhdx, dudx, mux
+      real*8 :: polyEstimateF
+
+      ! Finding f(x) [as in Appendix C of polytropic paper] exactly is a tricky indefinite integral,
+      ! so we'll expand it in a Taylor series around 1
+      ! TODO: Figure out if there is a more appropriate expansion point
+
+      gammaFrac = Gamma0*GammaR/(1 + Gamma0)
+      v1 = 1 !1. ** gammaFrac
+      mu1 = (log(1.+c500) - c500/(1.+c500))/(log(2.) - 0.5)
+      h1 = -2*mu1/(T0*x**2*x**GammaR)*Gamma0/(Gamma0 + 1)
+
+      dvdx = gammaFrac ! gammaFrac * x ** (gammaFrac-1)
+      dudx = (c500 + c500**2*(log(16.) - 1) - (1 + c500)**2*log(1 + c500))/((1 + c500)**2*(log(4.) - 1)**2)
+      dhdx = -2*Gamma0/(T0*(Gamma0 + 1))*(dudx - mu1*(GammaR + 2))
+
+      mux = (log(1.+c500*x) - c500*x/(1.+c500*x))/(log(1 + x) - x/(1 + x))
+
+      polyEstimateF = (h1*v1*x + (v1*dhdx + h1*dvdx)*(x/2 - 1)*x)/mux
+
+   END FUNCTION polyEstimateF
 !================================================================================================
    FUNCTION calcDMmass(rs_DM, rhos_DM, ri_DM)
 
@@ -2803,14 +3153,14 @@ CONTAINS
 
                   IF (rr < rmin) THEN
                      !CALL interp1d(logX_emiss1D, logr, n, phlog10(rmin), result)
-                     CALL interp1d_even(logX_emiss1D,logr,n,phlog10(rmin),result)
+                     CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rmin), result)
 
                   ELSEIF (rr > rmax) THEN
                      Xrayemissfunc1 = 0.d0
                      RETURN
                   ELSE
                      !CALL interp1d(logX_emiss1D, logr, n, phlog10(rr), result)
-                     CALL interp1d_even(logX_emiss1D,logr,n,phlog10(rr),result)
+                     CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rr), result)
                   END IF
 
                   Xrayemissfunc1 = 10.0**result
