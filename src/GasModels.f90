@@ -812,7 +812,7 @@ CONTAINS
          polyF_2500 = polyEstimateF(r2500_DM/r500_DM, c500_DM, Gamma0, GammaR, T0_poly)
          ne2500_poly = polyF_2500**(1/Gamma0)
          Rhogas2500 = ne2500_poly*mu_e
-         Tg2500_DM = exp(log(T0) + Gamma0*log(ne2500_poly) + GammaR*log(r2500_DM/r500_DM))*Tg500_DM
+         Tg2500_DM = exp(log(T0_poly) + Gamma0*log(ne2500_poly) + GammaR*log(r2500_DM/r500_DM))*Tg500_DM
 
        CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
 
@@ -829,7 +829,7 @@ CONTAINS
 
          ne200_poly = polyEstimateF(r200_DM/r500_DM, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
          Rhogas200 = ne200_poly*mu_e
-         Tg200_DM = exp(log(T0) + Gamma0*log(ne200_poly) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+         Tg200_DM = exp(log(T0_poly) + Gamma0*log(ne200_poly) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
 
          CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e200 = n_e200*1.d+6
@@ -850,7 +850,7 @@ CONTAINS
             rgx(m) = rx_incre*r500_DM
             ne_rx = polyEstimateF(rx_incre, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
             Rhogasx(m) = ne_rx*mu_e
-            Tgx(m) = exp(log(T0) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+            Tgx(m) = exp(log(T0_poly) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
                                  ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
@@ -872,7 +872,7 @@ CONTAINS
             rgx(m) = rx_incre*r500_DM
             ne_rx = polyEstimateF(rx_incre, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
             Rhogasx(m) = ne_rx*mu_e
-            Tgx(m) = exp(log(T0) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+            Tgx(m) = exp(log(T0_poly) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
                                  ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
@@ -890,7 +890,7 @@ CONTAINS
          DO m = 1, n
             ne_rx = polyEstimateF(r(m)/r500_DM, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
             Rhogas(m) = ne_rx*mu_e
-            T(m) = exp(log(T0) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+            T(m) = exp(log(T0_poly) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
 
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), &
                                  xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
