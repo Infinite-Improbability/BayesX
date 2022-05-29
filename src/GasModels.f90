@@ -26,7 +26,7 @@ CONTAINS
       REAL*8                       ::  result
       REAL*8                       ::  angfactor
 
-      real*8 :: Gamma0, GammaR, t0_poly, polyF, ne_poly, polyF_2500, ne2500_poly, ne200_poly, ne_rx
+      real*8 :: Gamma0, GammaR, t0_poly, polyF, ne500_poly, polyF_2500, ne2500_poly, ne200_poly, ne_rx
 !-----------------------------------------------------------------------
 
       IF (znow) THEN
@@ -723,20 +723,18 @@ CONTAINS
          END IF
 
          r500_DM = c500_DM*rs_DM
-         r200_DM = r500_DM*1.5d0 ! Taken from Gas Model 1
-         c200_DM = r200_DM/rs_DM
-
+         
          Gamma0 = 0.25
          GammaR = 0.14
          T0_poly = 1.76
+         
+         ! Calculate scale density by behaviour of NFW model
+         rhos_DM = (500.d0/3.d0) * (c500_DM)**3.d0 * rhocritz / (DLOG(1.d0 + c500_DM) - (c500_DM/(1.d0 + c500_DM)))
+         
+         
 
-         rhos_DM = (200.d0/3.d0)*((c200_DM)**3.d0)* &
-                   (rhocritz/(DLOG(1.d0 + c200_DM) - (1.d0/(1.d0 + c200_DM))))
-
-         ! Consider x = r/r500 at r=r500 s.t. x=1
-         polyF = polyEstimateF(1.d0, c500_DM, Gamma0, GammaR, T0_poly)
-
-         ne_poly = polyF**(1/Gamma0)
+         r200_DM = r500_DM*1.5d0 ! Taken from Gas Model 1. I assume it is valid for NFW.
+         c200_DM = r200_DM/rs_DM
 
          MT500_DM = calcDMmass(rs_DM, rhos_DM, r500_DM)
          
@@ -788,14 +786,26 @@ CONTAINS
 
          CALL xsphab(xrayE1, xrayNbin, N_H_col, photar)
 
-         Rhogas500 = ne_poly*mu_e
+         ! Consider x = r/r500 at r=r500 s.t. x=1
+         polyF = polyEstimateF(1.d0, c500_DM, Gamma0, GammaR, T0_poly)
+         ne500_poly = polyF**(1/Gamma0) ! I think this must be in cm^-3
+
+         ! mu_e is in kg
+         ! me_poly is probably in cm^-3?
+         ! So this is in kg cm^-3
+         Rhogas500 = ne500_poly*mu_e
+         ! But Xray_flux_coeff expects different units
+         Rhogas500 = Rhogas500 * 1.d+6 ! To kg m^-3
+         Rhogas500 = Rhogas500 / (m_sun/(Mpc2m*Mpc2m*Mpc2m)) ! To solar masses per megaparsec^3
 
          ! T500 as in eq (10) of Ghirardini et al. (2019) to match polytropic paper
-         Tg500_DM = 8.85*(MT500_DM/(h*10.**15*m_sun))**(2./3.)*(mu_m/0.6) ! TODO: Missing E(z)^(2/3)
+         ! The last constant is actually mu/0.6, where mu is the mean molecular weight per particle
+         ! I have accordingly used the molecular mass rather than SI units.
+         Tg500_DM = 8.85*(MT500_DM/(h*10.**15*m_sun))**(2./3.) * (rhocritz / rhocrit)**(1./3.) *(1.0078250319)
 
          ! TODO: n_e500 values appear to get calculated by the following, which feels odd given we've calculated it already
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayE1, xrayE2, &
-                              xrayNbin, xrayDeltaE, xrayFluxCoeff)
+         xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e500 = n_e500*1.d+6
          Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
          Pe500 = n_e500*Tg500_DM
@@ -811,12 +821,12 @@ CONTAINS
 
          polyF_2500 = polyEstimateF(r2500_DM/r500_DM, c500_DM, Gamma0, GammaR, T0_poly)
          ne2500_poly = polyF_2500**(1/Gamma0)
-         Rhogas2500 = ne2500_poly*mu_e
+         Rhogas2500 = ne2500_poly*mu_e * 1.d+6  / (m_sun/(Mpc2m*Mpc2m*Mpc2m))
          Tg2500_DM = exp(log(T0_poly) + Gamma0*log(ne2500_poly) + GammaR*log(r2500_DM/r500_DM))*Tg500_DM
 
-       CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
-
+         CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e2500 = n_e2500*1.d+6
+
          ! Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0)) ! TODO: Verify
 
          ! Pe2500 = n_e2500*Tg2500_DM
@@ -828,7 +838,7 @@ CONTAINS
          !fg2500_DM = Mg2500_DM/MT2500_DM
 
          ne200_poly = polyEstimateF(r200_DM/r500_DM, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
-         Rhogas200 = ne200_poly*mu_e
+         Rhogas200 = ne200_poly*mu_e * 1.d+6  / (m_sun/(Mpc2m*Mpc2m*Mpc2m))
          Tg200_DM = exp(log(T0_poly) + Gamma0*log(ne200_poly) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
 
          CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
@@ -849,7 +859,7 @@ CONTAINS
 
             rgx(m) = rx_incre*r500_DM
             ne_rx = polyEstimateF(rx_incre, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
-            Rhogasx(m) = ne_rx*mu_e
+            Rhogasx(m) = ne_rx*mu_e * 1.d+6  / (m_sun/(Mpc2m*Mpc2m*Mpc2m))
             Tgx(m) = exp(log(T0_poly) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
@@ -871,7 +881,7 @@ CONTAINS
 
             rgx(m) = rx_incre*r500_DM
             ne_rx = polyEstimateF(rx_incre, c500_DM, Gamma0, GammaR, T0_poly)**(1/Gamma0)
-            Rhogasx(m) = ne_rx*mu_e
+            Rhogasx(m) = ne_rx*mu_e * 1.d+6  / (m_sun/(Mpc2m*Mpc2m*Mpc2m))
             Tgx(m) = exp(log(T0_poly) + Gamma0*log(ne_rx) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
@@ -994,7 +1004,7 @@ CONTAINS
          aux(k, 10) = 0!fg2500_DM
          aux(k, 11) = Tg2500_DM
          aux(k, 12) = n_e2500
-         aux(k, 13) = 0!Ke2500
+         aux(k, 13) = ne2500_poly!Ke2500
          aux(k, 14) = 0!Pe2500
          aux(k, 15) = r500_DM
          aux(k, 16) = c500_DM
@@ -1003,7 +1013,7 @@ CONTAINS
          aux(k, 19) = 0!fg500_DM
          aux(k, 20) = Tg500_DM
          aux(k, 21) = n_e500
-         aux(k, 22) = 0!Ke500
+         aux(k, 22) = ne500_poly!Ke500
          aux(k, 23) = 0!Pe500
          aux(k, 24) = r200_DM
          aux(k, 25) = c200_DM
@@ -1012,7 +1022,7 @@ CONTAINS
          aux(k, 28) = 0!fg200_DM
          aux(k, 29) = 0!Tg200_DM
          aux(k, 30) = n_e200
-         aux(k, 31) = 0!Ke200
+         aux(k, 31) = ne200_poly!Ke200
          aux(k, 32) = 0!Pe200
 
          !i = 0
@@ -1112,7 +1122,7 @@ CONTAINS
 
       mux = (log(1.+c500*x) - c500*x/(1.+c500*x))/(log(1 + x) - x/(1 + x))
 
-      polyEstimateF = (h1*v1*x + (v1*dhdx + h1*dvdx)*(x/2 - 1)*x)/mux
+      polyEstimateF = (h1*v1*x + (v1*dhdx + h1*dvdx)*(x/2 - 1)*x) / mux ! TODO: mux or mu_m?
 
    END FUNCTION polyEstimateF
 !================================================================================================
