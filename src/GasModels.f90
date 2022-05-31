@@ -26,7 +26,7 @@ CONTAINS
       REAL*8                       ::  result
       REAL*8                       ::  angfactor
 
-      real*8 :: Gamma0, GammaR, t0_poly, ne500_poly, ne2500_poly, ne200_poly, ne_rx
+      real*8 :: ne500_poly, ne2500_poly, ne200_poly, ne_rx
 !-----------------------------------------------------------------------
 
       IF (znow) THEN
@@ -708,16 +708,12 @@ CONTAINS
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
 
-      ! Polytropic model based on A&A 627, A19 (2019)
+      ! Polytropic model based on Ghirardini2019 [A&A 627, A19 (2019)]
       ! https://doi.org/10.1051/0004-6361/201834875
       ELSEIF (GasModel == 3) THEN
          MT200_DM = GasPars(k, 1)   !M_sun
 
          ! TODO: Unit comments
-
-         Gamma0 = 0.25
-         GammaR = 0.14
-         T0_poly = 1.76
 
          !Neto et~al. 2007 for relaxed clusters
          c200_DM = 5.26d0*(((MT200_DM*h)/1.d14)**(-0.1d0))*(1.d0/(1.d0 + z(k)))
@@ -784,7 +780,7 @@ CONTAINS
         
          MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
 
-         ne500_poly = polyEstimateNumberDensity(r500_DM, c500_DM, Gamma0, GammaR, T0_poly)
+         ne500_poly = polyEstimateNumberDensity(r500_DM)
          Rhogas500 = ne500_poly*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m) ! solar masses per Mpc
          ! T500 as in eq (10) of Ghirardini et al. (2019) to match polytropic paper
          ! The last constant is actually mu/0.6, where mu is the mean molecular weight per particle
@@ -806,9 +802,9 @@ CONTAINS
          r2500_DM = r200_DM/3.5d0
          c2500_DM = r2500_DM/rs_DM
 
-         ne2500_poly = polyEstimateNumberDensity(r2500_DM, c500_DM, Gamma0, GammaR, T0_poly)
+         ne2500_poly = polyEstimateNumberDensity(r2500_DM)
          Rhogas2500 = ne2500_poly*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m) 
-         Tg2500_DM = exp(log(T0_poly) + Gamma0*log(ne2500_poly*1.d-6) + GammaR*log(r2500_DM/r500_DM))*Tg500_DM
+         Tg2500_DM = polyTemperature(r2500_DM, ne2500_poly)
 
          CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e2500 = n_e2500*1.d+6
@@ -823,9 +819,9 @@ CONTAINS
          ! r2500_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          !fg2500_DM = Mg2500_DM/MT2500_DM
 
-         ne200_poly = polyEstimateNumberDensity(r200_DM, c500_DM, Gamma0, GammaR, T0_poly)
+         ne200_poly = polyEstimateNumberDensity(r200_DM)
          Rhogas200 = ne200_poly*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
-         Tg200_DM = exp(log(T0_poly) + Gamma0*log(ne200_poly*1.d-6) + GammaR*log(r200_DM/r500_DM))*Tg500_DM
+         Tg200_DM = polyTemperature(r200_DM, ne200_poly)
 
          CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e200 = n_e200*1.d+6
@@ -844,9 +840,9 @@ CONTAINS
             rx_incre = rx_incre + 0.01
 
             rgx(m) = rx_incre*r500_DM
-            ne_rx = polyEstimateNumberDensity(rgx(m), c500_DM, Gamma0, GammaR, T0_poly)
+            ne_rx = polyEstimateNumberDensity(rgx(m))
             Rhogasx(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
-            Tgx(m) = exp(log(T0_poly) + Gamma0*log(ne_rx*1.d-6) + GammaR*log(rgx(m)/r500_DM))*Tg500_DM
+            Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
                                  ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
@@ -866,9 +862,9 @@ CONTAINS
             rx_incre = rx_incre + 0.05
 
             rgx(m) = rx_incre*r500_DM
-            ne_rx = polyEstimateNumberDensity(rgx(m), c500_DM, Gamma0, GammaR, T0_poly)
+            ne_rx = polyEstimateNumberDensity(rgx(m))
             Rhogasx(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
-            Tgx(m) = exp(log(T0_poly) + Gamma0*log(ne_rx*1.d-6) + GammaR*log(rgx(m)/r500_DM))*Tg500_DM
+            Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
                                  ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
@@ -884,9 +880,9 @@ CONTAINS
          END DO
 
          DO m = 1, n
-            ne_rx = polyEstimateNumberDensity(r(m), c500_DM, Gamma0, GammaR, T0_poly)
+            ne_rx = polyEstimateNumberDensity(r(m))
             Rhogas(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
-            T(m) = exp(log(T0_poly) + Gamma0*log(ne_rx*1.d-6) + GammaR*log(r(m)/r500_DM))*Tg500_DM
+            T(m) = polyTemperature(r(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), &
                                  xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
@@ -1087,37 +1083,56 @@ CONTAINS
    END FUNCTION GNFWmodel3D
 
 !================================================================================================
-   FUNCTION polyEstimateNumberDensity(radius, c500, Gamma0, GammaR, T0)
+   FUNCTION polyEstimateNumberDensity(radius)
 
       implicit none
-      real*8, intent(in) :: radius, c500, Gamma0, GammaR, T0
-      real*8 :: x, gammaFrac, v1, mu1, h1, dvdx, dhdx, dmudx, mux, a, vx
+      real*8, intent(in) :: radius
+      real*8 :: x, v, f0, result
+      real*8 :: eps=1.0d-4
       real*8 :: polyEstimateNumberDensity
-
-      ! Finding f(x) [as in Appendix C of polytropic paper] exactly is a tricky indefinite integral,
-      ! so we'll expand it in a Taylor series around a
-      ! TODO: Figure out if there is a more appropriate expansion point
 
       x = radius / r500_DM
 
-      a = 1
+      ! Invert our equation for temperature to find n_e at r500
+      !n0 = T0 ** (-1/Gamma0)
+      ! Then f0 = f(x=1) = n0^Gamma0
+      f0 = 1./T0_poly
+      
+      v = x ** Gamma0*GammaR/(1. + Gamma0)
 
-      gammaFrac = Gamma0*GammaR/(1 + Gamma0)
-      v1 = a ** gammaFrac
-      mu1 = (log(1.+c500*a) - c500*a/(1.+c500*a))/(log(1+a) - a/(1+a))
-      h1 = -2*mu1/(T0*a**2*a**GammaR)*Gamma0/(Gamma0 + 1)
+      CALL qtrap(polyhvIntegrand, 1.d0, x, eps, result)
 
-      dvdx = gammaFrac * a ** (gammaFrac-1)
-      dmudx = (c500**2 * a)/((1+c500*a)**2 * (-(a/(1+a))+log(1+a)))-(a*(-((c500*a)/(1+c500*a))+log(1+c500*a)))/((1+a)**2 * (-(a/(1+a))+log(1+a))**2)
-      dhdx = ( 2*Gamma0*a**(-3-GammaR) * ((2+GammaR)*mu1) - a*dmudx) / ((1+Gamma0)*T0)
-
-      vx = x**gammaFrac
-
-      !mux = (log(1.+c500*x) - c500*x/(1.+c500*x))/(log(1 + x) - x/(1 + x))
-
-      polyEstimateNumberDensity = ((h1*v1*x + (v1*dhdx + h1*dvdx)*(x/2 - a)*x) / vx)**(1/Gamma0) * 1.d+6 ! TODO: mux or mu_m? ! m^-3
+      polyEstimateNumberDensity = ((f0 + result) / v)**(1/gamma0)
 
    END FUNCTION polyEstimateNumberDensity
+!================================================================================================
+FUNCTION polyhvIntegrand(zz)
+
+   implicit none
+   real*8 :: zz
+   real*8 :: u, hx, v
+   real*8 :: polyhvIntegrand
+   
+   v = zz ** Gamma0*GammaR/(1 + Gamma0)
+   u = (log(1.+c500_dm*zz) - c500_dm*zz/(1.+c500_dm*zz))/(log(1+zz) - zz/(1+zz))
+   hx = -2*u*Gamma0/(T0_poly * zz**2 * zz**GammaR * (Gamma0+1))
+
+   polyhvIntegrand = v * h
+
+END FUNCTION
+
+!================================================================================================
+FUNCTION polyTemperature(radius, ne_r)
+
+   implicit none
+
+   real*8, intent(in) :: radius, ne_r
+   real*8 :: polyTemperature
+
+   polyTemperature = exp(log(T0_poly) + Gamma0*log(ne_r*1.d-6) + GammaR*log(radius/r500_DM))*Tg500_DM
+
+END FUNCTION
+
 !================================================================================================
    FUNCTION calcDMmass(rs_DM, rhos_DM, ri_DM)
 

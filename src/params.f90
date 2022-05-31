@@ -92,6 +92,14 @@ MODULE params
 
    REAL*8, DIMENSION(:), ALLOCATABLE  :: rgx, rhogasx, n_Hx, ne_nHx
    REAL*8, DIMENSION(:), ALLOCATABLE  :: n_ex, Tgx, Kex, Pex, M_DMx, Mg_DMx, fg_DMx
+
+! Parameters for polytropic model
+! Values taken from Ghirardini2019
+! https://doi.org/10.1051/0004-6361/201834875
+   REAL*8 :: Gamma0 = 0.25
+   REAL*8 :: GammaR = 0.14
+   REAL*8 :: T0_poly = 1.76
+
 !==========================================================================================================================================
 ! XRAY variables , parameters and working arrays
 
