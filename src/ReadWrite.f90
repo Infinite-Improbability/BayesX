@@ -197,23 +197,12 @@ CONTAINS
                ii = i - NGeoPars - 1
                if (Gas_PriorType(j,ii)<=0) cycle
                if (ii==1) then
-                  if (GasModel == 3) then
-                     parname='r_{s,poly}'
-                     if(NAtoms.gt.1) parname='r_{s,poly,'//trim(js)//'}'
-                     parunit='\mathrm{Mpc}'
-                  else
-                     parname='M_{T,200}'
-                     if(NAtoms.gt.1) parname='M_{T,200,'//trim(js)//'}'
-                     parunit='M_{\odot}'
-                  end if
+                  parname='M_{T,200}'
+                  if(NAtoms.gt.1) parname='M_{T,200,'//trim(js)//'}'
+                  parunit='M_{\odot}'
                elseif (ii==2) then
-                  if (GasModel == 3) then
-                     parname='\c_{500,poly}'
-                     if(NAtoms.gt.1) parname='\c_{500,poly,'//trim(js)//'}'
-                  else
-                     parname='f_{\mathrm{gas},200}'
-                     if(NAtoms.gt.1) parname='f_{\mathrm{gas},200,'//trim(js)//'}'
-                  end if
+                  parname='f_{\mathrm{gas},200}'
+                  if(NAtoms.gt.1) parname='f_{\mathrm{gas},200,'//trim(js)//'}'
                elseif (ii==3) then
                    parname='\gamma'
                    if(NAtoms.gt.1) parname=trim(parname)//'_{'//trim(js)//'}'

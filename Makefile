@@ -22,13 +22,13 @@
 
 # Parallel with GNU Compilers
 
-FC = mpifort
-CC = mpicc
-CXX = mpic++
-FFLAGS = -w -O3 -ffree-line-length-none -DMPI
-CFLAGS = -I. -O3
-CXXFLAGS = -I. -O3
-LIBS = -llapack -lcfitsio
+# FC = mpifort
+# CC = mpicc
+# CXX = mpic++
+# FFLAGS = -w -O3 -ffree-line-length-none -DMPI
+# CFLAGS = -I. -O3
+# CXXFLAGS = -I. -O3
+# LIBS = -llapack -lcfitsio
 
 
 # Serial with GNU Compilers
@@ -44,13 +44,13 @@ LIBS = -llapack -lcfitsio
 
 # Serial with GNU Compilers debug flags
 
-# FC = gfortran
-# CC = gcc
-# CXX = g++
-# FFLAGS = -ggdb -ffree-line-length-none
-# CFLAGS = -I. -O3
-# CXXFLAGS = -I. -O3
-# LIBS = -llapack -lcfitsio
+FC = gfortran
+CC = gcc
+CXX = g++
+FFLAGS = -ggdb -ffree-line-length-none
+CFLAGS = -I. -O3
+CXXFLAGS = -I. -O3
+LIBS = -llapack -lcfitsio
 
 
 

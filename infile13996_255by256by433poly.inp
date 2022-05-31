@@ -82,11 +82,26 @@
 #cluster_model
 3
 
-#rs_poly_prior
-1   0.d0    1.d0
+#m200_prior
+2	4.d14	15.d14
 
-#c500_poly_prior
-1   1.d0    10.d0
+#fgas200_prior
+1	0.01	0.3
+
+#a_GNFW_prior
+0	1.062    1.062	
+
+#b_GNFW_prior
+0	5.4807   5.4807
+
+#c_GNFW_prior
+0	0.3292   0.3292
+
+#c500_GNFW_prior
+0	1.156    1.156
+
+#alpha_model2_prior
+1       0.05     0.5
 
 #z_Prior
 0	0.0231	0.0231
@@ -104,4 +119,4 @@
 -1
 
 #root
-'chains/out13996poly'
+'chains/out13996-poly-'
