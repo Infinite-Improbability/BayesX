@@ -1102,7 +1102,8 @@ CONTAINS
 
       CALL qtrap(polyhvIntegrand, 1.d0, x, eps, result)
 
-      polyEstimateNumberDensity = ((f0 + result) / v)**(1/gamma0)
+      ! Technically it should be (f0*v0 + result)/v but v(x=1)=1
+      polyEstimateNumberDensity = ((f0 + result) / v)**(1/Gamma0)
 
    END FUNCTION polyEstimateNumberDensity
 !================================================================================================
