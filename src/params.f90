@@ -31,7 +31,7 @@ MODULE params
 !     5= DM_GNFW model (6 pars: Mtot(r200), fgas(r200), a, b, c, c500
 ! ??? Which gas density profile model?
    INTEGER                                              :: GasModel
-   INTEGER, PARAMETER                                   :: NGasPars = 7
+   INTEGER, PARAMETER                                   :: NGasPars = 10
    REAL*8                                              :: GasPars(NAtoms, NGasPars)
 ! redshift and angular diameter variables and lookup tables
    INTEGER                                              :: Dn, SCZdn
@@ -96,9 +96,9 @@ MODULE params
 ! Parameters for polytropic model
 ! Values taken from Ghirardini2019
 ! https://doi.org/10.1051/0004-6361/201834875
-   REAL*8 :: Gamma0 = 0.25
-   REAL*8 :: GammaR = 0.14
-   REAL*8 :: T0_poly = exp(1.76)
+   ! REAL*8 :: Gamma0 = 0.25
+   ! REAL*8 :: GammaR = 0.14
+   ! REAL*8 :: T0_poly = exp(1.76)
 
 !==========================================================================================================================================
 ! XRAY variables , parameters and working arrays

@@ -8,6 +8,7 @@ MODULE GasModels
 
    IMPLICIT NONE
    REAL*8                       ::  lmin, lmax, gd1, gd2
+   real*8, private              :: Gamma0, GammaR, T0_poly
 
 CONTAINS
 
@@ -711,7 +712,10 @@ CONTAINS
       ! Polytropic model based on Ghirardini2019 [A&A 627, A19 (2019)]
       ! https://doi.org/10.1051/0004-6361/201834875
       ELSEIF (GasModel == 3) THEN
-         MT200_DM = GasPars(k, 1)   !M_sun
+         MT200_DM = GasPars(k, 1)   !M_sun\
+         Gamma0 = GasPars(k, 8)
+         GammaR = GasPars(k, 9)
+         T0_poly = GasPars(k, 10)
 
          ! TODO: Unit comments
 

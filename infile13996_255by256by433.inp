@@ -83,10 +83,10 @@
 1
 
 #m200_prior
-2	2.d12	10.d14
+2	2.d12	6.d15
 
 #fgas200_prior
-1	0.01	0.3
+1	0.01	0.5
 
 #a_GNFW_prior
 0	1.062    1.062	
@@ -119,4 +119,4 @@
 -1
 
 #root
-'chains/out13996'
+'chains/out13996-einasto2-'

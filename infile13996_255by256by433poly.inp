@@ -83,7 +83,7 @@
 3
 
 #m200_prior
-2	4.d14	15.d14
+2	4.d14	6.d15
 
 #fgas200_prior
 1	0.01	0.3
@@ -101,7 +101,16 @@
 0	1.156    1.156
 
 #alpha_model2_prior
-1       0.05     0.5
+1   0.05    0.5
+
+#gamma0_poly_prior
+1   0.2    0.3
+
+#gammaR_poly_prior
+1   0.05    0.25
+
+#t0_poly_prior
+1   1.0    6.0
 
 #z_Prior
 0	0.0231	0.0231
@@ -119,4 +128,4 @@
 -1
 
 #root
-'chains/out13996-poly-'
+'chains/out13996-poly2-'
