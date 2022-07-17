@@ -709,7 +709,7 @@ CONTAINS
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
 
-      ! Polytropic model based on Ghirardini2019 [A&A 627, A19 (2019)]
+      ! Polytropic model based on Section 4.1 of Ghirardini2019 [A&A 627, A19 (2019)]
       ! https://doi.org/10.1051/0004-6361/201834875
       ELSEIF (GasModel == 3) THEN
          MT200_DM = GasPars(k, 1)   !M_sun\
@@ -734,12 +734,6 @@ CONTAINS
 
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &
                    (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sunMpc-
-
-         !Pei_GNFW = (mu_m/mu_e)*G*(mass_coeff_Einasto/(4.d0*pi))*Mg200_DM/ &
-         !           EinastoDM_GNFWgasvol(r200_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-         !Pei_GNFW_keV = Pei_GNFW*(m_sun/Mpc2m)*(J2keV)       !keVm-3
-
-         !Mg200_DM = MT200_DM*fg200_DM     !M_sun
 
          ! IF (Pei_GNFW .LE. 0d0) THEN
          !    WRITE (*, *) c200_DM, MT200_DM, fg200_DM
@@ -1088,6 +1082,8 @@ CONTAINS
 
 !================================================================================================
    FUNCTION polyEstimateNumberDensity(radius)
+      ! Estimate the number density of the gas by a method
+      ! derived in Appendix C of Ghirardini2019
 
       implicit none
       real*8, intent(in) :: radius
@@ -1098,7 +1094,7 @@ CONTAINS
       x = radius / r500_DM
 
       ! Invert our equation for temperature to find n_e at r500
-      !n0 = T0 ** (-1/Gamma0)
+      ! n0 = T0 ** (-1/Gamma0)
       ! Then f0 = f(x=1) = n0^Gamma0
       f0 = 1./T0_poly
       
@@ -1107,36 +1103,40 @@ CONTAINS
       CALL qtrap(polyhvIntegrand, 1.d0, x, eps, result)
 
       ! Technically it should be (f0*v0 + result)/v but v(x=1)=1
+      ! While the paper has mu as the denominator of eq. C.12,
+      ! running through the math shows it should be v instead.
       polyEstimateNumberDensity = ((f0 + result) / v)**(1/Gamma0)
 
    END FUNCTION polyEstimateNumberDensity
 !================================================================================================
-FUNCTION polyhvIntegrand(zz)
+   FUNCTION polyhvIntegrand(zz)
+      ! Integrand from eq C.12 of Ghirardini2019
 
-   implicit none
-   real*8 :: zz
-   real*8 :: u, hx, v
-   real*8 :: polyhvIntegrand
-   
-   v = zz ** Gamma0*GammaR/(1 + Gamma0)
-   u = (log(1.+c500_dm*zz) - c500_dm*zz/(1.+c500_dm*zz))/(log(1+zz) - zz/(1+zz))
-   hx = -2*u*Gamma0/(T0_poly * zz**2 * zz**GammaR * (Gamma0+1))
+      implicit none
+      real*8 :: zz
+      real*8 :: u, hx, v
+      real*8 :: polyhvIntegrand
+      
+      v = zz ** Gamma0*GammaR/(1 + Gamma0)
+      u = (log(1.+c500_dm*zz) - c500_dm*zz/(1.+c500_dm*zz))/(log(1+zz) - zz/(1+zz))
+      hx = -2*u*Gamma0/(T0_poly * zz**2 * zz**GammaR * (Gamma0+1))
 
-   polyhvIntegrand = v * h
+      polyhvIntegrand = v * h
 
-END FUNCTION
+   END FUNCTION
 
 !================================================================================================
-FUNCTION polyTemperature(radius, ne_r)
+   FUNCTION polyTemperature(radius, ne_r)
+      ! Derived from eq. 6 of Ghirardini2019, neglecting the intrinsic scatter
 
-   implicit none
+      implicit none
 
-   real*8, intent(in) :: radius, ne_r
-   real*8 :: polyTemperature
+      real*8, intent(in) :: radius, ne_r
+      real*8 :: polyTemperature
 
-   polyTemperature = exp(log(T0_poly) + Gamma0*log(ne_r*1.d-6) + GammaR*log(radius/r500_DM))*Tg500_DM
+      polyTemperature = exp(log(T0_poly) + Gamma0*log(ne_r*1.d-6) + GammaR*log(radius/r500_DM))*Tg500_DM
 
-END FUNCTION
+   END FUNCTION
 
 !================================================================================================
    FUNCTION calcDMmass(rs_DM, rhos_DM, ri_DM)
