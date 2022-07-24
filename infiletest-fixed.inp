@@ -17,31 +17,31 @@
 'data/MEKAL/mekal6.dat'
 
 #filARF
-'data/A262datafiles/ARF_630by1.txt'
+'data/simtestdatafiles/ARF_32by1.txt'
 
 #filRMF
-'data/A262datafiles/RMF_630by433.txt'
+'data/simtestdatafiles/RMF_32by32.txt'
 
 #filBG
-'ComaData/13996BG_256by256by433.txt'
+'data/simtestdatafiles/BG64by64by32.txt'
 
 #filevent
-'ComaData/13996data_256by256by433.txt'
+'data/simtestdatafiles/data64by64by32.txt'
 
 #filmask
-'ComaData/mask_binned.txt'
+'data/simtestdatafiles/BG64by64by32.txt'
 
 #XrayTelescope
 'CHA'
 
 #n
-100
+64
 
 #nx
-256
+64
 
 #ny
-256
+64
 
 #Aeffave
 250
@@ -50,10 +50,10 @@
 0.492
 
 #xrayNbin
-630
+32
 
 #xrayNch
-433
+32
 
 #xrayEmin
 0.7
@@ -62,10 +62,10 @@
 7.0
 
 #sexpotime
-123.0557552393d+3 
+120d+3 
 
 #bexpotime
-123.0557552393d+3 
+120+3 
 
 #NHcol
 2.2d20
@@ -128,4 +128,4 @@
 -1
 
 #root
-'chains/outtest'
+'chains/internalConCheck_'
