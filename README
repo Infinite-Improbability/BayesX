@@ -119,6 +119,8 @@ The root for background file:
 The root for the event file: 
 #filevent:		The event file contains the counts per pixel per energy channel. BAYES-X reads the event file in a 1-D array of dimension of (nx times ny times xrayNch) 
 
+The root for the mask file
+#filmask:       The mask file contains 1 where pixels are masked and 0 where they are not. The dimensions match the event file.
 
 #mass_function:	Type of the mass function (with mass_function = 1, 2 & 3 for Evrard, Jenkins & Tinker mass functions respectively).
 #cluster_model:  Type of the clust model (with cluster_model =1, 2 or 3 for NFW, Einasto or polytropic profiles respectively). The polytropic model is based on Ghirardini2019 [A&A 627, A19 (2019)]

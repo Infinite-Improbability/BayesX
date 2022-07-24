@@ -51,12 +51,19 @@ CONTAINS
       CALL MPI_COMM_RANK(MPI_COMM_WORLD, id, err)
 #endif
 
-!         Make predicted data:
+!     Make predicted data:
 
       CALL PredictXrayCounts(Cube, flag)
       IF (flag == 1) GOTO 999
 
-!         Calculate Likelihood
+!     Write predicted counts to file
+      open(unit=105, form='formatted', file=trim(n_root)//'generated-data.txt', status='replace')
+      do i=1, size(xrayCpred)
+         write(105, *) xrayCpred(i)
+      end do
+      close(105, status='KEEP')
+
+!     Calculate Likelihood
 
       CALL XrayCountsLhood(XRAYLhood)
       Lhood = XRAYLhood
@@ -107,10 +114,10 @@ CONTAINS
       k = 0
       DO i = 1, tot_dim
          CALL PClass(i, j)
-         IF(j/=0) THEN
-         k = k + 1
-         Cube1(k) = Cube(i)
-         ENDIF
+         IF (j /= 0) THEN
+            k = k + 1
+            Cube1(k) = Cube(i)
+         END IF
       END DO
 
       DO i = 1, NAtoms
@@ -162,7 +169,7 @@ CONTAINS
             ELSE
                sum = sum + (xrayCobs(m)*DLOG(xrayCpred(m)) - xrayCpred(m)) + (xrayBG_obs(m)*DLOG(bexpotime*xrayBG(m)/sexpotime) - (bexpotime*xrayBG(m)/sexpotime))
             END IF
-            
+
          END IF
 
       END DO

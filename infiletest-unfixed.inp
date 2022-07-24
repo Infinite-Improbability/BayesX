@@ -74,19 +74,19 @@
 8.4d-6
 
 #x_prior
-3	0.d0	10.0d0
+0	1.d0	1.0d0
 
 #y_prior
-3	0.d0	10.0d0
+0	1.d0	1.0d0
 
 #cluster_model
 3
 
 #m200_prior
-2	4.d14	1.d16
+1	4.d14	6.d14
 
 #fgas200_prior
-1	0.01	0.3
+0	0.01	0.1
 
 #a_GNFW_prior
 0	1.062    1.062	
@@ -101,16 +101,16 @@
 0	1.156    1.156
 
 #alpha_model2_prior
-1   0.05    0.5
+0   0.01    0.10
 
 #gamma0_poly_prior
-1   0.2    0.3
+1   0.1    0.3
 
 #gammaR_poly_prior
-1   0.01    0.25
+1   0.20    0.30
 
 #t0_poly_prior
-1   1.0    6.0
+1   2.0    4.0
 
 #z_Prior
 0	0.0231	0.0231
@@ -128,4 +128,4 @@
 -1
 
 #root
-'chains/out13996-poly2-'
+'chains/outtest-unfixed'
