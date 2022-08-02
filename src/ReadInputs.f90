@@ -107,6 +107,8 @@ contains
             read (funit, *) n_updint
          elseif (tag == '#maxmodes') then
             read (funit, *) n_maxModes
+         elseif (tag == '#nCdims') then
+            read (funit, *) clusterDims
          elseif (tag == '#seed') then
             read (funit, *) n_rseed
          elseif (tag == '#root') then
@@ -142,6 +144,12 @@ contains
             read (funit, *) z_PriorType(1), z_Prior(1, 1), z_Prior(1, 2)
          elseif (tag == '#mass_function') then
             read (funit, *) mass_function
+         elseif (tag == '#rmin') then
+            read(funit, *) rmin
+         elseif (tag == '#rmax') then
+            read(funit, *) rmax
+         elseif (tag == '#rlimit') then
+            read(funit, *) rlimit
          end if
       end do
 

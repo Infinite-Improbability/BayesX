@@ -84,7 +84,7 @@ PROGRAM BayesX
          IF (edim > 15) n_pWrap = 1
          CALL srand(n_rseed)
 
-         call nestRun(n_IS, n_mmodal, n_ceff, n_nlive, n_tol, n_efr, edim, n_totPar, 2, n_maxModes, n_updInt, -1d99, &
+         call nestRun(n_IS, n_mmodal, n_ceff, n_nlive, n_tol, n_efr, edim, n_totPar, clusterDims, n_maxModes, n_updInt, -1d99, &
                       n_root, n_rseed, n_pWrap, n_fb, .true., .true., .false., -1d10, -1, getloglike, dumper, context)
       end if
    end if

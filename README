@@ -151,6 +151,11 @@ Gaussian prior						3   [mean]              [standard deviation]
 Log-normal prior					4   [mean]              [width]
 Joint prior for M_{200} & z using the mass function	8   [minimum value]     [maximum value]
 
+Limits on the radius considered
+#rmin:      real
+#rmax:      real
+#rlimit:    real
+
 
 MultiNest Parameters
 #IS:			Do Importance Nested Sampling (INS)? [T/F], default value: F
@@ -162,6 +167,7 @@ MultiNest Parameters
 #root:			Root for the output files
 #updint:		No. of iterations after which the output files should be updated, default value: 100
 #maxmodes:		Maximum no. of modes (for memory allocation), default value: 20
+#nCdims:        no. of parameters on which clustering should be performed if mode seperation is enabled, default value: 2
 
 Please refer to the MultiNest README file (provided in multinest folder) for more details on these parameters.
 
