@@ -9,6 +9,8 @@ Run this script from the BayesX root folder.
 It expects the BayesX executable to be located at bin/BayesX and compiled for parallel execution
 with mpiexec.
 
+To set cluster model and priors look around line 160.
+
 # Process
 1. Generate predicted x-ray counts using BayesX for fixed priors.
    Fixed priors are selected from a uniform distribution between prior.min and prior.max,
@@ -22,6 +24,7 @@ with mpiexec.
 * Chains are output to a subfolder the main chains directory with the datetime in the name.
   This is to keep things tidy and prevent successive runs from conflicting. This folder also
   includes the generated .inp files so as to record run configuration.
+* To get the true values check infile-auto-fixed.inp.
 * Defaults to using all avaliable cores.
 """
 
@@ -43,7 +46,7 @@ class Path:
     if it is a path
     """
 
-    def __init__(self, path) -> None:
+    def __init__(self, path: str) -> None:
         self.path = path
 
     def __repr__(self) -> str:
@@ -52,24 +55,56 @@ class Path:
 
 class Prior:
     """
-    Define prior, using types defined in BayesX's readme.
+    Define prior.
 
-    True value is selected from a uniform distribtion.
-    TODO: Add support for other distributions.
+    True value is selected from the distribution. See readme for BayesX
+    for information on type, param1 and param2.
     """
 
-    def __init__(self, type_: int, min_: int, max_: int):
+    def __init__(self, type_: int, param1: float, param2: float, value: float = None):
+        """
+        Parameters
+        ----------
+        type_ : int
+            Prior type as specified in BayesX's readme
+        param1 : float
+            Parameter for prior
+        param2 : float
+            Parameter for prior
+        value : float, optional
+            Override random assignment of true value
+        """
         self.type = type_
-        self.min = min_
-        self.max = max_
+        self.param1 = param1
+        self.param2 = param2
+        self.value = self.generate_value()
+
+
+    def generate_value(self) -> float:
         if self.type == 0:
-            assert self.min == self.max
-            self.value = self.min
-        else:
-            self.value = rng.uniform(self.min, self.max)
+            assert self.param1 == self.param2
+            value = self.param1
+        elif self.type == 1:
+            # Uniform
+            value = rng.uniform(self.param1, self.param2)
+        elif self.type == 2:
+            # LogUniform
+            lx1 = np.log10(self.param1)
+            lx2 = np.log10(self.param2)
+            r = rng.random()
+            value = 10 ** (lx1 + r * (lx2 - lx1))
+            # This was taken directly from BayesX, but I find it weird how we call log
+            # on what are presumably already logs
+        elif self.type == 3:
+            # Gaussian
+            value = rng.normal(self.param1, self.param2)
+        elif self.type == 4:
+            # LogGaussian
+            value = rng.lognormal(self.param1, self.param2)
+        return value
 
     def free(self) -> str:
-        return f"{self.type}    {self.min}  {self.max}"
+        return f"{self.type}    {self.param1}  {self.param2}"
 
     def fixed(self) -> str:
         return f"0    {self.value}  {self.value}"
@@ -111,17 +146,17 @@ params["Aeffave"] = 250  # Average effective area of the telescope in cm^{2}
 params["xraycell"] = 0.492
 params["xrayEmin"] = 0.7
 params["xrayEmax"] = 7.0
-params["sexpotime"] = 120e3
-params["bexpotime"] = 120e3
-params["NHcol"] = 2.2e20
-params["xrayBG_model"] = 8.4e-6
+params["sexpotime"] = '120d3'
+params["bexpotime"] = '120d3'
+params["NHcol"] = '2.2d20'
+params["xrayBG_model"] = '8.4d-6'
 params["nlive"] = 100
 params["eff"] = 0.8
 params["tol"] = 0.5
 params["seed"] = -1
 
-# Currently only supports cluster model 1
-params["cluster_model"] = 1
+# Set cluster model
+params["cluster_model"] = 2
 
 # Priors
 # Note that the automatic free prior detection at the end assumes
@@ -140,7 +175,6 @@ priors["gamma0_poly_prior"] = Prior(1, 0.1, 0.4)
 priors["gammaR_poly_prior"] = Prior(1, 0.1, 0.4)
 priors["t0_poly_prior"] = Prior(1, 1, 5)
 priors["z_Prior"] = Prior(0, 0.0231, 0.0231)
-
 
 # Start configuring for fixed priors
 fixed_path = Path(f"{chain_path}/infile-auto-fixed.inp")
@@ -163,11 +197,9 @@ with open(fixed_path.path, "w") as f:
     for key, value in params.items():
         f.writelines(f"#{key}\n")
         f.write(str(value) + "\n")
-        f.write("\n")
     for key, value in priors.items():
         f.write(f"#{key}\n")
         f.write(str(value.fixed()) + "\n")
-        f.write("\n")
 
 # And run for fixed case
 time = datetime.now()
@@ -195,7 +227,6 @@ with open(free_path.path, "w") as f:
     for key, value in priors.items():
         f.write(f"#{key}\n")
         f.write(str(value.free()) + "\n")
-        f.write("\n")
 
 # Run with free priors
 time = datetime.now()
@@ -204,26 +235,40 @@ free_time = datetime.now() - time
 print(f"\nFree run complete in {free_time.total_seconds()} seconds\n\n")
 
 # Generate plot, with automatic detection of free priors
-# TODO: Make this more robust
-# Right now this will break, possibly silently, if which priors are fixed changes
+# Start off by figuring out which priors go with which model
+model_priors = {}
+model_priors[1] = [
+    "x_prior",
+    "y_prior",
+    "m200_prior",
+    "fgas200_prior",
+    "a_GNFW_prior",
+    "b_GNFW_prior",
+    "c_GNFW_prior",
+    "z_Prior",
+]
+model_priors[2] = model_priors[1] + ["alpha_model2_prior"]
+model_priors[3] = [
+    "x_prior",
+    "y_prior",
+    "m200_prior",
+    "gamma0_poly_prior",
+    "gammaR_poly_prior",
+    "t0_poly_prior",
+    "z_Prior",
+]
 plot_priors = []
-true_priors = ["-t"]
+true_priors = ["--true"]  # start list with flag needed for command
 p_count = 1
-for p in priors.values():
+for k in model_priors[params["cluster_model"]]:
+    p = priors[k]
     if p.type != 0:
-        plot_priors.append(f"p{str(p_count).zfill(3)}")
+        plot_priors.append(
+            f"p{str(p_count).zfill(3)}"
+        )  # plotting script expects p001, p002, etc
         true_priors.append(str(p.value))
         p_count += 1
-    # Break if we've addedd all the relevant params
-    if params["cluster_model"] == 1 and p_count > 2:
-        break
-    elif params["cluster_model"] == 2 and p_count > 3:
-        break
-    elif params["cluster_model"] == 3 and p_count > 4:
-        del plot_priors[1:2] # remove fgas200 and alpha_model2_prior
-        del true_priors[1:2]
-        break
-    
+
 run(
     ["python3", "scripts/auto_plot_tri.py", params["root"].path]
     + plot_priors
