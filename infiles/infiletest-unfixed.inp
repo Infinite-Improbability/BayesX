@@ -26,7 +26,7 @@
 'data/simtestdatafiles/BG64by64by32.txt'
 
 #filevent
-'chains/internalConCheck_generated-data.txt'
+'chains/fixedgenerated-data-noisy.txt'
 
 #filmask
 'data/simtestdatafiles/BG64by64by32.txt'
@@ -65,7 +65,7 @@
 120d+3 
 
 #bexpotime
-120+3 
+120d+3 
 
 #NHcol
 2.2d20
@@ -80,13 +80,13 @@
 0	1.d0	1.0d0
 
 #cluster_model
-3
+1
 
 #m200_prior
 1	4.d14	6.d14
 
 #fgas200_prior
-0	0.01	0.1
+1	0.10	0.30
 
 #a_GNFW_prior
 0	1.062    1.062	
@@ -101,22 +101,22 @@
 0	1.156    1.156
 
 #alpha_model2_prior
-0   0.01    0.10
+1   0.01    0.10
 
 #gamma0_poly_prior
-1   0.1    0.3
+1   0.1    0.4
 
 #gammaR_poly_prior
-1   0.20    0.30
+1   0.10    0.40
 
 #t0_poly_prior
-1   2.0    4.0
+1   1.0    5.0
 
 #z_Prior
 0	0.0231	0.0231
 
 #nlive
-1000
+100
 
 #eff
 0.8
@@ -127,5 +127,8 @@
 #seed
 -1
 
+#nCdims
+2
+
 #root
-'chains/outtest-unfixed'
+'chains/unfixed'

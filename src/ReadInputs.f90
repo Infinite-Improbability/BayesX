@@ -10,7 +10,7 @@ contains
 
       implicit none
 
-      integer i, j, ios, funit
+      integer ios, funit
       character*500 infilename, tag
 
       getinputs = 0        !error flag

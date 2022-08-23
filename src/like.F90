@@ -132,7 +132,7 @@ CONTAINS
 
       IMPLICIT NONE
 
-      INTEGER                        ::  i, j, m, k, flag
+      INTEGER                        ::  i, flag
       REAL*8                          ::  Cube(*)
 !        initialize working arrays
       xrayCpred = 0.0d0
@@ -155,7 +155,7 @@ CONTAINS
 
       IMPLICIT NONE
 
-      INTEGER                         ::  i, j, m
+      INTEGER                         ::  m
       REAL*8                           ::   XRAYLhood, sum
 
       sum = 0.0d0

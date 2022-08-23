@@ -1,7 +1,6 @@
 #!/usr/bin/python26
 
-from getdist import plots, MCSamples, loadMCSamples
-import getdist
+from getdist import plots, loadMCSamples
 
 from six.moves import input as raw_input # should work for python2 and 3
 
@@ -38,6 +37,7 @@ if 'y' in do_markers.lower():
     try:
       markers[p]=float(m)
     except:
+      print('Error applying true value ' + m + ' to ' + p)
       pass
 
 for i, samps in enumerate(ch):
