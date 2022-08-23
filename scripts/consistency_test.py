@@ -5,11 +5,11 @@ Automates internal consistency checking: whether BayesX can retrieve the paramet
 to generate a prediction x-ray count.
 
 # Usage
-Run this script from the BayesX root folder.
-It expects the BayesX executable to be located at bin/BayesX and compiled for parallel execution
-with mpiexec.
+Run this script from the BayesX root folder:
+```
+    ./scripts/consistency_test.py [MODEL_NUMBER]
+```
 
-To set cluster model and priors look around line 160.
 
 # Process
 1. Generate predicted x-ray counts using BayesX for fixed priors.
@@ -26,15 +26,24 @@ To set cluster model and priors look around line 160.
   includes the generated .inp files so as to record run configuration.
 * To get the true values check infile-auto-fixed.inp.
 * Defaults to using all avaliable cores.
+* Script xpects the BayesX executable to be located at bin/BayesX and compiled for parallel execution
+  with mpiexec.
+* To set priors look around line 150.
 """
 
 import numpy as np
 from subprocess import run
 from os import cpu_count, mkdir
 from datetime import datetime
+from argparse import ArgumentParser
 
 rng = np.random.default_rng()
+import argparse
 
+# Parse command line arguments
+parser = ArgumentParser(description="Run internal consistency check")
+parser.add_argument("model", type=int, help="Model number (1: NFW-GNFW, 2: Einasto-GNFW or 3: Polytropic)")
+args = parser.parse_args()
 
 class Path:
     """
@@ -156,7 +165,7 @@ params["tol"] = 0.5
 params["seed"] = -1
 
 # Set cluster model
-params["cluster_model"] = 2
+params["cluster_model"] = args.model
 
 # Priors
 # Note that the automatic free prior detection at the end assumes
