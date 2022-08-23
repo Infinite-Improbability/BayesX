@@ -712,15 +712,15 @@ CONTAINS
       ! Polytropic model based on Section 4.1 of Ghirardini2019 [A&A 627, A19 (2019)]
       ! https://doi.org/10.1051/0004-6361/201834875
       ELSEIF (GasModel == 3) THEN
-         MT200_DM = GasPars(k, 1)   ! M_sun
-         Gamma0 = GasPars(k, 8)     ! Dimensionless
-         GammaR = GasPars(k, 9)     ! Dimensionless
-         T0_poly = GasPars(k, 10)   ! Dimensionless
+         MT200_DM = GasPars(k, 1)   !M_sun\
+         Gamma0 = GasPars(k, 8)
+         GammaR = GasPars(k, 9)
+         T0_poly = GasPars(k, 10)
 
          ! TODO: Unit comments
 
          !Neto et~al. 2007 for relaxed clusters
-         c200_DM = 5.26d0*(((MT200_DM*h)/1.d14)**(-0.1d0))*(1.d0/(1.d0 + z(k))) ! Dimensionless
+         c200_DM = 5.26d0*(((MT200_DM*h)/1.d14)**(-0.1d0))*(1.d0/(1.d0 + z(k)))
 
          !null run
          IF (MT200_DM == 0.d0) THEN
@@ -733,7 +733,15 @@ CONTAINS
          rs_DM = r200_DM/c200_DM                   !Mpc
 
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &
-                   (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sun Mpc-3
+                   (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sunMpc-
+
+         ! IF (Pei_GNFW .LE. 0d0) THEN
+         !    WRITE (*, *) c200_DM, MT200_DM, fg200_DM
+         !    WRITE (*, *) Mg200_DM, r200_DM, r_2_DM
+         !    WRITE (*, *) rho_2_DM, rp_GNFW
+         !    WRITE (*, *) 'error Pei_GNFW= ', Pei_GNFW
+         !    STOP
+         ! END IF
 
          ALLOCATE (n_H(n))
          ALLOCATE (ne_nH(n), n_e(n))
@@ -770,13 +778,14 @@ CONTAINS
         
          MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
 
-         ne500_poly = polyEstimateNumberDensity(r500_DM) ! m^-3 ??
+         ne500_poly = polyEstimateNumberDensity(r500_DM)
          Rhogas500 = ne500_poly*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m) ! solar masses per Mpc
          ! T500 as in eq (10) of Ghirardini et al. (2019) to match polytropic paper
          ! The last constant is actually mu/0.6, where mu is the mean molecular weight per particle
          ! I have accordingly used the molecular mass rather than SI units.
          Tg500_DM = 8.85*(MT500_DM*h/(10.**15))**(2./3.) * (rhocritz / rhocrit)**(1./3.) *(1.0078250319) ! keV
 
+         ! TODO: n_e500 values appear to get calculated by the following, which feels odd given we've calculated it already
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayE1, xrayE2, &
          xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e500 = n_e500*1.d+6
@@ -824,49 +833,49 @@ CONTAINS
          ALLOCATE (Tgx(13), Kex(13), Pex(13))
          ALLOCATE (M_DMx(13), Mg_DMx(13), fg_DMx(13))
 
-         ! rx_incre = 0.03
-         ! DO m = 1, 7
-         !    rx_incre = rx_incre + 0.01
+         rx_incre = 0.03
+         DO m = 1, 7
+            rx_incre = rx_incre + 0.01
 
-         !    rgx(m) = rx_incre*r500_DM
-         !    ne_rx = polyEstimateNumberDensity(rgx(m))
-         !    Rhogasx(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
-         !    Tgx(m) = polyTemperature(rgx(m), ne_rx)
+            rgx(m) = rx_incre*r500_DM
+            ne_rx = polyEstimateNumberDensity(rgx(m))
+            Rhogasx(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
+            Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
-         !    CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
-         !                         ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
-         !                         xrayDeltaE, xrayFluxCoeff)
-         !    n_ex(m) = n_ex(m)*1.d+6
-         !    ! Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
-         !    ! Pex(m) = n_ex(m)*Tgx(m)
-         !    ! Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-         !    !             EinastoDM_GNFWgasvol( &
-         !    !             rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-         !    M_DMx(m) = calcDMmass(rs_DM, rhos_DM, rgx(m))
-         !    ! fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
-         ! END DO
+            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
+                                 ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
+                                 xrayDeltaE, xrayFluxCoeff)
+            n_ex(m) = n_ex(m)*1.d+6
+            ! Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+            ! Pex(m) = n_ex(m)*Tgx(m)
+            ! Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+            !             EinastoDM_GNFWgasvol( &
+            !             rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+            M_DMx(m) = calcDMmass(rs_DM, rhos_DM, rgx(m))
+            ! fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
+         END DO
 
-         ! rx_incre = 0.1
-         ! DO m = 8, 13
-         !    rx_incre = rx_incre + 0.05
+         rx_incre = 0.1
+         DO m = 8, 13
+            rx_incre = rx_incre + 0.05
 
-         !    rgx(m) = rx_incre*r500_DM
-         !    ne_rx = polyEstimateNumberDensity(rgx(m))
-         !    Rhogasx(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
-         !    Tgx(m) = polyTemperature(rgx(m), ne_rx)
+            rgx(m) = rx_incre*r500_DM
+            ne_rx = polyEstimateNumberDensity(rgx(m))
+            Rhogasx(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
+            Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
-         !    CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
-         !                         ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
-         !                         xrayDeltaE, xrayFluxCoeff)
-         !    n_ex(m) = n_ex(m)*1.d+6
-         !    ! Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
-         !    ! Pex(m) = n_ex(m)*Tgx(m)
-         !    ! Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-         !    !             EinastoDM_GNFWgasvol( &
-         !    !             rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-         !    M_DMx(m) = calcDMmass(rs_DM, rhos_DM, rgx(m))
-         !    ! fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
-         ! END DO
+            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
+                                 ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
+                                 xrayDeltaE, xrayFluxCoeff)
+            n_ex(m) = n_ex(m)*1.d+6
+            ! Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+            ! Pex(m) = n_ex(m)*Tgx(m)
+            ! Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+            !             EinastoDM_GNFWgasvol( &
+            !             rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+            M_DMx(m) = calcDMmass(rs_DM, rhos_DM, rgx(m))
+            ! fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
+         END DO
 
          DO m = 1, n
             ne_rx = polyEstimateNumberDensity(r(m))
@@ -1223,29 +1232,23 @@ CONTAINS
          xrayFluxCoeff(i) = 0.
       END DO
 
+      Rhogas0_SI = Rhogas0*m_sun/(Mpc2m*Mpc2m*Mpc2m)      !this is central gas density in kgm^-3
+
       sum_xenuctot = 0.
       DO i = 1, NOEL
          xe(i) = 10.**(abund(i) - 12.)
          sum_xenuctot = sum_xenuctot + xe(i)*nuc_tot(i)
       END DO
 
+      n_H0 = Rhogas0_SI/(m_p_kg*sum_xenuctot)           !this is central hydrogen density in m^-3
+
       CALL MEKAL1(KB_Tx, xe, xzin, ne_nH0)
 
-      if (GasModel == 3) then
-         ! Assume ne_0 is in m^-3
-         n_e0 = n_e0*1.d-6 ! cm^-3
-         n_H0 = n_e0 / ne_nH0 ! central Hydrogen density in cm^-3
-         el_den = n_e0 ! central electron density in cm^-3
+      el_den = ne_nH0*n_H0
 
-      else
-         Rhogas0_SI = Rhogas0*m_sun/(Mpc2m*Mpc2m*Mpc2m)      !this is central gas density in kgm^-3
-         n_H0 = Rhogas0_SI/(m_p_kg*sum_xenuctot)           !this is central hydrogen density in m^-3
-         el_den = ne_nH0*n_H0
-         n_H0 = n_H0*1.d-6         ! central Hydrogen density in cm^-3
-         n_e0 = el_den*1.d-6       ! central electron density in cm^-3
-         el_den = n_e0              ! central electron density in cm^-3
-      
-      end if
+      n_H0 = n_H0*1.d-6         ! central Hydrogen density in cm^-3
+      n_e0 = el_den*1.d-6       ! central electron density in cm^-3
+      el_den = n_e0              ! central electron density in cm^-3
 
       xfluxsec3 = (n_H0*n_H0)*(ne_nH0)/(SQRT(KB_Tx))
 
