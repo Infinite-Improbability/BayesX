@@ -98,6 +98,10 @@ is as follows:
 #NHcol:			Hydrogen column density in cm^2, e.g. NHcol = 2.2d20
 #xrayBG_model           Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1, e.g.  xrayBG_model=8.4d-6
 
+Limits on the radius considered:
+#rmin:      real
+#rmax:      real
+#rlimit:    real
 
 The root for MEKAL data files:
 #filion:		mekal1.dat 
@@ -150,12 +154,6 @@ Uniform prior in log					2   [minimum value]     [maximum value]
 Gaussian prior						3   [mean]              [standard deviation]
 Log-normal prior					4   [mean]              [width]
 Joint prior for M_{200} & z using the mass function	8   [minimum value]     [maximum value]
-
-Limits on the radius considered
-#rmin:      real
-#rmax:      real
-#rlimit:    real
-
 
 MultiNest Parameters
 #IS:			Do Importance Nested Sampling (INS)? [T/F], default value: F
@@ -288,12 +286,12 @@ log-evidence estimate.
 
 Visualization of Output:
 
-[root].txt file created by MultiNest is compatable with the format required by getdist package which is 
+[root].txt file created by MultiNest is compatible with the format required by getdist package which is 
 part of CosmoMC package. Refer to the following website in order to download or get more information about
 getdist:
 http://cosmologist.info/cosmomc/readme.html#Analysing
 
-Johannes Buchner's PyMultiNest can also be used on exisiting MultiNest output to plot & visualize results.
+Johannes Buchner's PyMultiNest can also be used on existing MultiNest output to plot & visualize results.
 https://github.com/JohannesBuchner/PyMultiNest
 
 
