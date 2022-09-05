@@ -86,7 +86,10 @@ class Prior:
         self.type = type_
         self.param1 = param1
         self.param2 = param2
-        self.value = self.generate_value()
+        if value:
+            self.value = value
+        else:
+            self.value = self.generate_value()
 
 
     def generate_value(self) -> float:
