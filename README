@@ -99,9 +99,9 @@ is as follows:
 #xrayBG_model           Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1, e.g.  xrayBG_model=8.4d-6
 
 Limits on the radius considered:
-#rmin:      real
-#rmax:      real
-#rlimit:    real
+#rmin:      real, Mpc
+#rmax:      real, Mpc
+#rlimit:    real, Mpc
 
 The root for MEKAL data files:
 #filion:		mekal1.dat 
