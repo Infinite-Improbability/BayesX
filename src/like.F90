@@ -59,7 +59,7 @@ CONTAINS
 !     Write predicted counts to file
       open(unit=105, form='formatted', file=trim(n_root)//'generated-data.txt', status='replace')
       do i=1, size(xrayCpred)
-         write(105, *) nint(xrayCpred(i))
+         write(105, *) xrayCpred(i)
       end do
       close(105, status='KEEP')
 

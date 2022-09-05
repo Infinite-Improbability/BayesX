@@ -102,8 +102,6 @@ class Prior:
             lx2 = np.log10(self.param2)
             r = rng.random()
             value = 10 ** (lx1 + r * (lx2 - lx1))
-            # This was taken directly from BayesX, but I find it weird how we call log
-            # on what are presumably already logs
         elif self.type == 3:
             # Gaussian
             value = rng.normal(self.param1, self.param2)
@@ -164,6 +162,10 @@ params["eff"] = 0.8
 params["tol"] = 0.5
 params["seed"] = -1
 
+params["rmin"] = 0.01
+params["rmax"] = 0.3
+params["rlimit"] = 0.3
+
 # Set cluster model
 params["cluster_model"] = args.model
 
@@ -173,8 +175,8 @@ params["cluster_model"] = args.model
 priors = {}
 priors["x_prior"] = Prior(0, 1, 1)
 priors["y_prior"] = Prior(0, 1, 1)
-priors["m200_prior"] = Prior(1, 4e14, 6e14)
-priors["fgas200_prior"] = Prior(1, 0.1, 0.3)
+priors["m200_prior"] = Prior(2, 1e14, 6e15, 5e15)
+priors["fgas200_prior"] = Prior(3, 0.13, 0.02, 0.131)
 priors["a_GNFW_prior"] = Prior(0, 1.062, 1.062)
 priors["b_GNFW_prior"] = Prior(0, 5.4807, 5.4807)
 priors["c_GNFW_prior"] = Prior(0, 0.3292, 0.3292)
@@ -183,7 +185,7 @@ priors["alpha_model2_prior"] = Prior(1, 0.05, 5)
 priors["gamma0_poly_prior"] = Prior(1, 0.1, 0.4)
 priors["gammaR_poly_prior"] = Prior(1, 0.1, 0.4)
 priors["t0_poly_prior"] = Prior(1, 1, 5)
-priors["z_Prior"] = Prior(0, 0.0231, 0.0231)
+priors["z_Prior"] = Prior(0, 0.5, 0.5)
 
 # Start configuring for fixed priors
 fixed_path = Path(f"{chain_path}/infile-auto-fixed.inp")
@@ -220,7 +222,7 @@ print(f"\nFixed run complete in {fixed_time.total_seconds()} seconds\n\n")
 # Load in results and apply poisson noise
 fixed_data = np.loadtxt(params["root"].path + "generated-data.txt")
 noisy_path = Path(params["root"].path + "generated-data-noisy.txt")
-np.savetxt(noisy_path.path, rng.poisson(fixed_data), fmt="%.1d")
+np.savetxt(noisy_path.path, np.round(rng.poisson(fixed_data)), fmt="%.1d")
 
 # Configure for free priors
 free_path = Path(f"{chain_path}/infile-auto-free.inp")
@@ -289,3 +291,6 @@ with open(f"{chain_path}/autorun-report.txt", "x") as f:
     f.write(f"Fixed runtime: {fixed_time.total_seconds()} seconds\n")
     f.write(f"Free runtime: {free_time.total_seconds()} seconds")
     # TODO: Include priors, posterior information, etc
+
+print(f"\n Completed processing of {chain_path}.\n")
+print(f"----------------------------------------------------------------\n\n\n")
