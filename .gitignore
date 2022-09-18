@@ -61,3 +61,8 @@ mask_binned.txt
 *.matxt
 # big file
 *generated-data.txt
+
+# datasets
+*.fits
+*.hdf5
+*.h5
