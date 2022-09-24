@@ -8,31 +8,119 @@ BayesX
    - plot()
    - run_report()
 """
+# TODO: Check compatability with earlier version of Python 3
 
-from pathlib import Path
-from typing import Union
-import numpy as np
 from datetime import datetime
+import logging
+from pathlib import Path
+from typing import Any, Union
 
-rng: np.Generator = np.random.default_rng()
+import numpy as np
+
+logger = logging.getLogger(__name__)
+rng = np.random.default_rng()
+
+
+class Prior:
+    """
+    A prior as defined in BayesX.
+
+    :param type_: Prior type as specified in BayesX's readme
+    :type type_: int
+    :param param1: Parameter for prior as specified in BayesX's readme for prior type.
+    :type param1: float
+    :param param1: See param1.
+    :type param1: float
+    :param true_value: True value of prior
+    :type true_value: float, optional
+    """
+
+    def __init__(
+        self,
+        type_: int,
+        param1: float,
+        param2: float,
+        true_value: float = None,
+        randomise: bool = False,
+    ) -> None:
+        """
+        :param type_: Prior type as specified in BayesX's readme
+        :type type_: int
+        :param param1: Parameter for prior
+        :type param1: float
+        :param param1: Parameter for prior
+        :type param1: float
+        :param true_value: True value of prior
+        :type true_value: float, optional
+        :param randomise: If true, pick true value from prior.
+        :type randomise: bool, optional
+        """
+        self.type: int = type_
+        self.param1: float = param1
+        self.param2: float = param2
+        self.true_value: float = true_value
+
+    def sample_prior(self) -> float:
+        """Randomly select a value from prior, using the same methods as in BayesX.
+
+        :return: Random value selected from prior.
+        :rtype: float
+        """
+        value: float
+        if self.type == 0:
+            assert self.param1 == self.param2
+            value = self.param1
+        elif self.type == 1:
+            # Uniform
+            value = rng.uniform(self.param1, self.param2)
+        elif self.type == 2:
+            # LogUniform
+            lx1 = np.log10(self.param1)
+            lx2 = np.log10(self.param2)
+            r = rng.random()
+            value = 10 ** (lx1 + r * (lx2 - lx1))
+        elif self.type == 3:
+            # Gaussian
+            value = rng.normal(self.param1, self.param2)
+        elif self.type == 4:
+            # LogGaussian
+            value = rng.lognormal(self.param1, self.param2)
+        return value
+
+    def free(self) -> str:
+        """Return prior as defined.
+
+        :return: String of prior params formatted as in BayesX infile.
+        :rtype: str
+        """
+        return f"{self.type}    {self.param1}  {self.param2}"
+
+    def fixed(self) -> str:
+        """Return true value of prior as fixed prior
+
+        :return: String of fixed prior at true value formatted as in BayesX infile.
+        :rtype: str
+        """
+        if self.true_value is None:
+            raise AttributeError(
+                "Unable to export fixed prior. No true value has been set."
+            )
+        return f"0    {self.true_value}  {self.true_value}"
 
 
 class BayesX:
     """Wrap everything needed for running BayesX on a dataset.
     Includes config, input data and results.
-    
-    :param label: A human-readable name used to identify this run, such as naming files. Defaults to current time in ISO8601 format.
-    :type label: str
 
+    :param label: A human-readable name used to identify this run, such as naming files.
+    Defaults to current time in ISO8601 format.
+    :type label: str
     :param path: Path to write all files to. Defaults to 'chains/{self.label}/'
     :type path: pathlib.Path
-
     :param config: Infile key/value pairs, excluding priors
     :type config: dict[str, any]
-
     :param priors: Infile key/value pairs for priors
     :type priors: dict[str, Prior]
-
     """
 
     def __init__(
@@ -40,30 +128,58 @@ class BayesX:
         label: str = str(datetime.now().isoformat()),
         chain_root: Union[str, bytes, Path] = "chains",
     ) -> None:
+        """
+        :param label: Human readable name for related output, defaults to
+        current time in ISO8601 format.
+        :type label: str, optional
+        :param chain_root: Root path for output of any BayesX run, defaults to "chains"
+        :type chain_root: Union[str, bytes, Path], optional
+        """
         self.label: str = label
         self.path: Path = Path.join(chain_root, self.label)
 
         self.config: dict[str] = None
         self.priors: dict[str, Prior] = None
 
-    def set_config(self, **kwargs) -> None:
-        config: None = BayesX.default_config()
+    def make_config(self, **kwargs) -> None:
+        """
+        Create config dictionary from default and dynamic values, with optional
+        overrides applied through keyword arguments. For details on keys and values
+        see the readme for BayesX. This overwrites any existing config.
+
+        Validation is applied where possible to ensure reasonable inputs.
+        """
+
+        config: dict[str, Any] = BayesX.default_config()
 
         config["root"] = self.output_path
+
         # TODO: Data paths
+
         # config["filBG"] = ''  # The root for background file
         # config["filevent"] = ''  # The root for the event file
         # config["filmask"] = ''
+
         # TODO: Dynamic stuff
+
         for k, v in kwargs.items():
             config[k] = v
+
         # TODO: Sanity checks - sensible values, actually exist
 
         # Call priors here?
 
+        if self.config:
+            logger.warn("Overwriting config.")
+
         self.config = config
 
-    def set_priors(self, *kwargs) -> None:
+    def set_priors(self, **kwargs: Prior) -> None:
+        """
+        Create prior dictionary from default, with optional overrides applied through
+        keyword arguments. For informnation on prior names and specifications see the
+        readme for BayesX.
+        """
         priors: dict = {}
         priors["x_prior"] = Prior(0, 1, 1)
         priors["y_prior"] = Prior(0, 1, 1)
@@ -87,9 +203,13 @@ class BayesX:
         self.priors = priors
 
     @classmethod
-    def default_config(cls) -> dict:
-        # All parameters will be defined in this dict
-        # Except priors, which have their own dict.
+    def default_config(cls) -> dict[str, Any]:
+        """Return a config dictonary with some default values. Does not include any
+        dynamic values created based on the data.
+
+        :return: Dictonary of key-value pairs as used in BayesX infile.
+        :rtype: dict[str, Any]
+        """
         params: dict = {}
 
         # The root for MEKAL data files:
@@ -101,9 +221,7 @@ class BayesX:
         params["filcaf"] = Path("data/MEKAL/mekal6.dat")
 
         # The telescope
-        params[
-            "XrayTelescope"
-        ] = "CHA"  # The first three letters of the X-ray telescope name
+        params["XrayTelescope"] = "CHA"  # The 1st 3 letters of the X-ray telescope name
         params["filARF"] = Path(
             "data/simtestdatafiles/ARF_32by1.txt"
         )  # Root for ARF telescope file in .txt format.
@@ -112,7 +230,7 @@ class BayesX:
         )  # Root for RMF telescope file in .txt format.
 
         # Misc params
-        # TODO: Set based on data
+        # TODO: Set based on data in set_config()
         params["n"] = 64  # Number of steps for discretising r
         params["nx"] = 64  # Number of pixels in x direction
         params["ny"] = 64  # Number of pixels in y direction
@@ -140,6 +258,12 @@ class BayesX:
         return params
 
     def export_config(self, path: Path = None) -> None:
+        """Export self.config to file
+
+        :param path: Path to destination file. Defaults to infile-{self.label}.inp in
+        the folder referenced by self.path
+        :type path: Path, optional
+        """
         if not path:
             path: Path = self.path.joinpath(f"infile-{self.label}.inp")
 
@@ -151,80 +275,40 @@ class BayesX:
                 f.write(f"#{key}\n")
                 f.write(value.free() + "\n")
 
-    def load_data(self, path: Path, file_type: str = None) -> None:
+    def load_events(self, path: Path, file_type: str = None) -> None:
+        """Try to intelligently handle events input from a number of file types.
+
+        :param path: Path to events file
+        :type path: Path
+        :param file_type: Override type detection by providing a file extension.
+        :type file_type: str, optional
+        :raises ValueError: If the file type cannot be recognised.
+        """
         ext = Path.suffix
         if file_type:
             ext = file_type if file_type[0] == "." else "." + file_type
         if ext == ".txt":
-            self.load_data_from_txt(self, path)
+            self.load_events_from_txt(self, path)
         elif ext == ".fits":
             self.load_data_from_fits(self, path)
         else:
             raise ValueError("Unrecognised data file extension.")
 
-    def load_data_from_txt(self, path: Path) -> None:
-        pass
+    def load_events_from_txt(self, path: Path) -> None:
+        """Load events from a text file.
+         The event file must contains the counts per pixel per energy channel as 1-D
+         array of dimension of (nx times ny times xrayNch) with each element on a
+         new line.
 
-    def load_data_from_fits(self, path: Path) -> None:
-        pass
-
-
-class Prior:
-    """
-    Define prior.
-
-    True value is selected from the distribution. See readme for BayesX
-    for information on type, param1 and param2.
-    """
-
-    def __init__(
-        self, type_: int, param1: float, param2: float, value: float = None
-    ) -> None:
+        :param path: Path to events txt file
+        :type path: Path
         """
-        Parameters
-        ----------
-        type_ : int
-            Prior type as specified in BayesX's readme
-        param1 : float
-            Parameter for prior
-        param2 : float
-            Parameter for prior
-        value : float, optional
-            Override random assignment of true value
+        self.config["filevent"] = path
+
+    def load_events_from_fits(self, path: Path) -> None:
+        """Load events from a fits file.
+        The file will be converted to the text format used by BayesX.
+
+        :param path: Path to events fits file
+        :type path: Path
         """
-        self.type: int = type_
-        self.param1: float = param1
-        self.param2: float = param2
-        self.value: float
-
-        if value:
-            self.value = value
-        else:
-            self.value = self.generate_value()
-
-    def generate_value(self) -> float:
-        if self.type == 0:
-            assert self.param1 == self.param2
-            value = self.param1
-        elif self.type == 1:
-            # Uniform
-            value = rng.uniform(self.param1, self.param2)
-        elif self.type == 2:
-            # LogUniform
-            lx1 = np.log10(self.param1)
-            lx2 = np.log10(self.param2)
-            r = rng.random()
-            value = 10 ** (lx1 + r * (lx2 - lx1))
-        elif self.type == 3:
-            # Gaussian
-            value = rng.normal(self.param1, self.param2)
-        elif self.type == 4:
-            # LogGaussian
-            value = rng.lognormal(self.param1, self.param2)
-        return value
-
-    def free(self) -> str:
-        return f"{self.type}    {self.param1}  {self.param2}"
-
-    def fixed(self) -> str:
-        return f"0    {self.value}  {self.value}"
