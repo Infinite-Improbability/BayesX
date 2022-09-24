@@ -38,7 +38,6 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 rng = np.random.default_rng()
-import argparse
 
 # Parse command line arguments
 parser = ArgumentParser(description="Run internal consistency check")
