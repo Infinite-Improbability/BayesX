@@ -47,7 +47,7 @@
 250
 
 #xraycell
-0.492
+4.92
 
 #xrayNbin
 630
@@ -73,6 +73,15 @@
 #xrayBG_model
 8.4d-6
 
+#rmin
+0.01
+
+#rmax
+0.6
+
+#rlimit
+0.6
+
 #x_prior
 3	0.d0	10.0d0
 
@@ -80,13 +89,13 @@
 3	0.d0	10.0d0
 
 #cluster_model
-3
+1
 
 #m200_prior
-2	4.d14	1.d16
+1	1.d14	2.d15
 
 #fgas200_prior
-1	0.01	0.3
+3	0.13	0.02
 
 #a_GNFW_prior
 0	1.062    1.062	
@@ -128,4 +137,4 @@
 -1
 
 #root
-'chains/out13996-poly2-'
+'chains/out13996-24092022/model1_'

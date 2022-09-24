@@ -57,11 +57,11 @@ CONTAINS
       IF (flag == 1) GOTO 999
 
 !     Write predicted counts to file
-      open(unit=105, form='formatted', file=trim(n_root)//'generated-data.txt', status='replace')
-      do i=1, size(xrayCpred)
-         write(105, *) xrayCpred(i)
-      end do
-      close(105, status='KEEP')
+      ! open(unit=105, form='formatted', file=trim(n_root)//'generated-data.txt', status='replace')
+      ! do i=1, size(xrayCpred)
+      !    write(105, *) xrayCpred(i)
+      ! end do
+      ! close(105, status='KEEP')
 
 !     Calculate Likelihood
 

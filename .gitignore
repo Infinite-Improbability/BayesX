@@ -66,3 +66,4 @@ mask_binned.txt
 *.fits
 *.hdf5
 *.h5
+scripts/sim_test.py
