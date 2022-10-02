@@ -67,3 +67,4 @@ mask_binned.txt
 *.hdf5
 *.h5
 scripts/sim_test.py
+pyxsimtest/*

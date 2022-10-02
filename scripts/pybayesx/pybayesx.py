@@ -4,6 +4,7 @@ BayesX
    - make_config()
  - Data
    - import()
+   - Way to trim data to certain channels, spatial ranges
  - Output
    - plot()
    - run_report()
@@ -16,8 +17,11 @@ from pathlib import Path
 from typing import Any, Union
 
 import numpy as np
+from astropy.io import fits
 
-logger = logging.getLogger(__name__)
+from .binning import bin
+
+log = logging.getLogger(__name__)
 rng = np.random.default_rng()
 
 
@@ -37,6 +41,7 @@ class Prior:
 
     def __init__(
         self,
+        name: str,
         type_: int,
         param1: float,
         param2: float,
@@ -44,6 +49,8 @@ class Prior:
         randomise: bool = False,
     ) -> None:
         """
+        :param name: Prior name as used by BayesX infile, excluding hash
+        :type name: str
         :param type_: Prior type as specified in BayesX's readme
         :type type_: int
         :param param1: Parameter for prior
@@ -55,6 +62,7 @@ class Prior:
         :param randomise: If true, pick true value from prior.
         :type randomise: bool, optional
         """
+        self.name: str = name
         self.type: int = type_
         self.param1: float = param1
         self.param2: float = param2
@@ -170,7 +178,7 @@ class BayesX:
         # Call priors here?
 
         if self.config:
-            logger.warn("Overwriting config.")
+            log.warn("Overwriting config.")
 
         self.config = config
 
@@ -203,7 +211,7 @@ class BayesX:
         self.priors = priors
 
     @classmethod
-    def default_config(cls) -> dict[str, Any]:
+    def default_config(cls) -> "dict[str, Any]":
         """Return a config dictonary with some default values. Does not include any
         dynamic values created based on the data.
 
@@ -258,7 +266,7 @@ class BayesX:
         return params
 
     def export_config(self, path: Path = None) -> None:
-        """Export self.config to file
+        """Export self.config and self.priors to file
 
         :param path: Path to destination file. Defaults to infile-{self.label}.inp in
         the folder referenced by self.path
@@ -267,13 +275,19 @@ class BayesX:
         if not path:
             path: Path = self.path.joinpath(f"infile-{self.label}.inp")
 
+        if not (self.config and self.priors):
+            log.warn("Exporting config when config or priors not set.")
+
         with open(self.path, "w") as f:
             for key, value in self.config.items():
-                f.writelines(f"#{key}\n")
-                f.write(str(value) + "\n")
-            for key, value in self.priors.items():
                 f.write(f"#{key}\n")
-                f.write(value.free() + "\n")
+                f.write(str(value) + "\n")
+            for key in self.model.priors():
+                prior: Prior = self.priors[key]
+                f.write(f"#{prior.name}\n")
+                f.write(prior.free() + "\n")
+
+        log.info(f"Exported config to {path}")
 
     def load_events(self, path: Path, file_type: str = None) -> None:
         """Try to intelligently handle events input from a number of file types.
@@ -295,7 +309,7 @@ class BayesX:
             raise ValueError("Unrecognised data file extension.")
 
     def load_events_from_txt(self, path: Path) -> None:
-        """Load events from a text file.
+        """Load events from a BayesX-style text file.
          The event file must contains the counts per pixel per energy channel as 1-D
          array of dimension of (nx times ny times xrayNch) with each element on a
          new line.
@@ -305,10 +319,27 @@ class BayesX:
         """
         self.config["filevent"] = path
 
-    def load_events_from_fits(self, path: Path) -> None:
+    def load_events_from_fits(
+        self,
+        path: Path,
+        x_key: str = "X",
+        y_key: str = "Y",
+        channel_key: str = "PI",
+        **kwargs,
+    ) -> None:
         """Load events from a fits file.
         The file will be converted to the text format used by BayesX.
 
         :param path: Path to events fits file
         :type path: Path
+        :param x_key: _description_, defaults to "X"
+        :type x_key: str, optional
+        :param y_key: _description_, defaults to "Y"
+        :type y_key: str, optional
+        :param energy_key: _description_, defaults to "ENERGY"
+        :type energy_key: str, optional
         """
+        with fits.open(path) as f:
+            outpath: Path = self.path.joinpath(f"{self.label}-events.inp")
+            bin(f[x_key], f[y_key], f[channel_key], outfile=outpath**kwargs)
+            # TODO: Get exposure time, etc
