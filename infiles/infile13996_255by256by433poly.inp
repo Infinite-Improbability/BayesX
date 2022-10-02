@@ -95,7 +95,7 @@
 1	1.d14	2.d15
 
 #fgas200_prior
-3	0.13	0.02
+1	0.1    0.2
 
 #a_GNFW_prior
 0	1.062    1.062	
@@ -137,4 +137,4 @@
 -1
 
 #root
-'chains/out13996-24092022/model1_'
+'chains/out13996-25092022/model1_'

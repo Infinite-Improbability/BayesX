@@ -56,7 +56,7 @@ contains
             filevent = trim(filevent)
          elseif (tag == '#filmask') then
             read (funit, *) filmask
-            filmask =  trim(filmask)
+            filmask = trim(filmask)
          elseif (tag == '#XrayTelescope') then
             read (funit, *) XrayTelescope
             XrayTelescope = trim(XrayTelescope)
@@ -122,34 +122,34 @@ contains
             read (funit, *) Geo_PriorType(1, 2), Geo_Prior(1, 2, 1), Geo_Prior(1, 2, 2)
          elseif (tag == '#m200_prior') then
             read (funit, *) Gas_PriorType(1, 1), Gas_Prior(1, 1, 1), Gas_Prior(1, 1, 2)
-         elseif ((tag == '#fgas200_prior').and.(GasModel.ne.3) ) then
+         elseif ((tag == '#fgas200_prior') .and. (GasModel .ne. 3)) then
             read (funit, *) Gas_PriorType(1, 2), Gas_Prior(1, 2, 1), Gas_Prior(1, 2, 2)
-         elseif ((tag == '#a_GNFW_prior').and.(GasModel.ne.3) ) then
+         elseif ((tag == '#a_GNFW_prior') .and. (GasModel .ne. 3)) then
             read (funit, *) Gas_PriorType(1, 3), Gas_Prior(1, 3, 1), Gas_Prior(1, 3, 2)
-         elseif ((tag == '#b_GNFW_prior').and.(GasModel.ne.3) ) then
+         elseif ((tag == '#b_GNFW_prior') .and. (GasModel .ne. 3)) then
             read (funit, *) Gas_PriorType(1, 4), Gas_Prior(1, 4, 1), Gas_Prior(1, 4, 2)
-         elseif ((tag == '#c_GNFW_prior').and.(GasModel.ne.3) ) then
+         elseif ((tag == '#c_GNFW_prior') .and. (GasModel .ne. 3)) then
             read (funit, *) Gas_PriorType(1, 5), Gas_Prior(1, 5, 1), Gas_Prior(1, 5, 2)
-         elseif ((tag == '#c500_GNFW_prior').and.(GasModel.ne.3) ) then
+         elseif ((tag == '#c500_GNFW_prior') .and. (GasModel .ne. 3)) then
             read (funit, *) Gas_PriorType(1, 6), Gas_Prior(1, 6, 1), Gas_Prior(1, 6, 2)
-         elseif ((tag == '#alpha_model2_prior').and.(GasModel==2)) then
+         elseif ((tag == '#alpha_model2_prior') .and. (GasModel == 2)) then
             read (funit, *) Gas_PriorType(1, 7), Gas_Prior(1, 7, 1), Gas_Prior(1, 7, 2)
-         elseif ((tag == '#gamma0_poly_prior').and.(GasModel==3)) then
+         elseif ((tag == '#gamma0_poly_prior') .and. (GasModel == 3)) then
             read (funit, *) Gas_PriorType(1, 8), Gas_Prior(1, 8, 1), Gas_Prior(1, 8, 2)
-         elseif ((tag == '#gammaR_poly_prior').and.(GasModel==3)) then
+         elseif ((tag == '#gammaR_poly_prior') .and. (GasModel == 3)) then
             read (funit, *) Gas_PriorType(1, 9), Gas_Prior(1, 9, 1), Gas_Prior(1, 9, 2)
-         elseif ((tag == '#t0_poly_prior').and.(GasModel==3)) then
+         elseif ((tag == '#t0_poly_prior') .and. (GasModel == 3)) then
             read (funit, *) Gas_PriorType(1, 10), Gas_Prior(1, 10, 1), Gas_Prior(1, 10, 2)
          elseif (tag == '#z_Prior') then
             read (funit, *) z_PriorType(1), z_Prior(1, 1), z_Prior(1, 2)
          elseif (tag == '#mass_function') then
             read (funit, *) mass_function
          elseif (tag == '#rmin') then
-            read(funit, *) rmin
+            read (funit, *) rmin
          elseif (tag == '#rmax') then
-            read(funit, *) rmax
+            read (funit, *) rmax
          elseif (tag == '#rlimit') then
-            read(funit, *) rlimit
+            read (funit, *) rlimit
          end if
       end do
 
