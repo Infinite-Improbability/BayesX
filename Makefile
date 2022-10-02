@@ -47,9 +47,9 @@ LIBS = -llapack -lcfitsio
 # FC = gfortran
 # CC = gcc
 # CXX = g++
-# FFLAGS = -ggdb -ffree-line-length-none
-# CFLAGS = -I. -O3
-# CXXFLAGS = -I. -O3
+# FFLAGS = -ggdb3 -ffree-line-length-none
+# CFLAGS = -ggdb3 -I. -Og
+# CXXFLAGS = -I. -Og
 # LIBS = -llapack -lcfitsio
 
 
