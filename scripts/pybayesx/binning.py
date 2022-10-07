@@ -34,10 +34,10 @@ def bin(
     :type x0: float, optional
     :param y0: See `x0`, defaults to None
     :type y0: float, optional
-    :param chan_max: Number of possible channels, defaults to None. If None, then the
+    :param n_channels: Number of possible channels, defaults to None. If None, then the
     maximum value of `channel` is used.
     If `mask` is True then a positive integer value is required.
-    :type chan_max: int, optional
+    :type n_channels: int, optional
     :param outfile: Path of file to export binned data to, defaults to None. If None
     export is skipped.
     :type outfile: Path, optional

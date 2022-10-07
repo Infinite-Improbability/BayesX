@@ -68,3 +68,5 @@ mask_binned.txt
 *.h5
 scripts/sim_test.py
 pyxsimtest/*
+data/4361data/4361
+/data/tngdata

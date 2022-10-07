@@ -8,6 +8,7 @@ BayesX
  - Output
    - plot()
    - run_report()
+- Might be memory hungry at present - probably don't need to keep all the events in mem
 """
 # TODO: Check compatability with earlier version of Python 3
 
@@ -19,10 +20,15 @@ from typing import Any, Union
 import numpy as np
 from astropy.io import fits
 
+# from astropy.cosmology import FlatLambdaCDM
+import astropy.units as u
+
 from .binning import bin
 
 log = logging.getLogger(__name__)
 rng = np.random.default_rng()
+
+# cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3, Ob0=0.041)
 
 
 class Prior:
@@ -116,6 +122,18 @@ class Prior:
         return f"0    {self.true_value}  {self.true_value}"
 
 
+class Model:
+    def __init__(
+        self,
+        name: str,
+        num: int,
+        priors: "list[Prior]",
+    ) -> None:
+        self.name = name
+        self.num = num
+        self.priors: "list[str]" = priors
+
+
 class BayesX:
     """Wrap everything needed for running BayesX on a dataset.
     Includes config, input data and results.
@@ -160,7 +178,7 @@ class BayesX:
 
         config: dict[str, Any] = BayesX.default_config()
 
-        config["root"] = self.output_path
+        config["root"] = self.path.joinpath("out/")
 
         # TODO: Data paths
 
@@ -239,22 +257,23 @@ class BayesX:
 
         # Misc params
         # TODO: Set based on data in set_config()
+        # Currently using None for values that really shouldn't have defaults
         params["n"] = 64  # Number of steps for discretising r
-        params["nx"] = 64  # Number of pixels in x direction
-        params["ny"] = 64  # Number of pixels in y direction
-        params["xrayNbin"] = 32  # Number of energy bins
-        params["xrayNch"] = 32  # Number of energy bins
+        params["nx"] = None  # Number of pixels in x direction
+        params["ny"] = None  # Number of pixels in y direction
+        params["xrayNbin"] = None  # Number of energy bins
+        params["xrayNch"] = None  # Number of energy bins
         params["Aeffave"] = 250  # Average effective area of the telescope in cm^{2}
         params["xraycell"] = 0.492
         params["xrayEmin"] = 0.7
         params["xrayEmax"] = 7.0
-        params["sexpotime"] = "120d3"
-        params["bexpotime"] = "120d3"
-        params["NHcol"] = "2.2d20"
+        params["sexpotime"] = None
+        params["bexpotime"] = None
+        params["NHcol"] = "4.0d20"
         params["xrayBG_model"] = "8.4d-6"
         params["rmin"] = 0.01
-        params["rmax"] = 0.3
-        params["rlimit"] = 0.3
+        params["rmax"] = None
+        params["rlimit"] = None
 
         params["eff"] = 0.8
         params["tol"] = 0.5
@@ -265,7 +284,7 @@ class BayesX:
 
         return params
 
-    def export_config(self, path: Path = None) -> None:
+    def export_config(self, path: Path = None, model=Model) -> None:
         """Export self.config and self.priors to file
 
         :param path: Path to destination file. Defaults to infile-{self.label}.inp in
@@ -282,8 +301,8 @@ class BayesX:
             for key, value in self.config.items():
                 f.write(f"#{key}\n")
                 f.write(str(value) + "\n")
-            for key in self.model.priors():
-                prior: Prior = self.priors[key]
+            for prior in model.priors:
+                prior: Prior
                 f.write(f"#{prior.name}\n")
                 f.write(prior.free() + "\n")
 
@@ -325,6 +344,8 @@ class BayesX:
         x_key: str = "X",
         y_key: str = "Y",
         channel_key: str = "PI",
+        du_index=1,
+        mode="evts",
         **kwargs,
     ) -> None:
         """Load events from a fits file.
@@ -336,10 +357,93 @@ class BayesX:
         :type x_key: str, optional
         :param y_key: _description_, defaults to "Y"
         :type y_key: str, optional
-        :param energy_key: _description_, defaults to "ENERGY"
-        :type energy_key: str, optional
+        :param channel_key: _description_, defaults to "PI"
+        :type channel_key: str, optional
+        :param du_index: List index of data unit with events (0-indexed)
+        :type du_index: int
+        :param mode: `'evts'` for events, `bg` for background.
+        :type mode: str
         """
-        with fits.open(path) as f:
-            outpath: Path = self.path.joinpath(f"{self.label}-events.inp")
-            bin(f[x_key], f[y_key], f[channel_key], outfile=outpath**kwargs)
-            # TODO: Get exposure time, etc
+        with fits.open(path) as fi:
+            f = fi[du_index]
+
+            if f.header["extname"] != "EVENTS":
+                log.warn(
+                    "Trying to load events from a data unit that lacks events extension"
+                )
+
+            if mode == "evts":
+                self.events = np.column_stack((f[x_key], f[y_key], f[channel_key]))
+                self.config["sexpotime"] = f.header["livetime"]
+            elif mode == "bg":
+                self.bg = np.column_stack((f[x_key], f[y_key], f[channel_key]))
+                self.config["bexpotime"] = f.header["livetime"]
+
+    def load_arf(self, path: Path):
+        with fits.open(Path) as f:
+            self.arf = f[1].data["specresp"]
+
+            self.config["xrayNbin"] = np.size(self.arf)
+
+            self.config["xrayEmin"] = np.minimum(f[1].data["energ_lo"])
+            self.config["xrayEmax"] = np.maximum(f[1].data["energ_hi"])
+
+    def export_arf(self, outfile: Path = None):
+        if outfile is None:
+            outfile = self.path.joinpath("arf.txt")
+
+        np.savetxt(self.arf)
+
+    def load_rmf(self, path: Path):
+        with fits.open(Path) as f:
+            rmf = f[1].data["matrix"]
+            self.config["xrayNch"] = len(rmf[-1])
+            mat = np.zeros((self.config["xrayNbin"], self.config["xrayNch"]))
+
+            for i in range(0, len(rmf)):
+                mat[i, : len(rmf[i])] = rmf[i]
+
+    def export_rmf(self, outfile: Path = None):
+        if outfile is None:
+            outfile = self.path.joinpath("rmf.txt")
+
+        np.savetxt(np.ravel(self.rmf))
+
+    def bin_and_export(self, n_bins: int, cellsize: float, redshift: float**kwargs):
+        self.config["filevent"] = self.path.joinpath("evts.txt")
+        bin(
+            self.events[:, 0],
+            self.events[:, 1],
+            self.events[:, 2],
+            n_bins,
+            cellsize,
+            outfile=self.config["filevent"],
+        )
+
+        self.config["filBG"] = self.path.joinpath("bg.txt")
+        bin(
+            self.bg[:, 0],
+            self.bg[:, 1],
+            self.bg[:, 2],
+            n_bins,
+            cellsize,
+            outfile=self.config["filBG"],
+        )
+
+        self.config["filmask"] = self.path.joinpath("mask.txt")
+        bin(
+            self.mask[:, 0],
+            self.mask[:, 1],
+            self.mask[:, 2],
+            n_bins,
+            cellsize,
+            n_channels=self.config["xrayNch"],
+            outfile=self.config["filmask"],
+            mask=True,
+        )
+
+        self.config["nx"] = n_bins
+        self.config["ny"] = n_bins
+
+        self.config["xrayCell"] = 0.492 * cellsize
+        # self.config['rmax'] = cellsize * n_bins * cosmo.
