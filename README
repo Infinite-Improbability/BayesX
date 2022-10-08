@@ -165,7 +165,7 @@ MultiNest Parameters
 #root:			Root for the output files
 #updint:		No. of iterations after which the output files should be updated, default value: 100
 #maxmodes:		Maximum no. of modes (for memory allocation), default value: 20
-#nCdims:        no. of parameters on which clustering should be performed if mode seperation is enabled, default value: 2
+#nCdims:        no. of parameters on which clustering should be performed if mode separation is enabled, default value: 2
 
 Please refer to the MultiNest README file (provided in multinest folder) for more details on these parameters.
 

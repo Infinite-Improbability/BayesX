@@ -46,7 +46,7 @@ CONTAINS
          c_GNFW = GasPars(k, 5)
          c500_GNFW = GasPars(k, 6)
 
-     IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0) THEN
+         IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0) THEN
             flag = 1
             RETURN
          END IF
@@ -144,7 +144,7 @@ CONTAINS
                      (1.0 + ((r2500_DM/rp_GNFW)**(a_GNFW)))* &
                      (((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
                      *(m_sun*Mpc2m*Mpc2m)*(J2keV)
-       CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+         CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e2500 = n_e2500*1.d+6
          Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0))
          Pe2500 = n_e2500*Tg2500_DM
@@ -181,7 +181,7 @@ CONTAINS
                      (1.0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
                      (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
                      *(m_sun*Mpc2m*Mpc2m)*(J2keV)
-          CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             n_ex(m) = n_ex(m)*1.d+6
             Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
             Pex(m) = n_ex(m)*Tgx(m)
@@ -201,7 +201,7 @@ CONTAINS
                      (1.0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
                      (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
                      *(m_sun*Mpc2m*Mpc2m)*(J2keV)
-          CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             n_ex(m) = n_ex(m)*1.d+6
             Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
             Pex(m) = n_ex(m)*Tgx(m)
@@ -265,7 +265,7 @@ CONTAINS
 
          DEALLOCATE (X_S2D)
 
-         angfactor = sec2rad*D
+         angfactor = sec2rad*D ! Physical Mpc per arcsec
          xrayx0 = GeoPars(k, 1)
          xrayy0 = GeoPars(k, 2)
          xrayCmap = 0d0
@@ -290,7 +290,7 @@ CONTAINS
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
-                 xrayCmap(i, xrayxpix, xrayypix) = (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)*(xraycell*xraycell*sec2min*sec2min)
+                  xrayCmap(i, xrayxpix, xrayypix) = (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)*(xraycell*xraycell*sec2min*sec2min)
                END DO
             END DO
          END DO
@@ -469,7 +469,7 @@ CONTAINS
                      (1.0d0 + ((r2500_DM/rp_GNFW)**(a_GNFW)))* &
                      (((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
                      (m_sun*Mpc2m*Mpc2m)*(J2keV)
-       CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+         CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
 
          n_e2500 = n_e2500*1.d+6
          Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0))
@@ -709,8 +709,8 @@ CONTAINS
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
 
-      ! Polytropic model based on Section 4.1 of Ghirardini2019 [A&A 627, A19 (2019)]
-      ! https://doi.org/10.1051/0004-6361/201834875
+         ! Polytropic model based on Section 4.1 of Ghirardini2019 [A&A 627, A19 (2019)]
+         ! https://doi.org/10.1051/0004-6361/201834875
       ELSEIF (GasModel == 3) THEN
          MT200_DM = GasPars(k, 1)   !M_sun\
          Gamma0 = GasPars(k, 8)
@@ -775,23 +775,23 @@ CONTAINS
 
          r500_DM = r200_DM/1.5d0                 !Mpc.
          c500_DM = r500_DM/rs_DM
-        
+
          MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
 
          ne500_poly = polyEstimateNumberDensity(r500_DM)
-         Rhogas500 = ne500_poly*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m) ! solar masses per Mpc
+         Rhogas500 = ne500_poly*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m) ! solar masses per Mpc
          ! T500 as in eq (10) of Ghirardini et al. (2019) to match polytropic paper
          ! The last constant is actually mu/0.6, where mu is the mean molecular weight per particle
          ! I have accordingly used the molecular mass rather than SI units.
-         Tg500_DM = 8.85*(MT500_DM*h/(10.**15))**(2./3.) * (rhocritz / rhocrit)**(1./3.) *(1.0078250319) ! keV
+         Tg500_DM = 8.85*(MT500_DM*h/(10.**15))**(2./3.)*(rhocritz/rhocrit)**(1./3.)*(1.0078250319) ! keV
 
          ! TODO: n_e500 values appear to get calculated by the following, which feels odd given we've calculated it already
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayE1, xrayE2, &
-         xrayNbin, xrayDeltaE, xrayFluxCoeff)
+                              xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e500 = n_e500*1.d+6
          !Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
          !Pe500 = n_e500*Tg500_DM
-         
+
          ! Mg500_DM = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
          !            EinastoDM_GNFWgasvol( &
          !            r500_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
@@ -801,14 +801,14 @@ CONTAINS
          c2500_DM = r2500_DM/rs_DM
 
          ne2500_poly = polyEstimateNumberDensity(r2500_DM)
-         Rhogas2500 = ne2500_poly*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m) 
+         Rhogas2500 = ne2500_poly*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
          Tg2500_DM = polyTemperature(r2500_DM, ne2500_poly)
 
          CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e2500 = n_e2500*1.d+6
 
          MT2500_DM = (4.d0*pi/3.d0)*(2500.d0*rhocritz)*(r2500_DM*r2500_DM*r2500_DM)
-         
+
          ! Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0)) ! TODO: Verify
          ! Pe2500 = n_e2500*Tg2500_DM
 
@@ -818,7 +818,7 @@ CONTAINS
          !fg2500_DM = Mg2500_DM/MT2500_DM
 
          ne200_poly = polyEstimateNumberDensity(r200_DM)
-         Rhogas200 = ne200_poly*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
+         Rhogas200 = ne200_poly*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
          Tg200_DM = polyTemperature(r200_DM, ne200_poly)
 
          CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
@@ -839,7 +839,7 @@ CONTAINS
 
             rgx(m) = rx_incre*r500_DM
             ne_rx = polyEstimateNumberDensity(rgx(m))
-            Rhogasx(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
+            Rhogasx(m) = ne_rx*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
             Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
@@ -861,7 +861,7 @@ CONTAINS
 
             rgx(m) = rx_incre*r500_DM
             ne_rx = polyEstimateNumberDensity(rgx(m))
-            Rhogasx(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
+            Rhogasx(m) = ne_rx*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
             Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
@@ -879,7 +879,7 @@ CONTAINS
 
          DO m = 1, n
             ne_rx = polyEstimateNumberDensity(r(m))
-            Rhogas(m) = ne_rx*mu_e / m_sun * (Mpc2m*Mpc2m*Mpc2m)
+            Rhogas(m) = ne_rx*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
             T(m) = polyTemperature(r(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), &
@@ -1088,24 +1088,24 @@ CONTAINS
       implicit none
       real*8, intent(in) :: radius
       real*8 :: x, v, f0, result
-      real*8 :: eps=1.0d-4
+      real*8 :: eps = 1.0d-4
       real*8 :: polyEstimateNumberDensity
 
-      x = radius / r500_DM
+      x = radius/r500_DM
 
       ! Invert our equation for temperature to find n_e at r500
       ! n0 = T0 ** (-1/Gamma0)
       ! Then f0 = f(x=1) = n0^Gamma0
       f0 = 1./T0_poly
-      
-      v = x ** Gamma0*GammaR/(1. + Gamma0)
+
+      v = x**Gamma0*GammaR/(1.+Gamma0)
 
       CALL qtrap(polyhvIntegrand, 1.d0, x, eps, result)
 
       ! Technically it should be (f0*v0 + result)/v but v(x=1)=1
       ! While the paper has mu as the denominator of eq. C.12,
       ! running through the math shows it should be v instead.
-      polyEstimateNumberDensity = ((f0 + result) / v)**(1/Gamma0)
+      polyEstimateNumberDensity = ((f0 + result)/v)**(1/Gamma0)
 
    END FUNCTION polyEstimateNumberDensity
 !================================================================================================
@@ -1116,12 +1116,12 @@ CONTAINS
       real*8 :: zz
       real*8 :: u, hx, v
       real*8 :: polyhvIntegrand
-      
-      v = zz ** Gamma0*GammaR/(1 + Gamma0)
-      u = (log(1.+c500_dm*zz) - c500_dm*zz/(1.+c500_dm*zz))/(log(1+zz) - zz/(1+zz))
-      hx = -2*u*Gamma0/(T0_poly * zz**2 * zz**GammaR * (Gamma0+1))
 
-      polyhvIntegrand = v * h
+      v = zz**Gamma0*GammaR/(1 + Gamma0)
+      u = (log(1.+c500_dm*zz) - c500_dm*zz/(1.+c500_dm*zz))/(log(1 + zz) - zz/(1 + zz))
+      hx = -2*u*Gamma0/(T0_poly*zz**2*zz**GammaR*(Gamma0 + 1))
+
+      polyhvIntegrand = v*h
 
    END FUNCTION
 
