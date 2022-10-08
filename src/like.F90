@@ -56,12 +56,14 @@ CONTAINS
       CALL PredictXrayCounts(Cube, flag)
       IF (flag == 1) GOTO 999
 
-!     Write predicted counts to file
-      ! open(unit=105, form='formatted', file=trim(n_root)//'generated-data.txt', status='replace')
-      ! do i=1, size(xrayCpred)
-      !    write(105, *) xrayCpred(i)
-      ! end do
-      ! close(105, status='KEEP')
+      ! Write predicted counts to file
+      if (clusterDims == 0) THEN
+         open (unit=105, form='formatted', file=trim(n_root)//'generated-data.txt', status='replace')
+         do i = 1, size(xrayCpred)
+            write (105, *) xrayCpred(i)
+         end do
+         close (105, status='KEEP')
+      end if
 
 !     Calculate Likelihood
 
