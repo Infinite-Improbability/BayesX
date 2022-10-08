@@ -17,19 +17,19 @@
 'data/MEKAL/mekal6.dat'
 
 #filARF
-'data/A262datafiles/ARF_630by1.txt'
+'chains/TNG-300-1-snap91-halo0/arf.txt'
 
 #filRMF
-'data/A262datafiles/RMF_630by433.txt'
+'chains/TNG-300-1-snap91-halo0/rmf.txt'
 
 #filBG
-'ComaData/13996BG_256by256by433.txt'
+'chains/TNG-300-1-snap91-halo0/bg.txt'
 
 #filevent
-'ComaData/13996data_256by256by433.txt'
+'chains/TNG-300-1-snap91-halo0/evts.txt'
 
 #filmask
-'ComaData/mask_binned.txt'
+'chains/TNG-300-1-snap91-halo0/mask.txt'
 
 #XrayTelescope
 'CHA'
@@ -38,10 +38,10 @@
 100
 
 #nx
-256
+128
 
 #ny
-256
+128
 
 #Aeffave
 250
@@ -50,37 +50,28 @@
 4.92
 
 #xrayNbin
-630
+937
 
 #xrayNch
-433
+897
 
 #xrayEmin
-0.7
+0.1
 
 #xrayEmax
-7.0
+11.0
 
 #sexpotime
-123.0557552393d+3 
+300.0d3
 
 #bexpotime
-123.0557552393d+3 
+300.0d+3 
 
 #NHcol
-2.2d20
+4.0d20
 
 #xrayBG_model
 8.4d-6
-
-#rmin
-0.01
-
-#rmax
-0.6
-
-#rlimit
-0.6
 
 #x_prior
 3	0.d0	10.0d0
@@ -92,10 +83,10 @@
 1
 
 #m200_prior
-1	1.d14	2.d15
+2	1.d14	9.d15
 
 #fgas200_prior
-1	0.1    0.2
+3	0.13    0.02
 
 #a_GNFW_prior
 0	1.062    1.062	
@@ -122,7 +113,7 @@
 1   1.0    6.0
 
 #z_Prior
-0	0.0231	0.0231
+0	0.099	0.099
 
 #nlive
 1000
@@ -137,4 +128,4 @@
 -1
 
 #root
-'chains/model1_test_'
+'chains/tng/tng_test1_'
