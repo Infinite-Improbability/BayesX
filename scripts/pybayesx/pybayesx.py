@@ -21,7 +21,7 @@ import numpy as np
 from astropy.io import fits
 
 # from astropy.cosmology import FlatLambdaCDM
-import astropy.units as u
+# import astropy.units as u
 
 from .binning import bin
 
@@ -162,7 +162,7 @@ class BayesX:
         :type chain_root: Union[str, bytes, Path], optional
         """
         self.label: str = label
-        self.path: Path = Path.join(chain_root, self.label)
+        self.path: Path = Path(chain_root).joinpath(self.label)
 
         self.config: dict[str] = None
         self.priors: dict[str, Prior] = None
@@ -380,13 +380,13 @@ class BayesX:
                 self.config["bexpotime"] = f.header["livetime"]
 
     def load_arf(self, path: Path):
-        with fits.open(Path) as f:
+        with fits.open(path) as f:
             self.arf = f[1].data["specresp"]
 
             self.config["xrayNbin"] = np.size(self.arf)
 
-            self.config["xrayEmin"] = np.minimum(f[1].data["energ_lo"])
-            self.config["xrayEmax"] = np.maximum(f[1].data["energ_hi"])
+            self.config["xrayEmin"] = np.min(f[1].data["energ_lo"])
+            self.config["xrayEmax"] = np.max(f[1].data["energ_hi"])
 
     def export_arf(self, outfile: Path = None):
         if outfile is None:
@@ -395,7 +395,7 @@ class BayesX:
         np.savetxt(self.arf)
 
     def load_rmf(self, path: Path):
-        with fits.open(Path) as f:
+        with fits.open(path) as f:
             rmf = f[1].data["matrix"]
             self.config["xrayNch"] = len(rmf[-1])
             mat = np.zeros((self.config["xrayNbin"], self.config["xrayNch"]))
@@ -409,7 +409,7 @@ class BayesX:
 
         np.savetxt(np.ravel(self.rmf))
 
-    def bin_and_export(self, n_bins: int, cellsize: float, redshift: float**kwargs):
+    def bin_and_export(self, n_bins: int, cellsize: float, **kwargs):
         self.config["filevent"] = self.path.joinpath("evts.txt")
         bin(
             self.events[:, 0],
@@ -418,6 +418,7 @@ class BayesX:
             n_bins,
             cellsize,
             outfile=self.config["filevent"],
+            n_channels=self.config["xrayNch"],
         )
 
         self.config["filBG"] = self.path.joinpath("bg.txt")
@@ -428,6 +429,7 @@ class BayesX:
             n_bins,
             cellsize,
             outfile=self.config["filBG"],
+            n_channels=self.config["xrayNch"],
         )
 
         self.config["filmask"] = self.path.joinpath("mask.txt")

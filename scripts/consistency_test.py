@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
 """
-Automates internal consistency checking: whether BayesX can retrieve the parameters it used
-to generate a prediction x-ray count.
+Automates internal consistency checking: whether BayesX can retrieve the parameters it
+used to generate a prediction x-ray count.
 
 # Usage
 Run this script from the BayesX root folder:
@@ -13,21 +13,21 @@ Run this script from the BayesX root folder:
 
 # Process
 1. Generate predicted x-ray counts using BayesX for fixed priors.
-   Fixed priors are selected from a uniform distribution between prior.min and prior.max,
-   which are specified in the prior definition below.
+   Fixed priors are selected from a uniform distribution between prior.min and
+   prior.max, which are specified in the prior definition below.
 2. Apply poisson noise to predicted counts.
 3. Free noisy prediction back into BayesX with free priors and the same model.
 4. Generate plot of posteriors corresponding to free priors for easy analysis.
    True values are marked, if in plot range.
 
 # Notes
-* Chains are output to a subfolder the main chains directory with the datetime in the name.
-  This is to keep things tidy and prevent successive runs from conflicting. This folder also
-  includes the generated .inp files so as to record run configuration.
+* Chains are output to a subfolder the main chains directory with the datetime in the
+  name. This is to keep things tidy and prevent successive runs from conflicting.
+  This folder also includes the generated .inp files so as to record run configuration.
 * To get the true values check infile-auto-fixed.inp.
 * Defaults to using all avaliable cores.
-* Script xpects the BayesX executable to be located at bin/BayesX and compiled for parallel execution
-  with mpiexec.
+* Script xpects the BayesX executable to be located at bin/BayesX and compiled for
+  parallel execution with mpiexec.
 * To set priors look around line 150.
 """
 
@@ -41,8 +41,13 @@ rng = np.random.default_rng()
 
 # Parse command line arguments
 parser = ArgumentParser(description="Run internal consistency check")
-parser.add_argument("model", type=int, help="Model number (1: NFW-GNFW, 2: Einasto-GNFW or 3: Polytropic)")
+parser.add_argument(
+    "model",
+    type=int,
+    help="Model number (1: NFW-GNFW, 2: Einasto-GNFW or 3: Polytropic)",
+)
 args = parser.parse_args()
+
 
 class Path:
     """
@@ -89,7 +94,6 @@ class Prior:
             self.value = value
         else:
             self.value = self.generate_value()
-
 
     def generate_value(self) -> float:
         if self.type == 0:
@@ -155,10 +159,10 @@ params["Aeffave"] = 250  # Average effective area of the telescope in cm^{2}
 params["xraycell"] = 0.492
 params["xrayEmin"] = 0.7
 params["xrayEmax"] = 7.0
-params["sexpotime"] = '120d3'
-params["bexpotime"] = '120d3'
-params["NHcol"] = '2.2d20'
-params["xrayBG_model"] = '8.4d-6'
+params["sexpotime"] = "120d3"
+params["bexpotime"] = "120d3"
+params["NHcol"] = "2.2d20"
+params["xrayBG_model"] = "8.4d-6"
 params["nlive"] = 100
 params["eff"] = 0.8
 params["tol"] = 0.5
@@ -195,10 +199,10 @@ params["root"] = Path(f"{chain_path}/fixed_")
 params["nCdims"] = "0"
 
 # For the event files we'll use a blank background and mask
-# For the fixed case we don't care about the event file, so we'll also use the blank file
+# In the fixed case we don't care about the event file, so we'll also use the blank file
 blank = np.zeros(
     (params["nx"] * params["ny"] * params["xrayNch"], 1)
-)  # BAYES-X reads the counts in a 1-D array of dimension of (nx times ny times xrayNch).
+)  # BayesX reads the counts in a 1-D array of dimension of (nx times ny times xrayNch).
 blank_path = Path(f'data/blank{params["nx"]}x{params["ny"]}x{params["xrayNch"]}.txt')
 np.savetxt(blank_path.path, blank, fmt="%.1d")
 params["filBG"] = blank_path  # The root for background file
@@ -295,4 +299,4 @@ with open(f"{chain_path}/autorun-report.txt", "x") as f:
     # TODO: Include priors, posterior information, etc
 
 print(f"\n Completed processing of {chain_path}.\n")
-print(f"----------------------------------------------------------------\n\n\n")
+print("----------------------------------------------------------------\n\n\n")
