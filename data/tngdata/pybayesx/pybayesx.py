@@ -407,14 +407,23 @@ class BayesX:
         np.savetxt(outfile, self.arf)
         self.config["filARF"] = outfile
 
-    def load_rmf(self, path: Path):
+    def load_rmf(self, path: Path, n_channels: int):
         with fits.open(path) as f:
             rmf = f[1].data["matrix"]
-            self.config["xrayNch"] = len(rmf[-1])
+
+            if n_channels:
+                self.config["xrayNch"] = n_channels
+            else:
+                self.config["xrayNch"] = np.max([len(r) for r in rmf])
+
             mat = np.zeros((self.config["xrayNbin"], self.config["xrayNch"]))
 
             for i in range(0, len(rmf)):
-                mat[i, : len(rmf[i])] = rmf[i]
+                chans = len(rmf[i])
+                end = (
+                    chans if chans <= self.config["xrayNch"] else self.config["xrayNch"]
+                )
+                mat[i, :end] = rmf[i][:end]
 
             self.rmf = mat
 

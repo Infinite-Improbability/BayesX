@@ -96,7 +96,7 @@ CONTAINS
          ALLOCATE (X_S1D(n))
          ALLOCATE (X_S2D(n, xrayNbin))
 
-         xfluxsec1 = 1.0/((4.0*pi)*((1.0 + z(k))**4))
+         xfluxsec1 = 1.0/((4.0*pi)*((1.0 + z(k))**4)) ! Coefficent of integral that gives observed surface brightness of cluster, in photons / m^2 / s / keV / arcmin^2 according to eq 8 of Olamaie2015.
 
          xfluxsec2 = (3.031d-15)
 
@@ -891,7 +891,7 @@ CONTAINS
          DO i = 1, xrayNbin
             DO m = 1, n
                logX_emiss1D(m) = phlog10(X_emiss2D(m, i)* &
-                                         xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m)
+                                         xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m) ! per cm^3?
                !      write(*,*)logX_emiss1D(m)
             END DO
 
@@ -902,7 +902,7 @@ CONTAINS
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
-               X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
+               X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm) ! per Mpc^2?
             END DO
          END DO
          !     write(*,*)'test'
@@ -955,7 +955,7 @@ CONTAINS
                   END IF
                   xrayCmap(i, xrayxpix, xrayypix) = &
                      (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)* &
-                     (xraycell*xraycell*sec2min*sec2min)
+                     (xraycell*xraycell*sec2min*sec2min) ! multiplying by cell area in arcmin^2
                END DO
             END DO
          END DO

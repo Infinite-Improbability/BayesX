@@ -4,6 +4,10 @@ from getdist import plots, loadMCSamples
 
 from six.moves import input as raw_input  # should work for python2 and 3
 
+import matplotlib
+
+matplotlib.use("Agg")
+
 ch_path = []
 while 1:
     ch_path.append(raw_input("Path to chains or q to quit: ").strip())
