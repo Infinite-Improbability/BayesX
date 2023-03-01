@@ -33,7 +33,7 @@ if args.true:
         try:
             markers[p] = float(v)
         except:
-            print("Error applying true value " + m + " to " + p)
+            print("Error applying true value " + v + " to " + p)
             pass
 
 for i, samps in enumerate(ch):
