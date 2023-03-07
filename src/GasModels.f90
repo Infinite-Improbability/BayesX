@@ -712,10 +712,10 @@ CONTAINS
          ! Polytropic model based on Section 4.1 of Ghirardini2019 [A&A 627, A19 (2019)]
          ! https://doi.org/10.1051/0004-6361/201834875
       ELSEIF (GasModel == 3) THEN
-         MT200_DM = GasPars(k, 1)   !M_sun\
-         Gamma0 = GasPars(k, 8)
-         GammaR = GasPars(k, 9)
-         T0_poly = GasPars(k, 10)
+         MT200_DM = GasPars(k, 1)   !M_sun
+         Gamma0 = GasPars(k, 8)  !dimensionless
+         GammaR = GasPars(k, 9)  !dimensionless
+         T0_poly = GasPars(k, 10)   !dimensionless
 
          ! TODO: Unit comments
 
@@ -728,20 +728,17 @@ CONTAINS
             RETURN
          END IF
 
+         ! Also used by prior models
          r200_DM = ((3.d0*MT200_DM)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)   !Mpc
 
-         rs_DM = r200_DM/c200_DM                   !Mpc
+         ! Also used by prior models
+         rs_DM = r200_DM/c200_DM ! Mpc
+         r500_DM = r200_DM/1.5d0 ! Mpc
+         c500_DM = r500_DM/rs_DM
 
+         ! Also used by prior models
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &
-            (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sunMpc-
-
-         ! IF (Pei_GNFW .LE. 0d0) THEN
-         !    WRITE (*, *) c200_DM, MT200_DM, fg200_DM
-         !    WRITE (*, *) Mg200_DM, r200_DM, r_2_DM
-         !    WRITE (*, *) rho_2_DM, rp_GNFW
-         !    WRITE (*, *) 'error Pei_GNFW= ', Pei_GNFW
-         !    STOP
-         ! END IF
+            (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sunMpc-3
 
          ALLOCATE (n_H(n))
          ALLOCATE (ne_nH(n), n_e(n))
@@ -750,12 +747,12 @@ CONTAINS
          ALLOCATE (X_S1D(n))
          ALLOCATE (X_S2D(n, xrayNbin))
 
-         xfluxsec1 = 1.0/((4.0*pi)*((1.0 + z(k))**4))
-
+         ! All used by prior models
+         xfluxsec1 = 1.0/((4.0*pi)*((1.0 + z(k))**4)) ! Coefficent of integral that gives observed surface brightness of cluster, in photons / m^2 / s / keV / arcmin^2 according to eq 8 of Olamaie2015.
          xfluxsec2 = (3.031d-15)
-
          xfluxsec5 = (pi*pi)/(60.0*60.0*180.0*180.0)
 
+         ! Init arrays
          DO i = 1, xrayNbin
             xrayFluxCoeff(i) = 0.
             xrayFlux(i) = 0.
@@ -773,8 +770,6 @@ CONTAINS
 
          CALL xsphab(xrayE1, xrayNbin, N_H_col, photar)
 
-         r500_DM = r200_DM/1.5d0                 !Mpc.
-         c500_DM = r500_DM/rs_DM
 
          MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
 
@@ -2135,7 +2130,7 @@ CONTAINS
 
       INTEGER i
 
-      param(1) = N_H_col*1.e-22
+      param(1) = N_H_col*1.e-22 ! 10^44 cm^-2 Why are we doing this?
       vparam(1) = param(1)
       DO i = 2, NPARM - 1
          vparam(i) = 1.
@@ -2178,9 +2173,10 @@ CONTAINS
 
       INTEGER i
 
+      ! TODO: This following code seems overly complex. Verify if it is necessary.
       pparam(1) = param(1)
       DO i = 2, NPARM - 1
-         pparam(i) = param(i)*param(1)
+         pparam(i) = param(i)*param(1) ! Why not skip the multiplication? I think we're multiplying by 1 eveywhere
       END DO
       pparam(NPARM) = param(NPARM)
 
