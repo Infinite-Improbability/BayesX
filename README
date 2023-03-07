@@ -148,9 +148,9 @@ In the line following the prior tag, users should list 3 values as follows:
 a	b	c
 where a is the prior type, b & c are the parameters specific to the prior type. Allowed prior types & their specific parameters are as follows:
 
-Delta function prior					0   [parameter value]   [parameter value]
+Delta function prior				0   [parameter value]   [parameter value]
 Uniform prior						1   [minimum value]     [maximum value]
-Uniform prior in log					2   [minimum value]     [maximum value]
+Uniform prior in log				2   [minimum value]     [maximum value]
 Gaussian prior						3   [mean]              [standard deviation]
 Log-normal prior					4   [mean]              [width]
 Joint prior for M_{200} & z using the mass function	8   [minimum value]     [maximum value]
