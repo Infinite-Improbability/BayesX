@@ -1116,7 +1116,7 @@ CONTAINS
       u = (log(1.+c500_dm*zz) - c500_dm*zz/(1.+c500_dm*zz))/(log(1 + zz) - zz/(1 + zz))
       hx = -2*u*Gamma0/(T0_poly*zz**2*zz**GammaR*(Gamma0 + 1))
 
-      polyhvIntegrand = v*h
+      polyhvIntegrand = v*hx
 
    END FUNCTION
 
