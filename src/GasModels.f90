@@ -2120,7 +2120,7 @@ CONTAINS
 ! Arguments :
 !     ear       r        i: the energy ranges on which to calculate the model
 !     ne        i        i: the number of energy ranges
-!     param     r        i: the H column density in 10^22 cm^-2
+!     param     r        i: the H column density in cm^-2
 !     photar    r        r: fractional transmission
 
       INTEGER NPARM
@@ -2130,7 +2130,7 @@ CONTAINS
 
       INTEGER i
 
-      param(1) = N_H_col*1.e-22 ! 10^44 cm^-2 Why are we doing this?
+      param(1) = N_H_col*1.e-22 ! 10^22 cm^-2
       vparam(1) = param(1)
       DO i = 2, NPARM - 1
          vparam(i) = 1.

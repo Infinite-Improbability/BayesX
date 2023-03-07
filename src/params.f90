@@ -163,8 +163,8 @@ MODULE params
    INTEGER, PARAMETER  ::  NL_MAX = 5500
 
    CHARACTER(LEN=3), PARAMETER   ::  Elements(1:15) = &
-                                    (/'H  ', 'He ', 'C  ', 'N  ', 'O  ', 'Ne ', 'Na ', 'Mg ', 'Al ', &
-                                      'Si ', 'S  ', 'Ar ', 'Ca ', 'Fe ', 'Ni '/)
+      (/'H  ', 'He ', 'C  ', 'N  ', 'O  ', 'Ne ', 'Na ', 'Mg ', 'Al ', &
+      'Si ', 'S  ', 'Ar ', 'Ca ', 'Fe ', 'Ni '/)
    REAL*8              ::  abund, nuc_tot, Z_tot, xe, xzin, elx, flx
    DIMENSION abund(NOEL), nuc_tot(NOEL), Z_tot(NOEL), xe(NOEL), xzin(NUMION), elx(NL_MAX)
    DIMENSION flx(NL_MAX)
@@ -211,7 +211,7 @@ MODULE params
    INTEGER, DIMENSION(:), ALLOCATABLE :: xrayCobs, xrayBG_obs
    REAL*8                    :: XRAYLhood0
 !Hydrogen Column Density
-   REAL                    ::  N_H_col
+   REAL                    ::  N_H_col ! cm^2
 !Background model
    REAL*8                 ::  xrayBG_predmax
 
