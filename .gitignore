@@ -59,6 +59,7 @@ mask.npz
 mask.txt.gz
 mask_binned.txt
 *.matxt
+testbed/*
 # big file
 *generated-data.txt
 

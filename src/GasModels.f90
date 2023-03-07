@@ -1081,7 +1081,7 @@ CONTAINS
       ! derived in Appendix C of Ghirardini2019
 
       implicit none
-      real*8, intent(in) :: radius
+      real*8, intent(in) :: radius ! Mpc
       real*8 :: x, v, f0, result
       real*8 :: eps = 1.0d-4
       real*8 :: polyEstimateNumberDensity
