@@ -1,16 +1,11 @@
-#!/usr/bin/python26
-
 from getdist import plots, loadMCSamples
-
-from six.moves import input as raw_input  # should work for python2 and 3
-
 import matplotlib
 
 matplotlib.use("Agg")
 
 ch_path = []
 while 1:
-    ch_path.append(raw_input("Path to chains or q to quit: ").strip())
+    ch_path.append(input("Path to chains or q to quit: ").strip())
     if ch_path[-1] == "q":
         ch_path = ch_path[:-1]
         break
@@ -29,19 +24,19 @@ print("Parameters are: ")
 print(pars)
 plotpars = []
 while 1:
-    p = raw_input("Parameter to plot or q to quit: ").strip()
+    p = input("Parameter to plot or q to quit: ").strip()
     if p == "q":
         break
     plotpars.append(pars.parWithName(p).label)
 
 plotpar_names = ["plot" + str(i) for i in range(len(plotpars))]
 
-do_markers = raw_input("Enter true values (y/n): ").strip()
+do_markers = input("Enter true values (y/n): ").strip()
 markers = {}
 if "y" in do_markers.lower():
     print("Enter true value or non-numerical value to skip")
     for p in plotpars:
-        m = raw_input("True value for " + p + ": ")
+        m = input("True value for " + p + ": ")
         try:
             markers[p] = float(m)
         except ValueError:
