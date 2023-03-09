@@ -12,10 +12,12 @@ BayesX
 """
 # TODO: Check compatability with earlier version of Python 3
 
+from dataclasses import dataclass
 from datetime import datetime
+from importlib.resources import path
 import logging
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 from astropy.io import fits
@@ -99,6 +101,8 @@ class Prior:
         elif self.type == 4:
             # LogGaussian
             value = rng.lognormal(self.param1, self.param2)
+        else:
+            raise Exception("Invalid prior type")
         return value
 
     def free(self) -> str:
@@ -127,11 +131,69 @@ class Model:
         self,
         name: str,
         num: int,
-        priors: "list[Prior]",
+        priors: list[Prior],
     ) -> None:
         self.name = name
         self.num = num
-        self.priors: "list[str]" = priors
+        self.priors: list[Prior] = priors
+
+
+@dataclass
+class Config:
+    """Class for BayesX config, as stored in infiles"""
+
+    # Input data
+    filARF: Path  # in txt format
+    filRMF: Path  # in text format
+
+    nx: int  # Number of pixels in x direction
+    ny: int  # Number of pixels in y direction
+    xrayNbin: int  # Number of energy bins
+    xrayNch: int  # Number of energy bins
+
+    xraycell: float  # Spatial pixel size in arcsecond
+    xrayEmin: float  # Minimum value of the energy range in keV
+    xrayEmax: float  # Maximum value of the energy range in keV
+    sexpotime: float  # Source exposure time in second
+    bexpotime: float  # Background exposure time in second
+
+    # Root for MEKAL data files
+    filion: Path = Path("data/MEKAL/mekal1.dat")
+    filrec: Path = Path("data/MEKAL/mekal2.dat")
+    filkar: Path = Path("data/MEKAL/mekal3.dat")
+    filcon: Path = Path("data/MEKAL/mekal4.dat")
+    fillin: Path = Path("data/MEKAL/mekal5.dat")
+    filcaf: Path = Path("data/MEKAL/mekal6.dat")
+
+    # Telescope config
+    XrayTelescope: str = "CHA"
+    Aeffave = 250  # Average effective area of the telescope in cm^{2}
+
+    # Data realted
+    n: int = 64  # Number of steps for discretising r
+
+    NHcol: float = 4.0e20  # Hydrogen column density in cm^2
+    xrayBG_model: float = (
+        8.4e-6  # Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1,
+    )
+    rmin: float = 0.01  # Minimum radius, Mpc
+    rmax: float = None  # Maximum radius for xray emission and GNFW model, Mpc
+    rlimit: float = (
+        None  # Used to calculate logr, may need to be slightly higher than rmax, Mpc
+    )
+
+    # MutliNest parameters
+    IS: bool = False  # Do Importance Nested Sampling?
+    multimodal: bool = False  # Do mode seperation
+    nlive: int = 1000  # Number of live points.
+    eff: float = 0.8  # Target efficiency
+    tol: float = 0.5  # Tolerance value for convergence
+    seed: int = -1  # Seed for RNG, negative value takes seed from system clock
+    updint: int = (
+        100  # No. of iterations after which the output files should be updated
+    )
+    maxmodes: int = 20  # Maximum no. of modes (for memory allocation)
+    nCdims: int = 2  # no. of parameters on which clustering should be performed if mode separation is enabled, default value: 2
 
 
 class BayesX:
@@ -164,7 +226,7 @@ class BayesX:
         self.label: str = label
         self.path: Path = Path(chain_root).joinpath(self.label)
 
-        self.config: dict[str] = None
+        self.config: Config = Config()
         self.priors: dict[str, Prior] = None
 
     def make_config(self, **kwargs) -> None:
@@ -176,7 +238,7 @@ class BayesX:
         Validation is applied where possible to ensure reasonable inputs.
         """
 
-        config: dict[str, Any] = BayesX.default_config()
+        config: dict[str, Any] = Config()
 
         config["root"] = self.path.joinpath("out/")
 
@@ -291,7 +353,7 @@ class BayesX:
         the folder referenced by self.path
         :type path: Path, optional
         """
-        if not path:
+        if path is None:
             path: Path = self.path.joinpath(f"infile-{self.label}.inp")
 
         if not (self.config and self.priors):
@@ -308,7 +370,7 @@ class BayesX:
 
         log.info(f"Exported config to {path}")
 
-    def load_events(self, path: Path, file_type: str = None) -> None:
+    def load_events(self, path: Path, file_type: Optional[str] = None) -> None:
         """Try to intelligently handle events input from a number of file types.
 
         :param path: Path to events file
@@ -321,9 +383,9 @@ class BayesX:
         if file_type:
             ext = file_type if file_type[0] == "." else "." + file_type
         if ext == ".txt":
-            self.load_events_from_txt(self, path)
+            self.load_events_from_txt(path)
         elif ext == ".fits":
-            self.load_data_from_fits(self, path)
+            self.load_events_from_fits(path)
         else:
             raise ValueError("Unrecognised data file extension.")
 
@@ -344,7 +406,7 @@ class BayesX:
         x_key: str = "X",
         y_key: str = "Y",
         channel_key: str = "PI",
-        du_index=1,
+        du_index=1,  # TODO: Confirm correct
         mode="evts",
         **kwargs,
     ) -> None:
