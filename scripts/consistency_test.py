@@ -287,7 +287,7 @@ for k in model_priors[params["cluster_model"]]:
         p_count += 1
 
 run(
-    ["python3", "scripts/auto_plot_tri.py", params["root"].path]
+    ["python3", "scripts/auto_plot_tri.py", params["root"].path, "-p"]
     + plot_priors
     + true_priors
 )
