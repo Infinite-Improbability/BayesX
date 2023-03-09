@@ -169,7 +169,7 @@ class Config:
     XrayTelescope: str = "CHA"
     Aeffave = 250  # Average effective area of the telescope in cm^{2}
 
-    # Data realted
+    # Data related
     n: int = 64  # Number of steps for discretising r
 
     NHcol: float = 4.0e20  # Hydrogen column density in cm^2
