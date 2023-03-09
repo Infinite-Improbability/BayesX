@@ -2,12 +2,15 @@
 
 from getdist import plots, loadMCSamples
 import argparse
+from datetime import datetime
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="Plot posteriors")
 
-parser.add_argument("path", type=str, help="Posterior root")
-parser.add_argument("params", nargs="+", help="List of parameter ids to plot")
+parser.add_argument("path", type=str, nargs="+", help="Posterior root")
+parser.add_argument(
+    "-p," "--params", nargs="+", help="List of parameter ids to plot", dest="params"
+)
 
 # Optional
 parser.add_argument(
@@ -16,7 +19,9 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-ch_path = [args.path]
+ch_path = args.path
+
+print(args)
 
 ch = []
 for p in ch_path:
@@ -113,4 +118,5 @@ for ipar, p in enumerate(plotpars):
                 ax = g.subplots[jplot, ipar]
                 ax.plot(markers[p], markers[p2], "*k")
 
-g.export(ch_path[0] + "_tri.png")
+g.export(ch_path[0] + datetime.now().strftime("%Y%m%d%H%M%S") + "_tri.png")
+print(ch_path[0] + "_" + datetime.now().strftime("%Y%m%d%H%M%S") + "_tri.png")
