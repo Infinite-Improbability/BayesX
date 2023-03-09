@@ -12,7 +12,7 @@ BayesX
 """
 # TODO: Check compatability with earlier version of Python 3
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from importlib.resources import path
 import logging
@@ -360,9 +360,15 @@ class BayesX:
             log.warn("Exporting config when config or priors not set.")
 
         with open(self.path, "w") as f:
-            for key, value in self.config.items():
+            for key, value in asdict(self.config).items():
                 f.write(f"#{key}\n")
-                f.write(str(value) + "\n")
+
+                if isinstance(value, float):
+                    value = str(value).replace(
+                        "e", "d"
+                    )  # Output using fortran double notation 4.0d5 = 4.0 * 10^5
+
+                f.write(value + "\n")
             for prior in model.priors:
                 prior: Prior
                 f.write(f"#{prior.name}\n")
