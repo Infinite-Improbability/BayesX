@@ -784,8 +784,8 @@ CONTAINS
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayE1, xrayE2, &
             xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e500 = n_e500*1.d+6
-         !Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
-         !Pe500 = n_e500*Tg500_DM
+         Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
+         Pe500 = n_e500*Tg500_DM
 
          ! Mg500_DM = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
          !            EinastoDM_GNFWgasvol( &
@@ -804,8 +804,8 @@ CONTAINS
 
          MT2500_DM = (4.d0*pi/3.d0)*(2500.d0*rhocritz)*(r2500_DM*r2500_DM*r2500_DM)
 
-         ! Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0)) ! TODO: Verify
-         ! Pe2500 = n_e2500*Tg2500_DM
+         Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0)) ! TODO: Verify
+         Pe2500 = n_e2500*Tg2500_DM
 
          ! Mg2500_DM = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
          ! EinastoDM_GNFWgasvol( &
@@ -819,8 +819,8 @@ CONTAINS
          CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e200 = n_e200*1.d+6
 
-         ! Ke200 = Tg200_DM/(n_e200**(2.0/3.0))
-         ! Pe200 = n_e200*Tg200_DM
+         Ke200 = Tg200_DM/(n_e200**(2.0/3.0))
+         Pe200 = n_e200*Tg200_DM
 
          ALLOCATE (rgx(13))
          ALLOCATE (rhogasx(13), n_Hx(13))
@@ -841,8 +841,8 @@ CONTAINS
                ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
                xrayDeltaE, xrayFluxCoeff)
             n_ex(m) = n_ex(m)*1.d+6
-            ! Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
-            ! Pex(m) = n_ex(m)*Tgx(m)
+            Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+            Pex(m) = n_ex(m)*Tgx(m)
             ! Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
             !             EinastoDM_GNFWgasvol( &
             !             rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
@@ -863,8 +863,8 @@ CONTAINS
                ne_nHx(m), xrayE1, xrayE2, xrayNbin, &
                xrayDeltaE, xrayFluxCoeff)
             n_ex(m) = n_ex(m)*1.d+6
-            ! Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
-            ! Pex(m) = n_ex(m)*Tgx(m)
+            Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+            Pex(m) = n_ex(m)*Tgx(m)
             ! Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
             !             EinastoDM_GNFWgasvol( &
             !             rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
@@ -979,8 +979,8 @@ CONTAINS
          aux(k, 10) = 0!fg2500_DM
          aux(k, 11) = Tg2500_DM
          aux(k, 12) = n_e2500
-         aux(k, 13) = ne2500_poly!Ke2500
-         aux(k, 14) = 0!Pe2500
+         aux(k, 13) = Ke2500
+         aux(k, 14) = Pe2500
          aux(k, 15) = r500_DM
          aux(k, 16) = c500_DM
          aux(k, 17) = 0!Mg500_DM
@@ -988,17 +988,17 @@ CONTAINS
          aux(k, 19) = 0!fg500_DM
          aux(k, 20) = Tg500_DM
          aux(k, 21) = n_e500
-         aux(k, 22) = ne500_poly!Ke500
-         aux(k, 23) = 0!Pe500
+         aux(k, 22) = Ke500
+         aux(k, 23) = Pe500
          aux(k, 24) = r200_DM
          aux(k, 25) = c200_DM
          aux(k, 26) = 0!Mg200_DM
          aux(k, 27) = MT200_DM
          aux(k, 28) = 0!fg200_DM
-         aux(k, 29) = 0!Tg200_DM
+         aux(k, 29) = Tg200_DM
          aux(k, 30) = n_e200
-         aux(k, 31) = ne200_poly!Ke200
-         aux(k, 32) = 0!Pe200
+         aux(k, 31) = Ke200
+         aux(k, 32) = Pe200
 
          !i = 0
          !DO m = 33, 129, 8
