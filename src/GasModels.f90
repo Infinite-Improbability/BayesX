@@ -985,7 +985,7 @@ CONTAINS
          aux(k, 16) = c500_DM
          aux(k, 17) = 0!Mg500_DM
          aux(k, 18) = MT500_DM
-         aux(k, 19) = 0!fg500_DM
+         aux(k, 19) = ne500_poly!fg500_DM
          aux(k, 20) = Tg500_DM
          aux(k, 21) = n_e500
          aux(k, 22) = Ke500
@@ -1209,18 +1209,18 @@ CONTAINS
 
    SUBROUTINE Xray_flux_coeff(Rhogas0, KB_Tx, n_e0, n_H0, ne_nH0, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
 
-      IMPLICIT NONE
-      INTEGER     :: i, k, flag, j, m, xrayNbin
+      implicit none
+      integer, intent(in) :: xrayNbin
+      real*8, intent(in) :: Rhogas0, KB_Tx, xrayDeltaE, xrayE1(1:xrayNbin), xrayE2(1:xrayNbin)
 
-      REAL*8       ::n_H0, Rhogas0, KB_Tx, xrayDeltaE
-      REAL*8       ::Rhogas0_SI, el_den, n_e0
-      REAL*8       ::ne_nH0, sum_xenuctot
-      INTEGER, PARAMETER          :: NOEL = 15
-      INTEGER, PARAMETER          :: NL_MAX = 5500
-      REAL*8       ::xrayE1(1:xrayNbin), xrayE2(1:xrayNbin), xrayFluxCoeff(1:xrayNbin)
+      real*8, intent(out) :: n_e0, n_H0, ne_nH0, xrayFluxCoeff(1:xrayNbin)
 
-      REAL*8 xe, xzin, elx, flx
-      DIMENSION xe(NOEL), xzin(NUMION), elx(NL_MAX), flx(NL_MAX)
+      real*8 :: Rhogas0_SI, el_den, sum_xenuctot
+      integer   :: i, k, flag, j, m
+      integer, parameter          :: NOEL = 15
+      integer, parameter          :: NL_MAX = 5500
+      real*8 :: xe, xzin, elx, flx
+      dimension xe(NOEL), xzin(NUMION), elx(NL_MAX), flx(NL_MAX)
 
       xrayde = 0.0
       DO i = 1, xrayNbin
@@ -1271,8 +1271,9 @@ CONTAINS
 !================================================================
    SUBROUTINE MEKAL1(T, Xe, Xzin, Ed)
       IMPLICIT NONE
-      REAL*8 T, Ed
-      REAL*8 alfa, fn, sion, so, Xe, Xzin
+      REAL*8, intent(in) :: T, Xe
+      REAL*8, intent(out) :: Ed, Xzin
+      REAL*8 alfa, fn, sion, so
       INTEGER i, iel, j, k, nion, NIONMAX, NOEL
 
       PARAMETER(NOEL=15, NIONMAX=29)
