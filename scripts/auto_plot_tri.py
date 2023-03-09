@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 from getdist import plots, loadMCSamples
 import argparse
 
@@ -14,11 +16,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-ch_path=[args.path]
+ch_path = [args.path]
 
-ch=[]
+ch = []
 for p in ch_path:
-  ch.append(loadMCSamples(p))
+    ch.append(loadMCSamples(p))
 
 pars = ch[0].getParamNames()
 plotpars = []
