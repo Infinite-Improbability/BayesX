@@ -774,11 +774,12 @@ CONTAINS
          MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
 
          ne500_poly = polyEstimateNumberDensity(r500_DM)
-         Rhogas500 = ne500_poly*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m) ! solar masses per Mpc
+         Rhogas500 = polyGasDensity(ne500_poly) ! solar masses per Mpc
          ! T500 as in eq (10) of Ghirardini et al. (2019) to match polytropic paper
          ! The last constant is actually mu/0.6, where mu is the mean molecular weight per particle
          ! I have accordingly used the molecular mass rather than SI units.
          Tg500_DM = 8.85*(MT500_DM*h/(10.**15))**(2./3.)*(rhocritz/rhocrit)**(1./3.)*(1.0078250319) ! keV
+         ! try kb*T500 = G*M500*mu*mp / (2*R500) instead?
 
          ! TODO: n_e500 values appear to get calculated by the following, which feels odd given we've calculated it already
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayE1, xrayE2, &
@@ -796,7 +797,7 @@ CONTAINS
          c2500_DM = r2500_DM/rs_DM
 
          ne2500_poly = polyEstimateNumberDensity(r2500_DM)
-         Rhogas2500 = ne2500_poly*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
+         Rhogas2500 = polyGasDensity(ne2500_poly)
          Tg2500_DM = polyTemperature(r2500_DM, ne2500_poly)
 
          CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
@@ -813,7 +814,7 @@ CONTAINS
          !fg2500_DM = Mg2500_DM/MT2500_DM
 
          ne200_poly = polyEstimateNumberDensity(r200_DM)
-         Rhogas200 = ne200_poly*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
+         Rhogas200 = polyGasDensity(ne200_poly)
          Tg200_DM = polyTemperature(r200_DM, ne200_poly)
 
          CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
@@ -834,7 +835,7 @@ CONTAINS
 
             rgx(m) = rx_incre*r500_DM
             ne_rx = polyEstimateNumberDensity(rgx(m))
-            Rhogasx(m) = ne_rx*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
+            Rhogasx(m) = polyGasDensity(ne_rx)
             Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
@@ -856,7 +857,7 @@ CONTAINS
 
             rgx(m) = rx_incre*r500_DM
             ne_rx = polyEstimateNumberDensity(rgx(m))
-            Rhogasx(m) = ne_rx*mu_e/m_sun*(Mpc2m*Mpc2m*Mpc2m)
+            Rhogasx(m) = polyGasDensity(ne_rx)
             Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
@@ -1134,6 +1135,19 @@ CONTAINS
    END FUNCTION
 
 !================================================================================================
+   FUNCTION polyGasDensity(ne)
+      ! Derived from eq. 6 of Ghirardini2019, neglecting the intrinsic scatter
+
+      implicit none
+
+      real*8, intent(in) :: ne
+      real*8 :: polyGasDensity
+
+      polyGasDensity = ne * mu_e / m_sun * (Mpc2m * Mpc2m * Mpc2m)
+
+   END FUNCTION
+
+!================================================================================================
    FUNCTION calcDMmass(rs_DM, rhos_DM, ri_DM)
 
       IMPLICIT NONE
@@ -1208,6 +1222,7 @@ CONTAINS
 !======================================================
 
    SUBROUTINE Xray_flux_coeff(Rhogas0, KB_Tx, n_e0, n_H0, ne_nH0, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+      ! I think ne_nH0 is the electron density relative to central hydrogen density
 
       implicit none
       integer, intent(in) :: xrayNbin
