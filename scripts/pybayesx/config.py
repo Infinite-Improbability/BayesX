@@ -28,9 +28,9 @@ class DataConfig:
     )
 
     rmin: float = 0.01  # Minimum radius, Mpc
-    rmax: float = None  # Maximum radius for xray emission and GNFW model, Mpc
+    rmax: float = 10  # Maximum radius for xray emission and GNFW model, Mpc
     rlimit: float = (
-        None  # Used to calculate logr, may need to be slightly higher than rmax, Mpc
+        10  # Used to calculate logr, may need to be slightly higher than rmax, Mpc
     )
 
 
