@@ -34,8 +34,6 @@ class Prior(ABC):
     This class is abstract and so cannot be directly instantiated.
     Subclasses must implement the `sample()` method.
 
-    :param type_: Prior type as specified in BayesX's readme
-    :type type_: int
     :param param1: Parameter for prior as specified in BayesX's readme for prior type.
     :type param1: float
     :param param1: See param1.
