@@ -51,3 +51,11 @@ class AnalysisConfig:
     )
     maxmodes: int = 20  # Maximum no. of modes (for memory allocation)
     nCdims: int = 2  # no. of parameters on which clustering should be performed if mode separation is enabled, default value: 2
+
+    # Root for MEKAL data files
+    filion: Path = Path("data/MEKAL/mekal1.dat")
+    filrec: Path = Path("data/MEKAL/mekal2.dat")
+    filkar: Path = Path("data/MEKAL/mekal3.dat")
+    filcon: Path = Path("data/MEKAL/mekal4.dat")
+    fillin: Path = Path("data/MEKAL/mekal5.dat")
+    filcaf: Path = Path("data/MEKAL/mekal6.dat")

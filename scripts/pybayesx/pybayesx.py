@@ -15,6 +15,7 @@ BayesX
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from importlib.resources import path
+from itertools import chain
 import logging
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -157,6 +158,8 @@ class Config:
     sexpotime: float  # Source exposure time in second
     bexpotime: float  # Background exposure time in second
 
+    root: Path = None  # Override output file destination
+
     # Root for MEKAL data files
     filion: Path = Path("data/MEKAL/mekal1.dat")
     filrec: Path = Path("data/MEKAL/mekal2.dat")
@@ -195,8 +198,12 @@ class Config:
     maxmodes: int = 20  # Maximum no. of modes (for memory allocation)
     nCdims: int = 2  # no. of parameters on which clustering should be performed if mode separation is enabled, default value: 2
 
+    def check(self) -> bool:
+        """Sanity checks for the configuration"""
+        return True
 
-class BayesX:
+
+class Run:
     """Wrap everything needed for running BayesX on a dataset.
     Includes config, input data and results.
 
@@ -206,13 +213,14 @@ class BayesX:
     :param path: Path to write all files to. Defaults to 'chains/{self.label}/'
     :type path: pathlib.Path
     :param config: Infile key/value pairs, excluding priors
-    :type config: dict[str, any]
+    :type config: Config
     :param priors: Infile key/value pairs for priors
     :type priors: dict[str, Prior]
     """
 
     def __init__(
         self,
+        config: Config,
         label: str = str(datetime.now().isoformat()),
         chain_root: Union[str, bytes, Path] = "chains",
     ) -> None:
@@ -223,44 +231,11 @@ class BayesX:
         :param chain_root: Root path for output of any BayesX run, defaults to "chains"
         :type chain_root: Union[str, bytes, Path], optional
         """
+
+        self.config: Config = config
         self.label: str = label
         self.path: Path = Path(chain_root).joinpath(self.label)
-
-        self.config: Config = Config()
         self.priors: dict[str, Prior] = None
-
-    def make_config(self, **kwargs) -> None:
-        """
-        Create config dictionary from default and dynamic values, with optional
-        overrides applied through keyword arguments. For details on keys and values
-        see the readme for BayesX. This overwrites any existing config.
-
-        Validation is applied where possible to ensure reasonable inputs.
-        """
-
-        config: dict[str, Any] = Config()
-
-        config["root"] = self.path.joinpath("out/")
-
-        # TODO: Data paths
-
-        # config["filBG"] = ''  # The root for background file
-        # config["filevent"] = ''  # The root for the event file
-        # config["filmask"] = ''
-
-        # TODO: Dynamic stuff
-
-        for k, v in kwargs.items():
-            config[k] = v
-
-        # TODO: Sanity checks - sensible values, actually exist
-
-        # Call priors here?
-
-        if self.config:
-            log.warn("Overwriting config.")
-
-        self.config = config
 
     def set_priors(self, **kwargs: Prior) -> None:
         """
@@ -289,62 +264,6 @@ class BayesX:
             priors[k] = v
 
         self.priors = priors
-
-    @classmethod
-    def default_config(cls) -> "dict[str, Any]":
-        """Return a config dictonary with some default values. Does not include any
-        dynamic values created based on the data.
-
-        :return: Dictonary of key-value pairs as used in BayesX infile.
-        :rtype: dict[str, Any]
-        """
-        params: dict = {}
-
-        # The root for MEKAL data files:
-        params["filion"] = Path("data/MEKAL/mekal1.dat")
-        params["filrec"] = Path("data/MEKAL/mekal2.dat")
-        params["filkar"] = Path("data/MEKAL/mekal3.dat")
-        params["filcon"] = Path("data/MEKAL/mekal4.dat")
-        params["fillin"] = Path("data/MEKAL/mekal5.dat")
-        params["filcaf"] = Path("data/MEKAL/mekal6.dat")
-
-        # The telescope
-        params["XrayTelescope"] = "CHA"  # The 1st 3 letters of the X-ray telescope name
-        params["filARF"] = Path(
-            "data/simtestdatafiles/ARF_32by1.txt"
-        )  # Root for ARF telescope file in .txt format.
-        params["filRMF"] = Path(
-            "data/simtestdatafiles/RMF_32by32.txt"
-        )  # Root for RMF telescope file in .txt format.
-
-        # Misc params
-        # TODO: Set based on data in set_config()
-        # Currently using None for values that really shouldn't have defaults
-        params["n"] = 64  # Number of steps for discretising r
-        params["nx"] = None  # Number of pixels in x direction
-        params["ny"] = None  # Number of pixels in y direction
-        params["xrayNbin"] = None  # Number of energy bins
-        params["xrayNch"] = None  # Number of energy bins
-        params["Aeffave"] = 250  # Average effective area of the telescope in cm^{2}
-        params["xraycell"] = 0.492
-        params["xrayEmin"] = 0.7
-        params["xrayEmax"] = 7.0
-        params["sexpotime"] = None
-        params["bexpotime"] = None
-        params["NHcol"] = "4.0d20"
-        params["xrayBG_model"] = "8.4d-6"
-        params["rmin"] = 0.01
-        params["rmax"] = None
-        params["rlimit"] = None
-
-        params["eff"] = 0.8
-        params["tol"] = 0.5
-        params["nlive"] = 100
-        params["seed"] = -1
-
-        params["nCdims"] = "2"
-
-        return params
 
     def export_config(self, path: Path = None, model=Model) -> None:
         """Export self.config and self.priors to file
@@ -460,7 +379,7 @@ class BayesX:
         if outfile is None:
             outfile = self.path.joinpath("arf.txt")
 
-        np.savetxt(self.arf)
+        np.savetxt(outfile, self.arf)
 
     def load_rmf(self, path: Path):
         with fits.open(path) as f:
@@ -475,7 +394,7 @@ class BayesX:
         if outfile is None:
             outfile = self.path.joinpath("rmf.txt")
 
-        np.savetxt(np.ravel(self.rmf))
+        np.savetxt(outfile, np.ravel(self.rmf))
 
     def bin_and_export(self, n_bins: int, cellsize: float, **kwargs):
         self.config["filevent"] = self.path.joinpath("evts.txt")
