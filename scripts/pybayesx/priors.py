@@ -1,5 +1,6 @@
 from enum import Enum
 import logging
+from typing import Optional
 import numpy as np
 from abc import ABC, abstractmethod
 
@@ -48,7 +49,7 @@ class Prior(ABC):
         type_: int,
         param1: float,
         param2: float,
-        true_value: float = None,
+        true_value: Optional[float] = None,
         randomise: bool = False,
     ) -> None:
         """
@@ -69,7 +70,7 @@ class Prior(ABC):
         self.type: int = type_
         self.param1: float = param1
         self.param2: float = param2
-        self.true_value: float = true_value
+        self.true_value: Optional[float] = true_value
 
     @abstractmethod
     def sample(self) -> float:
@@ -103,13 +104,13 @@ class Delta(Prior):
         self,
         property: Property,
         value: float,
-        true_value: float = None,
+        true_value: Optional[float] = None,
         randomise: bool = False,
     ) -> None:
         super().__init__(property, 0, value, value, true_value, randomise)
 
     def sample(self) -> float:
-        return self.sample
+        return self.param1
 
 
 class Uniform(Prior):
@@ -118,7 +119,7 @@ class Uniform(Prior):
         property: Property,
         min: float,
         max: float,
-        true_value: float = None,
+        true_value: Optional[float] = None,
         randomise: bool = False,
     ) -> None:
         super().__init__(property, 1, min, max, true_value, randomise)
@@ -133,7 +134,7 @@ class LogUniform(Prior):
         property: Property,
         min: float,
         max: float,
-        true_value: float = None,
+        true_value: Optional[float] = None,
         randomise: bool = False,
     ) -> None:
         super().__init__(property, 2, min, max, true_value, randomise)
@@ -151,7 +152,7 @@ class Normal(Prior):
         property: Property,
         mean: float,
         standard_deviation: float,
-        true_value: float = None,
+        true_value: Optional[float] = None,
         randomise: bool = False,
     ) -> None:
         super().__init__(property, 3, mean, standard_deviation, true_value, randomise)
@@ -166,7 +167,7 @@ class LogNormal(Prior):
         property: Property,
         mean: float,
         width: float,
-        true_value: float = None,
+        true_value: Optional[float] = None,
         randomise: bool = False,
     ) -> None:
         super().__init__(property, 4, mean, width, true_value, randomise)
