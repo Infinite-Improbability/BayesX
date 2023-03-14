@@ -83,13 +83,13 @@ Parameter values corresponding to a given tag are specified in the following lin
 is as follows:
 
 
-#XrayTelescope:		The first three letters of the X-ray telescope name, e.g. XrayTelescope = 'CHA' for Chandra, 'XMM' for XMM, etc
+#XrayTelescope:		The first three letters of the X-ray telescope name, e.g. XrayTelescope = 'CHA' for Chandra, 'XMM' for XMM, etc. Not actually used?
 #nx:			Number of pixels in x direction, e.g. nx = 256
 #ny:			Number of pixels in y direction, e.g. ny = 256
 #xrayNbin:		Number of energy bins, e.g. Nbin = 63
 #xrayNch:		Number of energy channels, e.g. Nch = 63
 #n:			Number of steps for discretising r, e.g. n = 100
-#Aeffave:		Average effective area of the telescope in cm^{2}, e.g. Aeffave = 250 for Chandra
+#Aeffave:		Average effective area of the telescope in cm^{2}, e.g. Aeffave = 250 for Chandra. Only used for calculating background.
 #xraycell:		Spatial pixel size in arcsecond, e.g. xraycell = 0.492
 #xrayEmin:		Minimum value of the energy range in keV, e.g. xrayEmin = 0.7
 #xrayEmax:		Maximum value of the energy range in keV, e.g. xrayEmax = 7.0
