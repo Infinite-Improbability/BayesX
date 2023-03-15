@@ -8,9 +8,8 @@ from typing import Optional
 import numpy as np
 from astropy.io import fits
 from astropy.io.fits.hdu import PrimaryHDU
+from binning import bin
 from numpy.typing import ArrayLike
-
-from .binning import bin
 
 log = logging.getLogger(__name__)
 

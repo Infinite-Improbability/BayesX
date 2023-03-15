@@ -2,7 +2,7 @@ import logging
 from enum import Enum
 from typing import Iterable
 
-from .priors import Property
+from priors import Property
 
 log = logging.getLogger(__name__)
 

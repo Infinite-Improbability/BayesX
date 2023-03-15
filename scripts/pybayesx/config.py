@@ -22,7 +22,7 @@ class DataConfig:
     sexpotime: float  # Source exposure time in second
     bexpotime: float  # Background exposure time in second
 
-    filmask: Optional[Path] = None
+    filmask: Optional[Path] = Path()
 
     NHcol: float = 4.0e20  # Hydrogen column density in cm^2
     xrayBG_model: float = (
