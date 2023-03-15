@@ -31,11 +31,13 @@ Run this script from the BayesX root folder:
 * To set priors look around line 150.
 """
 
-import numpy as np
-from subprocess import run
-from os import cpu_count, mkdir
-from datetime import datetime
 from argparse import ArgumentParser
+from datetime import datetime
+from os import cpu_count, mkdir
+from subprocess import run
+from typing import Optional
+
+import numpy as np
 
 rng = np.random.default_rng()
 
@@ -74,7 +76,9 @@ class Prior:
     for information on type, param1 and param2.
     """
 
-    def __init__(self, type_: int, param1: float, param2: float, value: float = None):
+    def __init__(
+        self, type_: int, param1: float, param2: float, value: Optional[float] = None
+    ):
         """
         Parameters
         ----------
@@ -114,6 +118,8 @@ class Prior:
         elif self.type == 4:
             # LogGaussian
             value = rng.lognormal(self.param1, self.param2)
+        else:
+            raise Exception("Invalid prior type")
         return value
 
     def free(self) -> str:
