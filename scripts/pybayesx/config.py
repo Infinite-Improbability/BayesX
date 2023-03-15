@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 
 @dataclass
@@ -7,7 +8,6 @@ class DataConfig:
     # Input data
     filBG: Path
     filevent: Path
-    filmask: Path
     filARF: Path  # in txt format
     filRMF: Path  # in text format
 
@@ -21,6 +21,8 @@ class DataConfig:
     xrayEmax: float  # Maximum value of the energy range in keV
     sexpotime: float  # Source exposure time in second
     bexpotime: float  # Background exposure time in second
+
+    filmask: Optional[Path] = None
 
     NHcol: float = 4.0e20  # Hydrogen column density in cm^2
     xrayBG_model: float = (
