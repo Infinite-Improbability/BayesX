@@ -15,7 +15,7 @@ from .binning import bin
 log = logging.getLogger(__name__)
 
 
-class Data:
+class Data(ABC):
     def __init__(self, data: ArrayLike) -> None:
         self.data = np.array(data)
         pass
@@ -43,12 +43,12 @@ class Data:
     @classmethod
     @abstractmethod
     def load_from_txt(cls, path: Path) -> Data:
-        return NotImplementedError
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def load_from_fits(cls, path: Path) -> Data:
-        return NotImplementedError
+        raise NotImplementedError
 
     @abstractmethod
     def bin_and_export(
@@ -90,7 +90,7 @@ class Events(Data):
         """
         return Events(reshaped, background)
 
-    def load_events_from_fits(
+    def load_from_fits(
         self,
         path: Path,
         background: bool,
@@ -117,7 +117,7 @@ class Events(Data):
         :param mode: `'evts'` for events, `bg` for background.
         :type mode: str
         """
-        return NotImplementedError  # type: ignore
+        raise NotImplementedError
 
         with fits.open(path) as fi:
             assert du_index < len(fi) + 1
@@ -135,3 +135,56 @@ class Events(Data):
             elif mode == "bg":
                 self.bg = np.column_stack((f[x_key], f[y_key], f[channel_key]))
                 self.config["bexpotime"] = f.header["livetime"]
+
+    def bin_and_export(
+        self, n_bins: int, cellsize: float, outfile: Path, n_channels: int, **kwargs
+    ):
+        bin(
+            self.data[:, 0],  # type: ignore
+            self.data[:, 1],  # type: ignore
+            self.data[:, 2],  # type: ignore
+            n_bins,
+            cellsize,
+            outfile=outfile,
+            n_channels=n_channels,
+        )
+
+        # TODO: Update nx, ny, etc and cellsize to match
+
+
+class Mask(Data):
+    def __init__(self, data: ArrayLike, background: bool) -> None:
+        super().__init__(data)
+        assert self.data.ndim == 3
+        self.background = background
+        self.nx, self.ny, self.nChannels = self.data.shape  # TODO: Verify correctness
+
+    @classmethod
+    def load_from_txt(
+        cls, path: Path, background: bool, nx: int, ny: int, nChannels: int, **kwargs
+    ) -> Data:
+        data = np.loadtxt(path)
+        reshaped = np.reshape(
+            data, (nx, ny, nChannels), order="C"
+        )  # TODO: Verify correctness
+        return Events(reshaped, background)
+
+    def load_from_fits(
+        self,
+        path: Path,
+        **kwargs,
+    ) -> Data:
+        raise NotImplementedError
+
+    def bin_and_export(
+        self, n_bins: int, cellsize: float, outfile: Path, n_channels: int, **kwargs
+    ):
+        bin(
+            self.data[:, 0],  # type: ignore
+            self.data[:, 1],  # type: ignore
+            self.data[:, 2],  # type: ignore
+            n_bins,
+            cellsize,
+            outfile=outfile,
+            n_channels=n_channels,
+        )
