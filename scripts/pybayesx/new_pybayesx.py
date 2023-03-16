@@ -28,7 +28,7 @@ dc = DataConfig(
     bexpotime=300e3,
 )
 
-ac = AnalysisConfig()
+ac = AnalysisConfig(nlive=100)
 
 ps = [
     Delta(Property.x, 1, 1),
@@ -50,7 +50,7 @@ def run(
     model: Model,
     binary_path: Path,
     base_path: Path,
-    label: str = str(datetime.now().isoformat()),
+    label: str = str(datetime.now().strftime("%Y%m%d%H%M%S")),
 ):
     base_path = base_path.joinpath(label)
     config_path = base_path.joinpath(f"infile_{label}.inp")
@@ -61,30 +61,28 @@ def run(
     mkdir(output_path)
     mkdir(plot_path)
 
+    output_path = output_path.joinpath("out_")  # add filename
+
     if not model.check_priors([i.property for i in priors]):
         raise Exception("Missing required priors for model.")
 
     with open(config_path, "w") as f:
         for key, value in (asdict(data_config) | asdict(analysis_config)).items():
-            f.write(f"#{key}\n")
-
-            if isinstance(value, float):
+            if value is None:
+                continue
+            elif isinstance(value, float):
                 value = str(value).replace(
                     "e", "d"
                 )  # Output using fortran double notation 4.0d5 = 4.0 * 10^5
             elif isinstance(value, Path):
-                if value == Path():
-                    value = "''"
-                else:
-                    value = f"'{value}'"
-            elif value is None:
-                continue
+                value = f"'{value}'"
             elif isinstance(value, bool):
                 if value:
                     value = "T"
                 else:
                     value = "F"
 
+            f.write(f"#{key}\n")
             f.write(str(value) + "\n")
         for prior in priors:
             prior: Prior
@@ -100,7 +98,7 @@ def run(
     log.info(f"Launching BayesX for run {label}")
     start_time = datetime.now()
 
-    sys_run(["mpiexec", "-n", str(cpu_count()), binary_path, config_path])
+    sys_run(["mpiexec", "-n", str(cpu_count()), binary_path, config_path], check=True)
 
     log.info(
         f"BayesX finished with run {label} after {(datetime.now() - start_time).total_seconds()}s"
@@ -120,13 +118,12 @@ def run(
                 1  # TODO: Have check in plot script to ensure it plots correct priors
             )
 
+    if len(true_priors) > 1:
+        plot_priors += true_priors
+
     sys_run(
-        [
-            "python3",
-            "scripts/auto_plot_tri.py",
-        ]
-        + plot_priors
-        + true_priors
+        ["python3", "scripts/auto_plot_tri.py", output_path] + plot_priors,
+        check=True,
     )
 
 

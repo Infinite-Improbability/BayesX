@@ -22,9 +22,11 @@ class DataConfig:
     sexpotime: float  # Source exposure time in second
     bexpotime: float  # Background exposure time in second
 
-    filmask: Optional[Path] = Path()
+    Aeffave: float = 250  # Average effective area of the telescope in cm^{2}
 
-    NHcol: float = 4.0e20  # Hydrogen column density in cm^2
+    filmask: Optional[Path] = None
+
+    NHcol: float = 2.20e20  # Hydrogen column density in cm^2
     xrayBG_model: float = (
         8.4e-6  # Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1,
     )
@@ -61,3 +63,5 @@ class AnalysisConfig:
     filcon: Path = Path("data/MEKAL/mekal4.dat")
     fillin: Path = Path("data/MEKAL/mekal5.dat")
     filcaf: Path = Path("data/MEKAL/mekal6.dat")
+
+    mass_function: int = 2  # Type of the mass function (with mass_function = 1, 2 & 3 for Evrard, Jenkins & Tinker mass functions respectively)
