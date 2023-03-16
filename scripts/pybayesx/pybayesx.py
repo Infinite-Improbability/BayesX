@@ -12,21 +12,20 @@ BayesX
 """
 # TODO: Check compatability with earlier version of Python 3
 
+import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from importlib.resources import path
-from itertools import chain
-import logging
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 from astropy.io import fits
 
+from .binning import bin
+
 # from astropy.cosmology import FlatLambdaCDM
 # import astropy.units as u
 
-from .binning import bin
 
 log = logging.getLogger(__name__)
 rng = np.random.default_rng()

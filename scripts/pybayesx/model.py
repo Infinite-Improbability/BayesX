@@ -1,6 +1,5 @@
 import logging
-from enum import Enum
-from typing import Iterable
+from collections.abc import Iterable
 
 from priors import Property
 

@@ -1,10 +1,10 @@
 import logging
+from collections.abc import Iterable
 from dataclasses import asdict
 from datetime import datetime
 from os import cpu_count, mkdir
 from pathlib import Path
 from subprocess import run as sys_run
-from typing import Iterable
 
 from config import AnalysisConfig, DataConfig
 from model import Model, nfw_gnfw
