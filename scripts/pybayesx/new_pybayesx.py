@@ -8,6 +8,7 @@ from subprocess import run as sys_run
 
 from config import AnalysisConfig, DataConfig
 from model import Model, nfw_gnfw
+from plot import plot
 from priors import Delta, LogUniform, Normal, Prior, Property
 
 log = logging.getLogger(__name__)
@@ -104,27 +105,21 @@ def run(
         f"BayesX finished with run {label} after {(datetime.now() - start_time).total_seconds()}s"
     )
 
-    plot_priors = []
-    true_priors = ["--true"]
+    # TODO: This logic seems sketchy, verify
+    plot_priors: list[str | tuple[str, float] | tuple[str, None]] = []
     p_count = 1
     for p in priors:
         if p.type != 0:
-            plot_priors.append(
-                f"p{str(p_count).zfill(3)}"
-            )  # plotting script expects p001, p002, etc
-            if p.true_value is not None:
-                true_priors.append(str(p.true_value))
-            p_count += (
-                1  # TODO: Have check in plot script to ensure it plots correct priors
+            p_label = (
+                f"p{str(p_count).zfill(3)}"  # plotting script expects p001, p002, etc
             )
+            if p.true_value is not None:
+                plot_priors.append((p_label, p.true_value))
+            else:
+                plot_priors.append(p_label)
+            p_count += 1
 
-    if len(true_priors) > 1:
-        plot_priors += true_priors
-
-    sys_run(
-        ["python3", "scripts/auto_plot_tri.py", output_path] + plot_priors,
-        check=True,
-    )
+    plot(output_path, plot_priors, plot_path)
 
 
 run(dc, ac, ps, nfw_gnfw, Path("bin/BayesX"), Path("chains/"))

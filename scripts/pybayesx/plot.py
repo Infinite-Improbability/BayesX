@@ -10,7 +10,7 @@ log = getLogger(__name__)
 
 def plot(
     chain_paths: Union[Path, Sequence[Path]],
-    parameters: Iterable[Union[int, tuple[int, float] | tuple[int, None]]],
+    parameters: Iterable[str | tuple[str, float] | tuple[str, None]],
     plot_path: Optional[Path] = None,
 ):
     # Massage input
