@@ -62,7 +62,9 @@ def run(
     mkdir(output_path)
     mkdir(plot_path)
 
-    output_path = output_path.joinpath("out_")  # add filename
+    # add filenames
+    output_path = output_path.joinpath("out_")
+    plot_path = plot_path.joinpath("automatic_tri.svg")
 
     if not model.check_priors([i.property for i in priors]):
         raise Exception("Missing required priors for model.")

@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from datetime import datetime
 from logging import getLogger
 from pathlib import Path
 from typing import Optional, Sequence, Union
@@ -11,7 +12,7 @@ log = getLogger(__name__)
 def plot(
     chain_paths: Union[Path, Sequence[Path]],
     parameters: Iterable[str | tuple[str, float] | tuple[str, None]],
-    plot_path: Optional[Path] = None,
+    plot_file: Optional[Path] = None,
 ):
     # Massage input
 
@@ -20,8 +21,10 @@ def plot(
         chain_paths = [chain_paths]
 
     # Set default output path
-    if plot_path is None:
-        plot_path = Path(chain_paths[0]).joinpath("_tri.png")
+    if plot_file is None:
+        plot_file = Path(chain_paths[0]).joinpath(
+            f"_{datetime.now().strftime('%Y%m%d%H%M%S')}_tri.png"
+        )
 
     # Convert all parameters to tuples of the form (id_number, true_value) using None if true value not provided
     parameters = [p if isinstance(p, tuple) else (p, None) for p in parameters]
@@ -43,7 +46,7 @@ def plot(
     for p in parameters:
         plotted_pars.append(
             first_chain_pars.parWithName(
-                p, error=True
+                p[0], error=True
             ).label  # pyright: ignore [reportOptionalMemberAccess]
         )
 
@@ -160,4 +163,4 @@ def plot(
                     ax.plot(markers[p], markers[p2], "*k")
 
     # Save as image
-    plotter.export(plot_path)
+    plotter.export(str(plot_file))
