@@ -1,6 +1,9 @@
 from dataclasses import dataclass
+from logging import getLogger
 from pathlib import Path
 from typing import Optional
+
+log = getLogger(__name__)
 
 
 @dataclass

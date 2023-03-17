@@ -1,8 +1,11 @@
 from collections.abc import Sequence
+from logging import getLogger
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+log = getLogger(__name__)
 
 
 def bin(

@@ -1,7 +1,7 @@
-from __future__ import annotations
+from __future__ import annotations  # python 3.7 and up
 
-import logging  # Python 3.7 and up
 from abc import ABC, abstractmethod
+from logging import getLogger
 from pathlib import Path
 from typing import Optional
 
@@ -11,7 +11,7 @@ from astropy.io.fits.hdu import PrimaryHDU
 from binning import bin
 from numpy.typing import ArrayLike
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
 
 class Data(ABC):

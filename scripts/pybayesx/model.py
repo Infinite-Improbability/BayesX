@@ -1,9 +1,9 @@
-import logging
 from collections.abc import Iterable
+from logging import getLogger
 
 from priors import Property
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
 
 class Model:

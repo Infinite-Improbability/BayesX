@@ -1,10 +1,11 @@
-from enum import Enum
-import logging
-from typing import Optional
-import numpy as np
 from abc import ABC, abstractmethod
+from enum import Enum
+from logging import getLogger
+from typing import Optional
 
-log = logging.getLogger(__name__)
+import numpy as np
+
+log = getLogger(__name__)
 rng = np.random.default_rng()
 
 
