@@ -7,41 +7,18 @@ from pathlib import Path
 from subprocess import run as sys_run
 
 from pybayesx.config import AnalysisConfig, DataConfig
-from pybayesx.model import Model, nfw_gnfw
+from pybayesx.model import (
+    DeltaPrior,
+    LogUniformPrior,
+    Model,
+    NormalPrior,
+    Prior,
+    Property,
+    nfw_gnfw,
+)
 from pybayesx.plot import plot
-from pybayesx.priors import Delta, LogUniform, Normal, Prior, Property
 
 log = logging.getLogger(__name__)
-
-dc = DataConfig(
-    filevent=Path("data/simtestdatafiles/data64by64by32.txt"),
-    filBG=Path("data/simtestdatafiles/BG64by64by32.txt"),
-    filARF=Path("data/simtestdatafiles/ARF_32by1.txt"),
-    filRMF=Path("data/simtestdatafiles/RMF_32by32.txt"),
-    nx=64,
-    ny=64,
-    xrayNbin=32,
-    xrayNch=32,
-    xraycell=0.492,
-    xrayEmin=0.7,
-    xrayEmax=7,
-    sexpotime=300e3,
-    bexpotime=300e3,
-)
-
-ac = AnalysisConfig(nlive=100)
-
-ps = [
-    Delta(Property.x, 1, 1),
-    Delta(Property.y, 1, 1),
-    LogUniform(Property.M_200, 1e14, 6e15),
-    Normal(Property.fg_200, 0.13, 0.02),
-    Delta(Property.a_GNFW, 1.062, 1.062),
-    Delta(Property.b_GNFW, 5.4807, 5.4807),
-    Delta(Property.c_GNFW, 0.3292, 0.3292),
-    Delta(Property.c500_GNFW, 1.156, 1.156),
-    Delta(Property.z, 0.5, 0.5),
-]
 
 
 def run(
@@ -143,4 +120,34 @@ def run(
 
 
 if __name__ == "main":
+    dc = DataConfig(
+        filevent=Path("data/simtestdatafiles/data64by64by32.txt"),
+        filBG=Path("data/simtestdatafiles/BG64by64by32.txt"),
+        filARF=Path("data/simtestdatafiles/ARF_32by1.txt"),
+        filRMF=Path("data/simtestdatafiles/RMF_32by32.txt"),
+        nx=64,
+        ny=64,
+        xrayNbin=32,
+        xrayNch=32,
+        xraycell=0.492,
+        xrayEmin=0.7,
+        xrayEmax=7,
+        sexpotime=300e3,
+        bexpotime=300e3,
+    )
+
+    ac = AnalysisConfig(nlive=100)
+
+    ps = [
+        DeltaPrior(Property.x, 1, 1),
+        DeltaPrior(Property.y, 1, 1),
+        LogUniformPrior(Property.M_200, 1e14, 6e15),
+        NormalPrior(Property.fg_200, 0.13, 0.02),
+        DeltaPrior(Property.a_GNFW, 1.062, 1.062),
+        DeltaPrior(Property.b_GNFW, 5.4807, 5.4807),
+        DeltaPrior(Property.c_GNFW, 0.3292, 0.3292),
+        DeltaPrior(Property.c500_GNFW, 1.156, 1.156),
+        DeltaPrior(Property.z, 0.5, 0.5),
+    ]
+
     run(dc, ac, ps, nfw_gnfw, Path("bin/BayesX"), Path("chains/"))
