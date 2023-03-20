@@ -14,6 +14,17 @@ def plot(
     parameters: Iterable[str | tuple[str, float] | tuple[str, None]],
     plot_file: Optional[Path] = None,
 ):
+    """Plot chains
+
+    :param chain_paths: _description_
+    :type chain_paths: Union[Path, Sequence[Path]]
+    :param parameters: _description_
+    :type parameters: Iterable[str  |  tuple[str, float]  |  tuple[str, None]]
+    :param plot_file: _description_, defaults to None
+    :type plot_file: Optional[Path], optional
+    :raises Exception: _description_
+    :raises Exception: _description_
+    """
     # Massage input
 
     # This allows us to accept a single path without the user having to wrap it in a sequence

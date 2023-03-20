@@ -1,0 +1,13 @@
+pyproject.toml
+PyBayesX.egg-info/PKG-INFO
+PyBayesX.egg-info/SOURCES.txt
+PyBayesX.egg-info/dependency_links.txt
+PyBayesX.egg-info/top_level.txt
+pybayesx/__init__.py
+pybayesx/binning.py
+pybayesx/config.py
+pybayesx/input_data.py
+pybayesx/model.py
+pybayesx/plot.py
+pybayesx/priors.py
+pybayesx/pybayesx.py

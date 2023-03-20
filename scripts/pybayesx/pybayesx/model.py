@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from logging import getLogger
 
-from priors import Property
+from pybayesx.priors import Property
 
 log = getLogger(__name__)
 

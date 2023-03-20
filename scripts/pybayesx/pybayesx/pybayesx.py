@@ -6,10 +6,10 @@ from os import cpu_count, mkdir
 from pathlib import Path
 from subprocess import run as sys_run
 
-from config import AnalysisConfig, DataConfig
-from model import Model, nfw_gnfw
-from plot import plot
-from priors import Delta, LogUniform, Normal, Prior, Property
+from pybayesx.config import AnalysisConfig, DataConfig
+from pybayesx.model import Model, nfw_gnfw
+from pybayesx.plot import plot
+from pybayesx.priors import Delta, LogUniform, Normal, Prior, Property
 
 log = logging.getLogger(__name__)
 
@@ -53,6 +53,24 @@ def run(
     base_path: Path,
     label: str = str(datetime.now().strftime("%Y%m%d%H%M%S")),
 ):
+    """_summary_
+
+    :param data_config: _description_
+    :type data_config: DataConfig
+    :param analysis_config: _description_
+    :type analysis_config: AnalysisConfig
+    :param priors: _description_
+    :type priors: Iterable[Prior]
+    :param model: _description_
+    :type model: Model
+    :param binary_path: _description_
+    :type binary_path: Path
+    :param base_path: _description_
+    :type base_path: Path
+    :param label: _description_, defaults to str(datetime.now().strftime("%Y%m%d%H%M%S"))
+    :type label: str, optional
+    :raises Exception: _description_
+    """
     base_path = base_path.joinpath(label)
     config_path = base_path.joinpath(f"infile_{label}.inp")
     output_path = base_path.joinpath("out")
@@ -124,4 +142,5 @@ def run(
     plot(output_path, plot_priors, plot_path)
 
 
-run(dc, ac, ps, nfw_gnfw, Path("bin/BayesX"), Path("chains/"))
+if __name__ == "main":
+    run(dc, ac, ps, nfw_gnfw, Path("bin/BayesX"), Path("chains/"))

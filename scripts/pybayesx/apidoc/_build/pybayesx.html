@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybayesx package &mdash; pybayesx  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to pybayesx’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pybayesx
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pybayesx package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybayesx.binning">pybayesx.binning module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.binning.bin"><code class="docutils literal notranslate"><span class="pre">bin()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybayesx.config">pybayesx.config module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.config.AnalysisConfig"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.IS"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.IS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.eff"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.eff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.filcaf"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.filcaf</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.filcon"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.filcon</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.filion"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.filion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.filkar"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.filkar</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.fillin"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.fillin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.filrec"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.filrec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.mass_function"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.mass_function</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.maxmodes"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.maxmodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.multimodal"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.multimodal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.n"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.n</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.nCdims"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.nCdims</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.nlive"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.nlive</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.seed"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.seed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.tol"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.tol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.AnalysisConfig.updint"><code class="docutils literal notranslate"><span class="pre">AnalysisConfig.updint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.config.DataConfig"><code class="docutils literal notranslate"><span class="pre">DataConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.Aeffave"><code class="docutils literal notranslate"><span class="pre">DataConfig.Aeffave</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.NHcol"><code class="docutils literal notranslate"><span class="pre">DataConfig.NHcol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.bexpotime"><code class="docutils literal notranslate"><span class="pre">DataConfig.bexpotime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.filARF"><code class="docutils literal notranslate"><span class="pre">DataConfig.filARF</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.filBG"><code class="docutils literal notranslate"><span class="pre">DataConfig.filBG</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.filRMF"><code class="docutils literal notranslate"><span class="pre">DataConfig.filRMF</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.filevent"><code class="docutils literal notranslate"><span class="pre">DataConfig.filevent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.filmask"><code class="docutils literal notranslate"><span class="pre">DataConfig.filmask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.nx"><code class="docutils literal notranslate"><span class="pre">DataConfig.nx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.ny"><code class="docutils literal notranslate"><span class="pre">DataConfig.ny</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.rlimit"><code class="docutils literal notranslate"><span class="pre">DataConfig.rlimit</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.rmax"><code class="docutils literal notranslate"><span class="pre">DataConfig.rmax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.rmin"><code class="docutils literal notranslate"><span class="pre">DataConfig.rmin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.sexpotime"><code class="docutils literal notranslate"><span class="pre">DataConfig.sexpotime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.xrayBG_model"><code class="docutils literal notranslate"><span class="pre">DataConfig.xrayBG_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.xrayEmax"><code class="docutils literal notranslate"><span class="pre">DataConfig.xrayEmax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.xrayEmin"><code class="docutils literal notranslate"><span class="pre">DataConfig.xrayEmin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.xrayNbin"><code class="docutils literal notranslate"><span class="pre">DataConfig.xrayNbin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.xrayNch"><code class="docutils literal notranslate"><span class="pre">DataConfig.xrayNch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.config.DataConfig.xraycell"><code class="docutils literal notranslate"><span class="pre">DataConfig.xraycell</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybayesx.input_data">pybayesx.input_data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.input_data.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Data.bin_and_export"><code class="docutils literal notranslate"><span class="pre">Data.bin_and_export()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Data.load_from_file"><code class="docutils literal notranslate"><span class="pre">Data.load_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Data.load_from_fits"><code class="docutils literal notranslate"><span class="pre">Data.load_from_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Data.load_from_txt"><code class="docutils literal notranslate"><span class="pre">Data.load_from_txt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.input_data.Events"><code class="docutils literal notranslate"><span class="pre">Events</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Events.bin_and_export"><code class="docutils literal notranslate"><span class="pre">Events.bin_and_export()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Events.load_from_fits"><code class="docutils literal notranslate"><span class="pre">Events.load_from_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Events.load_from_txt"><code class="docutils literal notranslate"><span class="pre">Events.load_from_txt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.input_data.Mask"><code class="docutils literal notranslate"><span class="pre">Mask</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Mask.bin_and_export"><code class="docutils literal notranslate"><span class="pre">Mask.bin_and_export()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Mask.load_from_fits"><code class="docutils literal notranslate"><span class="pre">Mask.load_from_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.input_data.Mask.load_from_txt"><code class="docutils literal notranslate"><span class="pre">Mask.load_from_txt()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybayesx.model">pybayesx.model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.model.Model.check_priors"><code class="docutils literal notranslate"><span class="pre">Model.check_priors()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybayesx.plot">pybayesx.plot module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.plot.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybayesx.priors">pybayesx.priors module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.priors.Delta"><code class="docutils literal notranslate"><span class="pre">Delta</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Delta.sample"><code class="docutils literal notranslate"><span class="pre">Delta.sample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.priors.LogNormal"><code class="docutils literal notranslate"><span class="pre">LogNormal</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.LogNormal.sample"><code class="docutils literal notranslate"><span class="pre">LogNormal.sample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.priors.LogUniform"><code class="docutils literal notranslate"><span class="pre">LogUniform</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.LogUniform.sample"><code class="docutils literal notranslate"><span class="pre">LogUniform.sample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.priors.Normal"><code class="docutils literal notranslate"><span class="pre">Normal</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Normal.sample"><code class="docutils literal notranslate"><span class="pre">Normal.sample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.priors.Prior"><code class="docutils literal notranslate"><span class="pre">Prior</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Prior.export"><code class="docutils literal notranslate"><span class="pre">Prior.export()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Prior.sample"><code class="docutils literal notranslate"><span class="pre">Prior.sample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.priors.Property"><code class="docutils literal notranslate"><span class="pre">Property</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.M_200"><code class="docutils literal notranslate"><span class="pre">Property.M_200</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.a_GNFW"><code class="docutils literal notranslate"><span class="pre">Property.a_GNFW</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.alpha_model2"><code class="docutils literal notranslate"><span class="pre">Property.alpha_model2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.b_GNFW"><code class="docutils literal notranslate"><span class="pre">Property.b_GNFW</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.c500_GNFW"><code class="docutils literal notranslate"><span class="pre">Property.c500_GNFW</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.c_GNFW"><code class="docutils literal notranslate"><span class="pre">Property.c_GNFW</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.fg_200"><code class="docutils literal notranslate"><span class="pre">Property.fg_200</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.gamma0_poly"><code class="docutils literal notranslate"><span class="pre">Property.gamma0_poly</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.gammaR_poly"><code class="docutils literal notranslate"><span class="pre">Property.gammaR_poly</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.t0_poly"><code class="docutils literal notranslate"><span class="pre">Property.t0_poly</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.x"><code class="docutils literal notranslate"><span class="pre">Property.x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.y"><code class="docutils literal notranslate"><span class="pre">Property.y</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Property.z"><code class="docutils literal notranslate"><span class="pre">Property.z</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.priors.Uniform"><code class="docutils literal notranslate"><span class="pre">Uniform</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybayesx.priors.Uniform.sample"><code class="docutils literal notranslate"><span class="pre">Uniform.sample()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybayesx.pybayesx">pybayesx.pybayesx module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybayesx.pybayesx.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybayesx">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pybayesx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pybayesx package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pybayesx.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pybayesx-package">
+<h1>pybayesx package<a class="headerlink" href="#pybayesx-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-pybayesx.binning">
+<span id="pybayesx-binning-module"></span><h2>pybayesx.binning module<a class="headerlink" href="#module-pybayesx.binning" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pybayesx.binning.bin">
+<span class="sig-prename descclassname"><span class="pre">pybayesx.binning.</span></span><span class="sig-name descname"><span class="pre">bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/pybayesx/binning.html#bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.binning.bin" title="Permalink to this definition"></a></dt>
+<dd><p>Bin data given spatial coordinates and channel coordinates of events.
+If <cite>mask = True</cite> then instead bin passed on mask status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Sequence</em>) – Sequence of x coordinates of events</p></li>
+<li><p><strong>y</strong> (<em>Sequence</em>) – Sequence of y coordinates of events, assumed to use the same units as x</p></li>
+<li><p><strong>channel</strong> – Sequence of channel of events. If <cite>mask</cite> is True then this value</p></li>
+</ul>
+</dd>
+</dl>
+<p>should be 1 for all masked spatial coordinates and 0 otherwise.
+:type channel: Sequence
+:param nbins: The number of bins along each spatial axis
+:type nbins: int
+:param cellsize: The size of a bin, in units matching x and y
+:type cellsize: float
+:param x0: Central (origin) point along x axis in data, defaults to None. If None</p>
+<blockquote>
+<div><p>then the midpoint of x is used.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y0</strong> (<em>float</em><em>, </em><em>optional</em>) – See <cite>x0</cite>, defaults to None</p></li>
+<li><p><strong>n_channels</strong> – Number of possible channels, defaults to None. If None, then the</p></li>
+</ul>
+</dd>
+</dl>
+<p>maximum value of <cite>channel</cite> is used.
+If <cite>mask</cite> is True then a positive integer value is required.
+:type n_channels: int, optional
+:param outfile: Path of file to export binned data to, defaults to None. If None
+export is skipped.
+:type outfile: Path, optional
+:param mask: If True then the channel sequence is treated as a 1/0 (T/F) boolean
+definining masked regions. Defaults to False.
+:type mask: bool, optional
+:raises ValueError: If the value of max_chan is &lt;=0 or (if in mask mode) if not set.
+:return: A 1D array of counts, of length <cite>n_bins*n_bins*chan_max</cite>. Nested as
+x_bin_index(y_bin_index)
+:rtype: np.ndarray[Any, np.dtype[np.float64]]</p>
+</dd></dl>
+
+</section>
+<section id="module-pybayesx.config">
+<span id="pybayesx-config-module"></span><h2>pybayesx.config module<a class="headerlink" href="#module-pybayesx.config" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.config.</span></span><span class="sig-name descname"><span class="pre">AnalysisConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IS</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multimodal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxmodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nCdims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('data/MEKAL/mekal1.dat')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filrec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('data/MEKAL/mekal2.dat')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filkar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('data/MEKAL/mekal3.dat')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filcon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('data/MEKAL/mekal4.dat')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('data/MEKAL/mekal5.dat')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filcaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('data/MEKAL/mekal6.dat')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/config.html#AnalysisConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.config.AnalysisConfig" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.IS">
+<span class="sig-name descname"><span class="pre">IS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.IS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.eff">
+<span class="sig-name descname"><span class="pre">eff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.8</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.eff" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.filcaf">
+<span class="sig-name descname"><span class="pre">filcaf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PosixPath('data/MEKAL/mekal6.dat')</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.filcaf" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.filcon">
+<span class="sig-name descname"><span class="pre">filcon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PosixPath('data/MEKAL/mekal4.dat')</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.filcon" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.filion">
+<span class="sig-name descname"><span class="pre">filion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PosixPath('data/MEKAL/mekal1.dat')</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.filion" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.filkar">
+<span class="sig-name descname"><span class="pre">filkar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PosixPath('data/MEKAL/mekal3.dat')</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.filkar" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.fillin">
+<span class="sig-name descname"><span class="pre">fillin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PosixPath('data/MEKAL/mekal5.dat')</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.fillin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.filrec">
+<span class="sig-name descname"><span class="pre">filrec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PosixPath('data/MEKAL/mekal2.dat')</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.filrec" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.mass_function">
+<span class="sig-name descname"><span class="pre">mass_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.mass_function" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.maxmodes">
+<span class="sig-name descname"><span class="pre">maxmodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.maxmodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.multimodal">
+<span class="sig-name descname"><span class="pre">multimodal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.multimodal" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.n">
+<span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.n" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.nCdims">
+<span class="sig-name descname"><span class="pre">nCdims</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.nCdims" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.nlive">
+<span class="sig-name descname"><span class="pre">nlive</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.nlive" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.seed">
+<span class="sig-name descname"><span class="pre">seed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.seed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.tol">
+<span class="sig-name descname"><span class="pre">tol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.tol" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.AnalysisConfig.updint">
+<span class="sig-name descname"><span class="pre">updint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#pybayesx.config.AnalysisConfig.updint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.config.</span></span><span class="sig-name descname"><span class="pre">DataConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filBG</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filevent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filARF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filRMF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrayNbin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrayNch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xraycell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrayEmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrayEmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sexpotime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bexpotime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Aeffave</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">250</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filmask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NHcol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.2e+20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrayBG_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8.4e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/config.html#DataConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.config.DataConfig" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.Aeffave">
+<span class="sig-name descname"><span class="pre">Aeffave</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">250</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.Aeffave" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.NHcol">
+<span class="sig-name descname"><span class="pre">NHcol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2.2e+20</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.NHcol" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.bexpotime">
+<span class="sig-name descname"><span class="pre">bexpotime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.bexpotime" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.filARF">
+<span class="sig-name descname"><span class="pre">filARF</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.filARF" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.filBG">
+<span class="sig-name descname"><span class="pre">filBG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.filBG" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.filRMF">
+<span class="sig-name descname"><span class="pre">filRMF</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.filRMF" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.filevent">
+<span class="sig-name descname"><span class="pre">filevent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.filevent" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.filmask">
+<span class="sig-name descname"><span class="pre">filmask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.filmask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.nx">
+<span class="sig-name descname"><span class="pre">nx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.nx" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.ny">
+<span class="sig-name descname"><span class="pre">ny</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.ny" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.rlimit">
+<span class="sig-name descname"><span class="pre">rlimit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.rlimit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.rmax">
+<span class="sig-name descname"><span class="pre">rmax</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.rmax" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.rmin">
+<span class="sig-name descname"><span class="pre">rmin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.01</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.rmin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.sexpotime">
+<span class="sig-name descname"><span class="pre">sexpotime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.sexpotime" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.xrayBG_model">
+<span class="sig-name descname"><span class="pre">xrayBG_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8.4e-06</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.xrayBG_model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.xrayEmax">
+<span class="sig-name descname"><span class="pre">xrayEmax</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.xrayEmax" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.xrayEmin">
+<span class="sig-name descname"><span class="pre">xrayEmin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.xrayEmin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.xrayNbin">
+<span class="sig-name descname"><span class="pre">xrayNbin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.xrayNbin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.xrayNch">
+<span class="sig-name descname"><span class="pre">xrayNch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.xrayNch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.config.DataConfig.xraycell">
+<span class="sig-name descname"><span class="pre">xraycell</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pybayesx.config.DataConfig.xraycell" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pybayesx.input_data">
+<span id="pybayesx-input-data-module"></span><h2>pybayesx.input_data module<a class="headerlink" href="#module-pybayesx.input_data" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.input_data.Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.input_data.</span></span><span class="sig-name descname"><span class="pre">Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/input_data.html#Data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Data" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Data.bin_and_export">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bin_and_export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/input_data.html#Data.bin_and_export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Data.bin_and_export" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Data.load_from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><span class="pre">Data</span></a></span></span><a class="reference internal" href="_modules/pybayesx/input_data.html#Data.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Data.load_from_file" title="Permalink to this definition"></a></dt>
+<dd><p>Try to intelligently handle events input from a number of file types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>Path</em>) – Path to events file</p></li>
+<li><p><strong>file_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Override type detection by providing a file extension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the file type cannot be recognised.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Data.load_from_fits">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><span class="pre">Data</span></a></span></span><a class="reference internal" href="_modules/pybayesx/input_data.html#Data.load_from_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Data.load_from_fits" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Data.load_from_txt">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><span class="pre">Data</span></a></span></span><a class="reference internal" href="_modules/pybayesx/input_data.html#Data.load_from_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Data.load_from_txt" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.input_data.Events">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.input_data.</span></span><span class="sig-name descname"><span class="pre">Events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/input_data.html#Events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Events" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Events.bin_and_export">
+<span class="sig-name descname"><span class="pre">bin_and_export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/input_data.html#Events.bin_and_export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Events.bin_and_export" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Events.load_from_fits">
+<span class="sig-name descname"><span class="pre">load_from_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'X'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'PI'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">du_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'evts'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><span class="pre">Data</span></a></span></span><a class="reference internal" href="_modules/pybayesx/input_data.html#Events.load_from_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Events.load_from_fits" title="Permalink to this definition"></a></dt>
+<dd><p>Load events from a fits file.
+The file will be converted to the text format used by BayesX.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>Path</em>) – Path to events fits file</p></li>
+<li><p><strong>x_key</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_, defaults to “X”</p></li>
+<li><p><strong>y_key</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_, defaults to “Y”</p></li>
+<li><p><strong>channel_key</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_, defaults to “PI”</p></li>
+<li><p><strong>du_index</strong> (<em>int</em>) – List index of data unit with events (0-indexed)</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – <cite>‘evts’</cite> for events, <cite>bg</cite> for background.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Events.load_from_txt">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nChannels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><span class="pre">Data</span></a></span></span><a class="reference internal" href="_modules/pybayesx/input_data.html#Events.load_from_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Events.load_from_txt" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.input_data.Mask">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.input_data.</span></span><span class="sig-name descname"><span class="pre">Mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/input_data.html#Mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Mask" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Mask.bin_and_export">
+<span class="sig-name descname"><span class="pre">bin_and_export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/input_data.html#Mask.bin_and_export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Mask.bin_and_export" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Mask.load_from_fits">
+<span class="sig-name descname"><span class="pre">load_from_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><span class="pre">Data</span></a></span></span><a class="reference internal" href="_modules/pybayesx/input_data.html#Mask.load_from_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Mask.load_from_fits" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.input_data.Mask.load_from_txt">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nChannels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pybayesx.input_data.Data" title="pybayesx.input_data.Data"><span class="pre">Data</span></a></span></span><a class="reference internal" href="_modules/pybayesx/input_data.html#Mask.load_from_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.input_data.Mask.load_from_txt" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pybayesx.model">
+<span id="pybayesx-model-module"></span><h2>pybayesx.model module<a class="headerlink" href="#module-pybayesx.model" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.model.Model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_priors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pybayesx.priors.Property" title="pybayesx.priors.Property"><span class="pre">Property</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/model.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.model.Model" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.model.Model.check_priors">
+<span class="sig-name descname"><span class="pre">check_priors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_priors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pybayesx.priors.Property" title="pybayesx.priors.Property"><span class="pre">Property</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/pybayesx/model.html#Model.check_priors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.model.Model.check_priors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pybayesx.plot">
+<span id="pybayesx-plot-module"></span><h2>pybayesx.plot module<a class="headerlink" href="#module-pybayesx.plot" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pybayesx.plot.plot">
+<span class="sig-prename descclassname"><span class="pre">pybayesx.plot.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chain_paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/plot.html#plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.plot.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot chains</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chain_paths</strong> (<em>Union</em><em>[</em><em>Path</em><em>, </em><em>Sequence</em><em>[</em><em>Path</em><em>]</em><em>]</em>) – _description_</p></li>
+<li><p><strong>parameters</strong> (<em>Iterable</em><em>[</em><em>str</em><em>  |  </em><em>tuple</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]  </em><em>|  </em><em>tuple</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>]</em>) – _description_</p></li>
+<li><p><strong>plot_file</strong> (<em>Optional</em><em>[</em><em>Path</em><em>]</em><em>, </em><em>optional</em>) – _description_, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Exception</strong> – _description_</p></li>
+<li><p><strong>Exception</strong> – _description_</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pybayesx.priors">
+<span id="pybayesx-priors-module"></span><h2>pybayesx.priors module<a class="headerlink" href="#module-pybayesx.priors" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.priors.Delta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.priors.</span></span><span class="sig-name descname"><span class="pre">Delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.priors.Property" title="pybayesx.priors.Property"><span class="pre">Property</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/priors.html#Delta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Delta" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pybayesx.priors.Prior" title="pybayesx.priors.Prior"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prior</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.priors.Delta.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/pybayesx/priors.html#Delta.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Delta.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Randomly select a value from prior, using the same methods as in BayesX.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Random value selected from prior.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.priors.LogNormal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.priors.</span></span><span class="sig-name descname"><span class="pre">LogNormal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.priors.Property" title="pybayesx.priors.Property"><span class="pre">Property</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/priors.html#LogNormal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.LogNormal" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pybayesx.priors.Prior" title="pybayesx.priors.Prior"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prior</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.priors.LogNormal.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/pybayesx/priors.html#LogNormal.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.LogNormal.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Randomly select a value from prior, using the same methods as in BayesX.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Random value selected from prior.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.priors.LogUniform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.priors.</span></span><span class="sig-name descname"><span class="pre">LogUniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.priors.Property" title="pybayesx.priors.Property"><span class="pre">Property</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/priors.html#LogUniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.LogUniform" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pybayesx.priors.Prior" title="pybayesx.priors.Prior"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prior</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.priors.LogUniform.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/pybayesx/priors.html#LogUniform.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.LogUniform.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Randomly select a value from prior, using the same methods as in BayesX.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Random value selected from prior.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.priors.Normal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.priors.</span></span><span class="sig-name descname"><span class="pre">Normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.priors.Property" title="pybayesx.priors.Property"><span class="pre">Property</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_deviation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/priors.html#Normal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Normal" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pybayesx.priors.Prior" title="pybayesx.priors.Prior"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prior</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.priors.Normal.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/pybayesx/priors.html#Normal.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Normal.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Randomly select a value from prior, using the same methods as in BayesX.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Random value selected from prior.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.priors.Prior">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.priors.</span></span><span class="sig-name descname"><span class="pre">Prior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.priors.Property" title="pybayesx.priors.Property"><span class="pre">Property</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/priors.html#Prior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Prior" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>A prior as defined in BayesX.</p>
+<p>This class is abstract and so cannot be directly instantiated.
+Subclasses must implement the <cite>sample()</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>param1</strong> (<em>float</em>) – Parameter for prior as specified in BayesX’s readme for prior type.</p></li>
+<li><p><strong>param1</strong> – See param1.</p></li>
+<li><p><strong>true_value</strong> (<em>float</em><em>, </em><em>optional</em>) – True value of prior</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.priors.Prior.export">
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/pybayesx/priors.html#Prior.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Prior.export" title="Permalink to this definition"></a></dt>
+<dd><p>Return prior as defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fixed</strong> (<em>bool</em><em>, </em><em>optional</em>) – Export true value as delta prior, defaults to False</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AttributeError</strong> – When attempting to export fixed prior without setting true value</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>String describing prior as used in BAYES-X infile.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.priors.Prior.sample">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/pybayesx/priors.html#Prior.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Prior.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Randomly select a value from prior, using the same methods as in BayesX.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Random value selected from prior.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.priors.Property">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.priors.</span></span><span class="sig-name descname"><span class="pre">Property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/priors.html#Property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Property" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.M_200">
+<span class="sig-name descname"><span class="pre">M_200</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'m200_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.M_200" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.a_GNFW">
+<span class="sig-name descname"><span class="pre">a_GNFW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'a_GNFW_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.a_GNFW" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.alpha_model2">
+<span class="sig-name descname"><span class="pre">alpha_model2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'alpha_model2_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.alpha_model2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.b_GNFW">
+<span class="sig-name descname"><span class="pre">b_GNFW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'b_GNFW_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.b_GNFW" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.c500_GNFW">
+<span class="sig-name descname"><span class="pre">c500_GNFW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'c500_GNFW_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.c500_GNFW" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.c_GNFW">
+<span class="sig-name descname"><span class="pre">c_GNFW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'c_GNFW_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.c_GNFW" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.fg_200">
+<span class="sig-name descname"><span class="pre">fg_200</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fgas200_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.fg_200" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.gamma0_poly">
+<span class="sig-name descname"><span class="pre">gamma0_poly</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gamma0_poly_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.gamma0_poly" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.gammaR_poly">
+<span class="sig-name descname"><span class="pre">gammaR_poly</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gammaR_poly_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.gammaR_poly" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.t0_poly">
+<span class="sig-name descname"><span class="pre">t0_poly</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'t0_poly_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.t0_poly" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.x">
+<span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'x_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.x" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.y">
+<span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'y_prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.y" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybayesx.priors.Property.z">
+<span class="sig-name descname"><span class="pre">z</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'z_Prior'</span></em><a class="headerlink" href="#pybayesx.priors.Property.z" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybayesx.priors.Uniform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybayesx.priors.</span></span><span class="sig-name descname"><span class="pre">Uniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.priors.Property" title="pybayesx.priors.Property"><span class="pre">Property</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/priors.html#Uniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Uniform" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pybayesx.priors.Prior" title="pybayesx.priors.Prior"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prior</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybayesx.priors.Uniform.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/pybayesx/priors.html#Uniform.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.priors.Uniform.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Randomly select a value from prior, using the same methods as in BayesX.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Random value selected from prior.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pybayesx.pybayesx">
+<span id="pybayesx-pybayesx-module"></span><h2>pybayesx.pybayesx module<a class="headerlink" href="#module-pybayesx.pybayesx" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pybayesx.pybayesx.run">
+<span class="sig-prename descclassname"><span class="pre">pybayesx.pybayesx.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.config.DataConfig" title="pybayesx.config.DataConfig"><span class="pre">DataConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.config.AnalysisConfig" title="pybayesx.config.AnalysisConfig"><span class="pre">AnalysisConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">priors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pybayesx.priors.Prior" title="pybayesx.priors.Prior"><span class="pre">Prior</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybayesx.model.Model" title="pybayesx.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'20230321105244'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybayesx/pybayesx.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybayesx.pybayesx.run" title="Permalink to this definition"></a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_config</strong> (<a class="reference internal" href="#pybayesx.config.DataConfig" title="pybayesx.config.DataConfig"><em>DataConfig</em></a>) – _description_</p></li>
+<li><p><strong>analysis_config</strong> (<a class="reference internal" href="#pybayesx.config.AnalysisConfig" title="pybayesx.config.AnalysisConfig"><em>AnalysisConfig</em></a>) – _description_</p></li>
+<li><p><strong>priors</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="#pybayesx.priors.Prior" title="pybayesx.priors.Prior"><em>Prior</em></a><em>]</em>) – _description_</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#pybayesx.model.Model" title="pybayesx.model.Model"><em>Model</em></a>) – _description_</p></li>
+<li><p><strong>binary_path</strong> (<em>Path</em>) – _description_</p></li>
+<li><p><strong>base_path</strong> (<em>Path</em>) – _description_</p></li>
+<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_, defaults to str(datetime.now().strftime(“%Y%m%d%H%M%S”))</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – _description_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pybayesx">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pybayesx" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to pybayesx’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
