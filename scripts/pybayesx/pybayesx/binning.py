@@ -28,7 +28,7 @@ def bin(
     :param y: Sequence of y coordinates of events, assumed to use the same units as x
     :type y: Sequence
     :param channel: Sequence of channel of events. If `mask` is True then this value
-    should be 1 for all masked spatial coordinates and 0 otherwise.
+     should be 1 for all masked spatial coordinates and 0 otherwise.
     :type channel: Sequence
     :param nbins: The number of bins along each spatial axis
     :type nbins: int
@@ -40,18 +40,20 @@ def bin(
     :param y0: See `x0`, defaults to None
     :type y0: float, optional
     :param n_channels: Number of possible channels, defaults to None. If None, then the
-    maximum value of `channel` is used.
-    If `mask` is True then a positive integer value is required.
+     maximum value of `channel` is used.
+     If `mask` is True then a positive integer value is required.
     :type n_channels: int, optional
     :param outfile: Path of file to export binned data to, defaults to None. If None
-    export is skipped.
+     export is skipped.
     :type outfile: Path, optional
     :param mask: If True then the channel sequence is treated as a 1/0 (T/F) boolean
-    definining masked regions. Defaults to False.
+     definining masked regions. Defaults to False.
     :type mask: bool, optional
+
     :raises ValueError: If the value of max_chan is <=0 or (if in mask mode) if not set.
     :return: A 1D array of counts, of length `n_bins*n_bins*chan_max`. Nested as
-    x_bin_index(y_bin_index)
+     x_bin_index(y_bin_index)
+
     :rtype: np.ndarray[Any, np.dtype[np.float64]]
     """
 
