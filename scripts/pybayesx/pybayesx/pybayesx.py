@@ -7,7 +7,8 @@ from pathlib import Path
 from subprocess import run as sys_run
 from typing import Union
 
-from pybayesx.config import AnalysisConfig, DataConfig
+from pybayesx.config import AnalysisConfig
+from pybayesx.input import DataConfig
 from pybayesx.model import (
     DeltaPrior,
     LogUniformPrior,

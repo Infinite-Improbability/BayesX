@@ -1,44 +1,8 @@
 from dataclasses import dataclass
 from logging import getLogger
 from pathlib import Path
-from typing import Optional
 
 log = getLogger(__name__)
-
-
-@dataclass
-class DataConfig:
-    # Input data
-    filBG: Path
-    filevent: Path
-    filARF: Path  # in txt format
-    filRMF: Path  # in text format
-
-    nx: int  # Number of pixels in x direction
-    ny: int  # Number of pixels in y direction
-    xrayNbin: int  # Number of energy bins
-    xrayNch: int  # Number of energy bins
-
-    xraycell: float  # Spatial pixel size in arcsecond
-    xrayEmin: float  # Minimum value of the energy range in keV
-    xrayEmax: float  # Maximum value of the energy range in keV
-    sexpotime: float  # Source exposure time in second
-    bexpotime: float  # Background exposure time in second
-
-    Aeffave: float = 250  # Average effective area of the telescope in cm^{2}
-
-    filmask: Optional[Path] = None
-
-    NHcol: float = 2.20e20  # Hydrogen column density in cm^2
-    xrayBG_model: float = (
-        8.4e-6  # Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1,
-    )
-
-    rmin: float = 0.01  # Minimum radius, Mpc
-    rmax: float = 10  # Maximum radius for xray emission and GNFW model, Mpc
-    rlimit: float = (
-        10  # Used to calculate logr, may need to be slightly higher than rmax, Mpc
-    )
 
 
 @dataclass
