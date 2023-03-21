@@ -44,14 +44,6 @@ pybayesx.plot module
    :undoc-members:
    :show-inheritance:
 
-pybayesx.priors module
-----------------------
-
-.. automodule:: pybayesx.priors
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pybayesx.pybayesx module
 ------------------------
 
