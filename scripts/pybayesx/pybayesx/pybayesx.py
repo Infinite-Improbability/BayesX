@@ -160,4 +160,4 @@ if __name__ == "main":
         str(datetime.now().strftime("%Y%m%d%H%M%S")),
     ]
 
-    run(dc, ac, ps, nfw_gnfw, Path("bin/BayesX"), Path("chains/"))
+    run(dc, ac, nfw_gnfw, ps, Path("bin/BayesX"), Path("chains/"))
