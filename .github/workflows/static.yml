@@ -31,16 +31,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Sphinx Build
-        uses: ammaraskar/sphinx-action@0.4
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
         with:
-          docs-folder: "scripts/pybayesx/docs/"
+          python-version: '3.x'
+
+      - name: Upgrade pip
+        run: |
+          # install pip=>20.1 to use "pip cache dir"
+          python3 -m pip install --upgrade pip
+
+      - name: Get pip cache dir
+        id: pip-cache
+        run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: python3 -m pip install -r ./requirements.txt
+
+      - name: Build docs
+        run: make html -C scripts/pybayesx/docs
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: 'scripts/pybayesx/docs/build/html'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
