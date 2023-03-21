@@ -4,53 +4,15 @@ pybayesx package
 Submodules
 ----------
 
-pybayesx.binning module
------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: pybayesx.binning
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pybayesx.config module
-----------------------
-
-.. automodule:: pybayesx.config
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pybayesx.input\_data module
----------------------------
-
-.. automodule:: pybayesx.input_data
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pybayesx.model module
----------------------
-
-.. automodule:: pybayesx.model
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pybayesx.plot module
---------------------
-
-.. automodule:: pybayesx.plot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pybayesx.pybayesx module
-------------------------
-
-.. automodule:: pybayesx.pybayesx
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   pybayesx.binning
+   pybayesx.config
+   pybayesx.input_data
+   pybayesx.model
+   pybayesx.plot
+   pybayesx.pybayesx
 
 Module contents
 ---------------

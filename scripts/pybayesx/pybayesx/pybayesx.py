@@ -5,6 +5,7 @@ from datetime import datetime
 from os import cpu_count, mkdir
 from pathlib import Path
 from subprocess import run as sys_run
+from typing import Union
 
 from pybayesx.config import AnalysisConfig, DataConfig
 from pybayesx.model import (
@@ -24,45 +25,53 @@ log = logging.getLogger(__name__)
 def run(
     data_config: DataConfig,
     analysis_config: AnalysisConfig,
-    priors: Iterable[Prior],
     model: Model,
-    binary_path: Path,
-    base_path: Path,
+    priors: Iterable[Prior],
+    binary_path: Union[Path, str],
+    base_path: Union[Path, str],
     label: str = str(datetime.now().strftime("%Y%m%d%H%M%S")),
 ):
-    """_summary_
+    """Run BayesX with a given configuration.
 
-    :param data_config: _description_
+    :param data_config: Input data files and associated configuration
     :type data_config: DataConfig
-    :param analysis_config: _description_
+    :param analysis_config: Data-independent configuration for this analysis
     :type analysis_config: AnalysisConfig
-    :param priors: _description_
-    :type priors: Iterable[Prior]
-    :param model: _description_
+    :param model: Model being used.
     :type model: Model
-    :param binary_path: _description_
-    :type binary_path: Path
-    :param base_path: _description_
-    :type base_path: Path
-    :param label: _description_, defaults to str(datetime.now().strftime("%Y%m%d%H%M%S"))
+    :param priors: Prior distributions. Must include all priors required by the model.
+    :type priors: Iterable[Prior]
+    :param binary_path: Path to the Bayes-X binary
+    :type binary_path: Union[Path, str]
+    :param base_path: Path to root folder for all output, e.g. chains.
+     Actual output will go into a subfolder determined by the label.
+    :type base_path: Union[Path, str]
+    :param label: Label for the run and related output, defaults to current time in format YYYYMMDDHHmmSS
     :type label: str, optional
-    :raises Exception: _description_
+    :raises ValueError: When missing priors required by model.
     """
+    # Convert input data to desired formats
+    binary_path = Path(binary_path) if isinstance(binary_path, str) else binary_path
+    base_path = Path(base_path) if isinstance(base_path, str) else base_path
+
+    # Generate paths for this run based on base_path and label
     base_path = base_path.joinpath(label)
     config_path = base_path.joinpath(f"infile_{label}.inp")
     output_path = base_path.joinpath("out")
     plot_path = base_path.joinpath("plots")
 
+    # Make output folders
     mkdir(base_path)
     mkdir(output_path)
     mkdir(plot_path)
 
-    # add filenames
+    # Append filenames to paths
     output_path = output_path.joinpath("out_")
     plot_path = plot_path.joinpath("automatic_tri.svg")
 
+    # Verify we have all required priors
     if not model.check_priors([i.property for i in priors]):
-        raise Exception("Missing required priors for model.")
+        raise ValueError("Missing required priors for model.")
 
     with open(config_path, "w") as f:
         for key, value in (asdict(data_config) | asdict(analysis_config)).items():
@@ -148,6 +157,7 @@ if __name__ == "main":
         DeltaPrior(Property.c_GNFW, 0.3292, 0.3292),
         DeltaPrior(Property.c500_GNFW, 1.156, 1.156),
         DeltaPrior(Property.z, 0.5, 0.5),
+        str(datetime.now().strftime("%Y%m%d%H%M%S")),
     ]
 
     run(dc, ac, ps, nfw_gnfw, Path("bin/BayesX"), Path("chains/"))
