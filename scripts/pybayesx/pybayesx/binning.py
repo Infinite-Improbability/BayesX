@@ -21,6 +21,7 @@ def bin(
     mask: bool = False,
 ) -> "np.ndarray[Any, np.dtype[np.float64]]":
     """Bin data given spatial coordinates and channel coordinates of events.
+    Bins are only spatial and do not reduce channel count.
     This will crop points if they are not within `n_bins/2` bins of the center.
     If `mask = True` then instead bin passed on mask status.
 

@@ -21,7 +21,7 @@ class Data(ABC):
         pass
 
     @classmethod
-    def load_from_file(cls, path: Path, file_type: Optional[str] = None) -> Data:
+    def load_from_file(cls, path: Path, file_type: Optional[str] = None):
         """Try to intelligently handle events input from a number of file types.
 
         :param path: Path to events file
@@ -50,11 +50,18 @@ class Data(ABC):
     def load_from_fits(cls, path: Path) -> Data:
         raise NotImplementedError
 
-    @abstractmethod
-    def bin_and_export(
-        self, n_bins: int, cellsize: float, outfile: Path, n_channels: int, **kwargs
+    def bin(
+        self, n_bins: int, cellsize: float, outfile: Optional[Path] = None, **kwargs
     ):
-        pass
+        return bin(
+            self.data[:, 0],
+            self.data[:, 1],
+            self.data[:, 2],
+            n_bins,
+            cellsize,
+            outfile=outfile,
+            **kwargs,
+        )
 
 
 class Events(Data):
@@ -67,8 +74,8 @@ class Events(Data):
     @classmethod
     def load_from_txt(
         cls, path: Path, background: bool, nx: int, ny: int, nChannels: int, **kwargs
-    ) -> Data:
-        data = np.loadtxt(path)
+    ) -> Events:
+        data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
         reshaped = np.reshape(
             data, (nx, ny, nChannels), order="C"
         )  # TODO: Verify correctness
@@ -100,7 +107,7 @@ class Events(Data):
         du_index=1,  # TODO: Confirm correct
         mode="evts",
         **kwargs,
-    ) -> Data:
+    ) -> Events:
         """Load events from a fits file.
         The file will be converted to the text format used by BayesX.
 
@@ -120,7 +127,7 @@ class Events(Data):
         raise NotImplementedError
 
         with fits.open(path) as fi:
-            assert du_index < len(fi) + 1
+            assert du_index < len(fi)
 
             f: PrimaryHDU = fi[du_index]  # type: ignore
 
@@ -136,21 +143,6 @@ class Events(Data):
                 self.bg = np.column_stack((f[x_key], f[y_key], f[channel_key]))
                 self.config["bexpotime"] = f.header["livetime"]
 
-    def bin_and_export(
-        self, n_bins: int, cellsize: float, outfile: Path, n_channels: int, **kwargs
-    ):
-        bin(
-            self.data[:, 0],  # type: ignore
-            self.data[:, 1],  # type: ignore
-            self.data[:, 2],  # type: ignore
-            n_bins,
-            cellsize,
-            outfile=outfile,
-            n_channels=n_channels,
-        )
-
-        # TODO: Update nx, ny, etc and cellsize to match
-
 
 class Mask(Data):
     def __init__(self, data: ArrayLike, background: bool) -> None:
@@ -162,32 +154,25 @@ class Mask(Data):
     @classmethod
     def load_from_txt(
         cls, path: Path, background: bool, nx: int, ny: int, nChannels: int, **kwargs
-    ) -> Data:
+    ) -> Mask:
         data = np.loadtxt(path)
         reshaped = np.reshape(
             data, (nx, ny, nChannels), order="C"
         )  # TODO: Verify correctness
-        return Events(reshaped, background)
+        return Mask(reshaped, background)
 
     def load_from_fits(
         self,
         path: Path,
         **kwargs,
-    ) -> Data:
+    ) -> Mask:
         raise NotImplementedError
 
-    def bin_and_export(
-        self, n_bins: int, cellsize: float, outfile: Path, n_channels: int, **kwargs
+    def bin(
+        self, n_bins: int, cellsize: float, outfile: Optional[Path] = None, **kwargs
     ):
-        bin(
-            self.data[:, 0],  # type: ignore
-            self.data[:, 1],  # type: ignore
-            self.data[:, 2],  # type: ignore
-            n_bins,
-            cellsize,
-            outfile=outfile,
-            n_channels=n_channels,
-        )
+        kwargs["mask"] = True
+        super().bin(n_bins, cellsize, outfile, **kwargs)
 
 
 @dataclass
@@ -226,3 +211,52 @@ class DataConfig:
         10  # Used to calculate logr, may need to be slightly higher than rmax, Mpc
     )
 
+    def load_all(self) -> tuple[Events, Events, Mask | None]:
+        events = Events.load_from_file(self.filevent)
+        bg = Events.load_from_file(self.filBG)
+        mask = None
+        if self.filmask is not None:
+            mask = Mask.load_from_file(self.filmask)
+
+        return events, bg, mask  # type: ignore
+
+    def bin_all(self, nbins: int, cellsize: int, outdir: Path, **kwargs):
+        (
+            events,
+            bg,
+            mask,
+        ) = self.load_all()  # should we load and discard each to lower memory use?
+
+        filevent = outdir.joinpath(f"events_binned{nbins}of{cellsize}.txt")
+        events.bin(
+            nbins,
+            cellsize,
+            outfile=filevent,
+            **kwargs,
+        )
+        self.filevent = (
+            filevent  # run after so it doesn't get changed if the binning fails
+        )
+
+        filBG = outdir.joinpath(f"background_binned{nbins}of{cellsize}.txt")
+        bg.bin(
+            nbins,
+            cellsize,
+            outfile=filBG,
+            **kwargs,
+        )
+        self.filBG = filBG
+
+        filmask = outdir.joinpath(f"mask_binned{nbins}of{cellsize}.txt")
+        if mask:
+            mask.bin(
+                nbins,
+                cellsize,
+                outfile=filmask,
+                **kwargs,
+            )
+        self.filmask = filmask
+
+        self.xraycell *= cellsize
+        self.nx = nbins
+        self.ny = nbins
