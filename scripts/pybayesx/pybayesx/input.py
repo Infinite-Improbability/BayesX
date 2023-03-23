@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from logging import getLogger
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 from astropy.io import fits
@@ -18,6 +18,7 @@ log = getLogger(__name__)
 class Data(ABC):
     def __init__(self, data: ArrayLike) -> None:
         self.data = np.array(data)
+        self.path = None  # path to data in format ready for BayesX
         pass
 
     @classmethod
@@ -53,6 +54,8 @@ class Data(ABC):
     def bin(
         self, n_bins: int, cellsize: float, outfile: Optional[Path] = None, **kwargs
     ):
+        if outfile is not None:
+            self.path = outfile
         return bin(
             self.data[:, 0],
             self.data[:, 1],
@@ -62,6 +65,11 @@ class Data(ABC):
             outfile=outfile,
             **kwargs,
         )
+
+    def __str__(self) -> str:
+        if self.path is None:
+            raise ValueError("Data class has no file set. Please export to file.")
+        return str(self.path)
 
 
 class Events(Data):
@@ -124,7 +132,7 @@ class Events(Data):
         :param mode: `'evts'` for events, `bg` for background.
         :type mode: str
         """
-        raise NotImplementedError
+        raise NotImplementedError  # needs verification
 
         with fits.open(path) as fi:
             assert du_index < len(fi)
@@ -180,8 +188,8 @@ class DataConfig:
     """Configuration options relevant to the input data."""
 
     # Input data
-    filBG: Path
-    filevent: Path
+    filBG: Union[Path, Events]
+    filevent: Union[Path, Events]
     filARF: Path  # in txt format
     filRMF: Path  # in text format
 
@@ -198,7 +206,7 @@ class DataConfig:
 
     Aeffave: float = 250  # Average effective area of the telescope in cm^{2}
 
-    filmask: Optional[Path] = None
+    filmask: Optional[Union[Path, Mask]] = None
 
     NHcol: float = 2.20e20  # Hydrogen column density in cm^2
     xrayBG_model: float = (
@@ -212,11 +220,31 @@ class DataConfig:
     )
 
     def load_all(self) -> tuple[Events, Events, Mask | None]:
-        events = Events.load_from_file(self.filevent)
-        bg = Events.load_from_file(self.filBG)
+        # This function is getting a little heavy on the error handling.
+        # Can we make it more elegant?
+        events_file = (
+            self.filevent.path if isinstance(self.filevent, Events) else self.filevent
+        )
+        bg_file = self.filBG.path if isinstance(self.filBG, Events) else self.filBG
+
+        if events_file is None or bg_file is None:
+            raise ValueError(
+                "Cannot load events or bg data: path to exported data not set."
+            )
+
+        events = Events.load_from_file(events_file)
+        bg = Events.load_from_file(bg_file)
+
         mask = None
         if self.filmask is not None:
-            mask = Mask.load_from_file(self.filmask)
+            mask_file = (
+                self.filmask.path if isinstance(self.filmask, Mask) else self.filmask
+            )
+            if mask_file is None:
+                raise ValueError(
+                    "Cannot load mask data: path to exported data not set."
+                )
+            mask = Mask.load_from_file(mask_file)
 
         return events, bg, mask  # type: ignore
 
