@@ -57,6 +57,9 @@ jobs:
       - name: Install dependencies
         run: python3 -m pip install -r scripts/pybayesx/docs/requirements.txt
 
+      - name: Install pybayesx
+        run: python3 -m pip install scripts/pybayesx
+
       - name: Build docs
         run: make html -C scripts/pybayesx/docs
 
