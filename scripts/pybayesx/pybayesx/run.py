@@ -6,6 +6,7 @@ from os import cpu_count, mkdir
 from pathlib import Path
 from subprocess import run as sys_run
 from typing import Union
+from sys import stderr, stdout
 
 from pybayesx.config import AnalysisConfig
 from pybayesx.input import DataConfig
@@ -52,6 +53,9 @@ def run(
     :type label: str, optional
     :raises ValueError: When missing priors required by model.
     """
+
+    log.info("Initalizing run.")
+
     # Convert input data to desired formats
     binary_path = Path(binary_path) if isinstance(binary_path, str) else binary_path
     base_path = Path(base_path) if isinstance(base_path, str) else base_path
@@ -107,7 +111,17 @@ def run(
     log.info(f"Launching BayesX for run {label}")
     start_time = datetime.now()
 
-    sys_run(["mpiexec", "-n", str(cpu_count()), binary_path, config_path], check=True)
+    sys_run(
+        [
+            "mpirun",
+            "--use-hwthread-cpus",
+            "-n",
+            str(cpu_count()),
+            binary_path,
+            config_path,
+        ],
+        check=True,
+    )
 
     log.info(
         f"BayesX finished with run {label} "
@@ -131,7 +145,18 @@ def run(
     plot(output_path, plot_priors, plot_path)
 
 
-if __name__ == "main":
+if __name__ == "__main__":
+    # Write logging to shell
+    log.setLevel(logging.INFO)  # log everything
+    infoHandler = logging.StreamHandler(stream=stdout)
+    infoHandler.setLevel(logging.INFO)  # write info to stdout
+    log.addHandler(infoHandler)
+    errorHandler = logging.StreamHandler(stream=stderr)
+    errorHandler.setLevel(logging.WARNING)  # warnings or errors go to stderr
+    log.addHandler(errorHandler)
+
+    log.info("Running example analysis")
+
     dc = DataConfig(
         filevent=Path("data/simtestdatafiles/data64by64by32.txt"),
         filBG=Path("data/simtestdatafiles/BG64by64by32.txt"),
@@ -160,7 +185,6 @@ if __name__ == "main":
         DeltaPrior(Property.c_GNFW, 0.3292, 0.3292),
         DeltaPrior(Property.c500_GNFW, 1.156, 1.156),
         DeltaPrior(Property.z, 0.5, 0.5),
-        str(datetime.now().strftime("%Y%m%d%H%M%S")),
     ]
 
     run(dc, ac, nfw_gnfw, ps, Path("bin/BayesX"), Path("chains/"))
