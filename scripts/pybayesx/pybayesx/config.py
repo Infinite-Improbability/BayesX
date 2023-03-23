@@ -21,7 +21,8 @@ class AnalysisConfig:
         100  # No. of iterations after which the output files should be updated
     )
     maxmodes: int = 20  # Maximum no. of modes (for memory allocation)
-    nCdims: int = 2  # no. of parameters on which clustering should be performed if mode separation is enabled, default value: 2
+    nCdims: int = 2  # no. of parameters on which clustering should be performed if
+    # mode separation is enabled, default value: 2
 
     # Root for MEKAL data files
     filion: Path = Path("data/MEKAL/mekal1.dat")
@@ -31,4 +32,5 @@ class AnalysisConfig:
     fillin: Path = Path("data/MEKAL/mekal5.dat")
     filcaf: Path = Path("data/MEKAL/mekal6.dat")
 
-    mass_function: int = 2  # Type of the mass function (with mass_function = 1, 2 & 3 for Evrard, Jenkins & Tinker mass functions respectively)
+    mass_function: int = 2  # Type of the mass function (with mass_function = 1, 2 & 3
+    # for Evrard, Jenkins & Tinker mass functions respectively)

@@ -27,7 +27,8 @@ def plot(
     """
     # Massage input
 
-    # This allows us to accept a single path without the user having to wrap it in a sequence
+    # This allows us to accept a single path without the user having to wrap it in a
+    # sequence
     if isinstance(chain_paths, Path):
         chain_paths = [chain_paths]
 
@@ -37,7 +38,8 @@ def plot(
             f"_{datetime.now().strftime('%Y%m%d%H%M%S')}_tri.png"
         )
 
-    # Convert all parameters to tuples of the form (id_number, true_value) using None if true value not provided
+    # Convert all parameters to tuples of the form (id_number, true_value) using None
+    # if true value not provided
     parameters = [p if isinstance(p, tuple) else (p, None) for p in parameters]
 
     # Load in chains
@@ -49,7 +51,8 @@ def plot(
     first_chain_pars = chains[0].getParamNames()
     if first_chain_pars is None:
         raise Exception(
-            f"MCSample {chains[0]} has no parameter names. Is there a .paramnames file alongside the chains?"
+            f"MCSample {chains[0]} has no parameter names."
+            "Is there a .paramnames file alongside the chains?"
         )
 
     # Select the parameters we are plotting
@@ -72,7 +75,8 @@ def plot(
         parsi = samps.getParamNames()
         if parsi is None:
             raise Exception(
-                f"MCSample {chains[0]} has no parameter names. Is there a .paramnames file alongside the chains?"
+                f"MCSample {chains[0]} has no parameter names."
+                "Is there a .paramnames file alongside the chains?"
             )
 
         # Search for parameters by name in current chain
@@ -89,7 +93,7 @@ def plot(
 
                     # Handle special case parameters
                     if p_label[0] == "M" and "M_{\\odot}" in p_label:
-                        # Add a derived parameter for mass to get around labelling issues
+                        # Adds derived parameter for mass to get around labelling issues
                         M = getattr(samps.getParams(), pj.name)
                         M1 = samps.ranges.getLower(pj.name)
                         M2 = samps.ranges.getUpper(pj.name)

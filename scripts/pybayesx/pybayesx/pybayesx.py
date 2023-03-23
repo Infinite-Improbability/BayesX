@@ -47,7 +47,8 @@ def run(
     :param base_path: Path to root folder for all output, e.g. chains.
      Actual output will go into a subfolder determined by the label.
     :type base_path: Union[Path, str]
-    :param label: Label for the run and related output, defaults to current time in format YYYYMMDDHHmmSS
+    :param label: Label for the run and related output, defaults to current time in
+     format YYYYMMDDHHmmSS
     :type label: str, optional
     :raises ValueError: When missing priors required by model.
     """
@@ -109,7 +110,8 @@ def run(
     sys_run(["mpiexec", "-n", str(cpu_count()), binary_path, config_path], check=True)
 
     log.info(
-        f"BayesX finished with run {label} after {(datetime.now() - start_time).total_seconds()}s"
+        f"BayesX finished with run {label} "
+        f"after {(datetime.now() - start_time).total_seconds()}s"
     )
 
     # TODO: This logic seems sketchy, verify

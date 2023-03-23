@@ -13,8 +13,10 @@ rng = np.random.default_rng()
 class Property(Enum):
     x = "x_prior"  # prior on x coordinate on the sky in arcsec of the cluster center
     y = "y_prior"  # prior on y coordinate on the sky in arcsec of the cluster center
-    M_200 = "m200_prior"  # prior on cluster mass within the overdensity radius of r_{200} (M_{200}) in M_{\sun}
-    fg_200 = "fgas200_prior"  # prior on cluster gas mass fraction within the overdensity radius of r_{200} (f_{g,200})
+    M_200 = "m200_prior"  # prior on cluster mass within the overdensity radius of
+    # r_{200} (M_{200}) in M_{\sun}
+    fg_200 = "fgas200_prior"  # prior on cluster gas mass fraction within the
+    # overdensity radius of r_{200} (f_{g,200})
     a_GNFW = "a_GNFW_prior"  # prior on slope parameter "a" in GNFW pressure profile
     b_GNFW = "b_GNFW_prior"  # prior on slope parameter "b" in GNFW pressure profile
     c_GNFW = "c_GNFW_prior"  # prior on slope parameter "c" in GNFW pressure profile
@@ -87,7 +89,8 @@ class Prior(ABC):
 
         :param fixed: Export true value as delta prior, defaults to False
         :type fixed: bool, optional
-        :raises AttributeError: When attempting to export fixed prior without setting true value
+        :raises AttributeError: When attempting to export fixed prior without having set
+         the true value
         :return: String describing prior as used in BAYES-X infile.
         :rtype: str
         """

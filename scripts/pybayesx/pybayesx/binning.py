@@ -25,9 +25,11 @@ def bin(
     This will crop points if they are not within `n_bins/2` bins of the center.
     If `mask = True` then instead bin passed on mask status.
 
-    :param x: 1D sequence of x coordinates of events. Should have an entry for every point.
+    :param x: 1D sequence of x coordinates of events. Should have an entry for every
+     point.
     :type x: numpy.typing.ArrayLike
-    :param y: Sequence of y coordinates of events, assumed to use the same units and order as x.
+    :param y: Sequence of y coordinates of events, assumed to use the same units and
+      order as x.
     :type y: numpy.typing.ArrayLike
     :param channel: Sequence of channel of events. If `mask` is True then this value
      should be 1 for all masked spatial coordinates and 0 otherwise.
@@ -94,7 +96,8 @@ def bin(
     j0 = n_bins / 2
 
     # Loop over every cell
-    # The x and y arrays contain an entry for every point so we don't need a nested iteration over dy
+    # The x and y arrays contain an entry for every point so we don't need a nested
+    # iteration over dy
     for k in range(len(dx)):
         # Get cell coordinates in original basis, relative to centre
         u = dx[k]
