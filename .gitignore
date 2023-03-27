@@ -224,7 +224,8 @@ testbed/*
 *.fits
 *.hdf5
 *.h5
+data/
 scripts/sim_test.py
-data/pyxsimtest
-data/4361data/4361
-data/tngdata
+!data/A262datafiles
+!data/MEKAL
+!data/simtestdatafiles
