@@ -103,10 +103,11 @@ class Events(Data):
                 END DO
             END DO
         """
-        return Events(reshaped, background)
+        return cls(reshaped, background)
 
+    @classmethod
     def load_from_fits(
-        self,
+        cls,
         path: Path,
         background: bool,
         x_key: str = "X",
@@ -155,7 +156,7 @@ class Events(Data):
 class Mask(Data):
     def __init__(self, data: ArrayLike, background: bool) -> None:
         super().__init__(data)
-        assert self.data.ndim == 3
+        assert self.data.ndim == 2
         self.background = background
         self.nx, self.ny, self.nChannels = self.data.shape  # TODO: Verify correctness
 
@@ -167,10 +168,11 @@ class Mask(Data):
         reshaped = np.reshape(
             data, (nx, ny, nChannels), order="C"
         )  # TODO: Verify correctness
-        return Mask(reshaped, background)
+        return cls(reshaped, background)
 
+    @classmethod
     def load_from_fits(
-        self,
+        cls,
         path: Path,
         **kwargs,
     ) -> Mask:
@@ -181,6 +183,85 @@ class Mask(Data):
     ):
         kwargs["mask"] = True
         super().bin(n_bins, cellsize, outfile, **kwargs)
+
+
+class ARF(Data):
+    def __init__(self, data: ArrayLike) -> None:
+        super().__init__(data)
+        assert self.data.ndim == 2 and 1 in self.data.shape  # TODO: Better verification
+        self.xrayNbins = len(self.data)  # TODO: Verify correctness
+
+    @classmethod
+    def load_from_txt(cls, path: Path, **kwargs) -> ARF:
+        data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
+        # reshaped = np.reshape(
+        #     data, (nx, ny, nChannels), order="C"
+        # )  # TODO: Verify correctness
+        return cls(data)
+
+    @classmethod
+    def load_from_fits(
+        cls,
+        path: Path,
+        background: bool,
+        x_key: str = "X",
+        y_key: str = "Y",
+        channel_key: str = "PI",
+        du_index=1,  # TODO: Confirm correct
+        mode="evts",
+        **kwargs,
+    ) -> ARF:
+        with fits.open(path) as f:
+            data = f[1].data["specresp"]  # type: ignore
+
+            # self.xrayEmin = np.min(f[1].data["energ_lo"])
+            # self.xrayEmax = np.max(f[1].data["energ_hi"])
+
+        return cls(data)
+
+    def export(self, outfile: Path):
+        np.savetxt(outfile, self.data)
+
+
+class RMF(Data):
+    def __init__(self, data: ArrayLike) -> None:
+        super().__init__(data)
+        assert self.data.ndim == 2  # TODO: Better verification
+        self.xrayNbins, self.xrayNch = self.data.shape  # TODO: Verify correctness
+
+    @classmethod
+    def load_from_txt(cls, path: Path, nBins: int, nChannels: int, **kwargs) -> RMF:
+        data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
+        reshaped = np.reshape(
+            data, (nBins, nChannels), order="C"
+        )  # TODO: Verify correctness
+        return cls(data)
+
+    @classmethod
+    def load_from_fits(
+        cls,
+        path: Path,
+        background: bool,
+        x_key: str = "X",
+        y_key: str = "Y",
+        channel_key: str = "PI",
+        du_index=1,  # TODO: Confirm correct
+        mode="evts",
+        **kwargs,
+    ) -> RMF:
+        with fits.open(path) as f:
+            rmf = f[1].data["matrix"]  # type: ignore
+            xrayNch = len(rmf[-1])
+            xrayNbin = len(rmf)
+            mat = np.zeros((xrayNbin, xrayNch))
+
+            for i in range(0, len(rmf)):
+                mat[i, : len(rmf[i])] = rmf[i]
+
+        return cls(mat)
+
+    def export(self, outfile: Path):
+        np.savetxt(outfile, np.ravel(self.data))
 
 
 @dataclass
