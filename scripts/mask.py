@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+
 import numpy as np
 
 # Parse command line arguments
@@ -38,7 +39,7 @@ parser.add_argument(
         "smaller. '.matxt' will export entire mask matrix to text file. "
         "This is intended for debugging purposes and is not formatted for the "
         "binning script.",
-    ),
+    ),  # type: ignore
     type=argparse.FileType("wb"),
     default="mask.npz",
 )
@@ -202,10 +203,10 @@ for n in range(1, size[1]):
         break
 
 # Convert indices to coordinates
-yMin = i + args.yMin
-yMax = args.yMax - j
-xMin = k + args.xMin
-xMax = args.xMax - n
+yMin = i + args.yMin  # type: ignore
+yMax = args.yMax - j  # type: ignore
+xMin = k + args.xMin  # type: ignore
+xMax = args.xMax - n  # type: ignore
 
 # Get ellipse centres
 ox = []
@@ -218,6 +219,6 @@ for el in ellipses:
 fig, ax = plt.subplots()
 
 im = ax.imshow(mask, extent=(xMin, xMax, yMin, yMax), origin="lower")
-ax.scatter(ox, oy, marker="+")
+ax.scatter(ox, oy, marker="+")  # type: ignore
 
 plt.show()

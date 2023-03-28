@@ -1,10 +1,8 @@
-#!/usr/bin/python26
-
-from getdist import plots, loadMCSamples
-
-from six.moves import input as raw_input  # should work for python2 and 3
+#!/usr/bin/env python
 
 import matplotlib
+from getdist import loadMCSamples, plots
+from six.moves import input as raw_input  # should work for python2 and 3
 
 matplotlib.use("Agg")
 
