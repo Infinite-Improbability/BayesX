@@ -97,7 +97,9 @@ def coord2index(x, y, referenceCoordinates=(args.xMin, args.yMin)):
 
     # Adds zero index to each coordinate and rounds
     # TODO: Needs confirmation of correct rounding behaviour.
-    return [int(round(coord - ref)) for coord, ref in zip((x, y), referenceCoordinates)]
+    return [
+        int(np.ceil(coord - ref)) for coord, ref in zip((x, y), referenceCoordinates)
+    ]
 
 
 # Convert lines of ellipse definitions in input file to a list of Ellipse objects.
@@ -123,7 +125,7 @@ for el in ellipses:
     elM = el.generate_matrix(args.overdraw)
 
     # Get indices to place the ellipse on the mask matrix
-    radius = elM.shape[1] / 2
+    radius = elM.shape[0] / 2  # elM is square
     x0, y0 = coord2index(el.x - radius, el.y - radius)
     x1, y1 = coord2index(el.x + radius, el.y + radius)
 
