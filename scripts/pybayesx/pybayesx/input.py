@@ -7,10 +7,13 @@ from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
+from astropy.cosmology import FlatLambdaCDM
 from astropy.io import fits
 from astropy.io.fits.hdu import PrimaryHDU
 from numpy.typing import ArrayLike
 from pybayesx.binning import bin
+
+from scripts.pybayesx.pybayesx.config import AnalysisConfig
 
 log = getLogger(__name__)
 
@@ -54,8 +57,7 @@ class Data(ABC):
     def bin(
         self, n_bins: int, cellsize: float, outfile: Optional[Path] = None, **kwargs
     ):
-        if outfile is not None:
-            self.path = outfile
+        self.path = outfile
         return bin(
             self.data[:, 0],
             self.data[:, 1],
@@ -73,15 +75,22 @@ class Data(ABC):
 
 
 class Events(Data):
-    def __init__(self, data: ArrayLike, background: bool) -> None:
+    def __init__(self, data: ArrayLike, background: bool, exposure_time: float) -> None:
         super().__init__(data)
         assert self.data.ndim == 3
         self.background = background
         self.nx, self.ny, self.nChannels = self.data.shape  # TODO: Verify correctness
+        self.exposure_time = exposure_time
 
     @classmethod
     def load_from_txt(
-        cls, path: Path, background: bool, nx: int, ny: int, nChannels: int, **kwargs
+        cls,
+        path: Path,
+        background: bool,
+        nx: int,
+        ny: int,
+        nChannels: int,
+        exposure_time: float,
     ) -> Events:
         data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
         reshaped = np.reshape(
@@ -103,7 +112,7 @@ class Events(Data):
                 END DO
             END DO
         """
-        return cls(reshaped, background)
+        return cls(reshaped, background, exposure_time)
 
     @classmethod
     def load_from_fits(
@@ -114,7 +123,6 @@ class Events(Data):
         y_key: str = "Y",
         channel_key: str = "PI",
         du_index=1,  # TODO: Confirm correct
-        mode="evts",
         **kwargs,
     ) -> Events:
         """Load events from a fits file.
@@ -133,8 +141,6 @@ class Events(Data):
         :param mode: `'evts'` for events, `bg` for background.
         :type mode: str
         """
-        raise NotImplementedError  # needs verification
-
         with fits.open(path) as fi:
             assert du_index < len(fi)
 
@@ -145,12 +151,10 @@ class Events(Data):
                     "Trying to load events from a data unit that lacks events extension"
                 )
 
-            if mode == "evts":
-                self.events = np.column_stack((f[x_key], f[y_key], f[channel_key]))
-                self.config["sexpotime"] = f.header["livetime"]
-            elif mode == "bg":
-                self.bg = np.column_stack((f[x_key], f[y_key], f[channel_key]))
-                self.config["bexpotime"] = f.header["livetime"]
+            data = np.column_stack((f[x_key], f[y_key], f[channel_key]))  # type: ignore
+            exposure_time: float = f.header["livetime"]  # type: ignore
+
+            return cls(data, background, exposure_time)
 
 
 class Mask(Data):
@@ -200,17 +204,7 @@ class ARF(Data):
         return cls(data)
 
     @classmethod
-    def load_from_fits(
-        cls,
-        path: Path,
-        background: bool,
-        x_key: str = "X",
-        y_key: str = "Y",
-        channel_key: str = "PI",
-        du_index=1,  # TODO: Confirm correct
-        mode="evts",
-        **kwargs,
-    ) -> ARF:
+    def load_from_fits(cls, path: Path) -> ARF:
         with fits.open(path) as f:
             data = f[1].data["specresp"]  # type: ignore
 
@@ -220,6 +214,7 @@ class ARF(Data):
         return cls(data)
 
     def export(self, outfile: Path):
+        self.path = outfile
         np.savetxt(outfile, self.data)
 
 
@@ -238,17 +233,7 @@ class RMF(Data):
         return cls(data)
 
     @classmethod
-    def load_from_fits(
-        cls,
-        path: Path,
-        background: bool,
-        x_key: str = "X",
-        y_key: str = "Y",
-        channel_key: str = "PI",
-        du_index=1,  # TODO: Confirm correct
-        mode="evts",
-        **kwargs,
-    ) -> RMF:
+    def load_from_fits(cls, path: Path) -> RMF:
         with fits.open(path) as f:
             rmf = f[1].data["matrix"]  # type: ignore
             xrayNch = len(rmf[-1])
@@ -369,3 +354,57 @@ class DataConfig:
         self.xraycell *= cellsize
         self.nx = nbins
         self.ny = nbins
+
+
+def load_all_from_fits(
+    evts_path: Path,
+    bg_path: Path,
+    arf_path: Path,
+    rmf_path: Path,
+    out_path: Path,
+    z=float,
+):
+    evts = Events.load_from_fits(evts_path, False)
+    bg = Events.load_from_fits(bg_path, True)
+    arf = ARF.load_from_fits(arf_path)
+    rmf = RMF.load_from_fits(rmf_path)
+    # Missing mask
+
+    cellsize = 4
+    nbins = 256
+
+    evts.bin(nbins, cellsize, out_path.joinpath("evts.txt"))
+    bg.bin(nbins, cellsize, out_path.joinpath("bg.txt"))
+
+    rmf.export(out_path.joinpath("rmf.txt"))
+    arf.export(out_path.joinpath("arf.txt"))
+
+    cosmology = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.041)
+    cellsize_arcsec = 0.492 * cellsize
+    cellsize_radians = 4.8481368e-6 * cellsize_arcsec
+    distance_per_rad = cosmology.angular_diameter_distance(z)
+    cellsize_Mpc = cellsize_radians * distance_per_rad
+    area_radius = np.min(evts.nx, evts.ny) / 2 * cellsize_Mpc
+
+    dc = DataConfig(
+        filBG=bg.path,  # type: ignore
+        filevent=evts.path,  # type: ignore
+        filARF=arf.path,
+        filRMF=rmf.path,  # type: ignore
+        nx=evts.nx,
+        ny=evts.ny,
+        xrayNbin=rmf.data.shape[0],
+        xrayNch=rmf.data.shape[1],
+        xraycell=cellsize_arcsec,
+        xrayEmin=0,
+        xrayEmax=0,
+        sexpotime=evts.exposure_time,
+        bexpotime=bg.exposure_time,
+        rmax=area_radius,
+        rlimit=area_radius,
+        rmin=0.001 * area_radius,
+    )
+
+    ac = AnalysisConfig(nlive=100)
+
+    return dc, ac

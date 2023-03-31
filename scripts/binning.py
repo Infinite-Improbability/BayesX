@@ -1,12 +1,13 @@
+#!/usr/bin/env python3
 import sys
 
-import matplotlib
 import numpy as np
 from matplotlib import pyplot
+from matplotlib.colors import LogNorm
 
 # Needs tidying up and generalizing.  Currently works on Coma data.
 
-matplotlib.use("TkAgg")
+# matplotlib.use("TkAgg")
 
 PI_chan_max = 0  # keep type hinter happy
 
@@ -19,20 +20,20 @@ while mode not in ["evts", "bg", "mask"]:
     mode = input("Enter mode (evts/bg/mask): ")
 
 if mode == "evts":
-    data1 = np.loadtxt("13996_evts_07_7keV.txt", usecols=(10, 11, 40))
-    outfilename = "13996data_256by256by433.txt"
+    data1 = np.loadtxt("data/4361_test2/txt/evts.txt", usecols=(0, 1, 2))
+    outfilename = "data/4361_test2/b_evts.txt"
 elif mode == "mask":
-    data1 = np.load("mask.npz")["arr_0"]
-    outfilename = "mask_binned.txt"
+    data1 = np.load("data/4361_test2/txt/mask.npz")["arr_0"]
+    outfilename = "data/4361_test2/b_mask.txt"
     PI_chan_max = int(input("Enter number of energy channels: "))
     # This should case the energy mask file to match the structure of the binned data
     # The file is accordingly PI_chan_max times longer, but we avoid having to expand the
     # mask across all channels in BayesX, which could confusion in the future.
 else:
     data1 = np.loadtxt(
-        "13996_bg_07_7keV.txt", usecols=(6, 7, 10)
+        "data/4361_test2/txt/bg.txt", usecols=(0, 1, 2)
     )  # For the background file
-    outfilename = "13996BG_256by256by433.txt"
+    outfilename = "data/4361_test2/b_bg.txt"
 
 sky_x = data1[:, 0]  # spatial coordinate
 sky_y = data1[:, 1]  # spatial coordinate
@@ -42,14 +43,14 @@ PI_chan = data1[:, 2]
 
 del data1
 
-x_point = 4096.5
-y_point = 4096.5
+x_point = 3996.5
+y_point = 4208.5
 
 dx = sky_x - x_point
 dy = sky_y - y_point
 nbins = 256  # 1024
 
-cellsize = 10.0
+cellsize = 4.0
 xyrange = cellsize * (nbins - 1.0) / 2.0
 
 if mode == "mask":
@@ -103,7 +104,10 @@ trc = int(icentre + npix_out / 2)
 # PI_counts_out=PI_counts[PI_chan_min-1:,blc:trc,blc:trc]
 PI_counts_out = PI_counts[blc:trc, blc:trc, PI_chan_min - 1 :]
 
-pyplot.imshow(np.sum(PI_counts_out, axis=-1))
+if mode == "mask":
+    pyplot.imshow(np.sum(PI_counts_out, axis=-1), origin="lower")
+else:
+    pyplot.imshow(np.sum(PI_counts_out, axis=-1), origin="lower", norm=LogNorm())
 pyplot.show()
 
 np.savetxt(outfilename, PI_counts_out.ravel(), "%5d")
