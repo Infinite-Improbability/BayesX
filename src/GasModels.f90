@@ -20,7 +20,7 @@ CONTAINS
       INTEGER                       ::  i, j, k, m, flag
 
       REAL*8                       ::  yc, index, index_g
-      REAL*8                       ::  rs, ps, cc, T0, logT0, rr, rlimit1
+      REAL*8                       ::  rs, ps, cc, T0, logT0, rlimit1
       REAL*8                       ::  prefactor, prefactor2
       REAL*8                       ::  thetaE
       REAL*8, PARAMETER           ::  eps = 1d-4
@@ -283,7 +283,7 @@ CONTAINS
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
                      call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (rr > rlimit) then
+                  ELSEIF (xrayr > rlimit) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
