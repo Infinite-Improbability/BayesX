@@ -93,7 +93,7 @@ CONTAINS
          f0=(1-wx)*f(i1)+wx*f(i1+1)
       else
          write(*,*) 'x = ', x0, '  is out of table range xmin: ', xmin, ' xmax: ', xmax
-         write(*,*) 'exp:', exp(x0), exp(xmin), exp(xmax)
+         write(*,*) '10**x:', 10**x0, 10**xmin, 10**xmax
          stop
       endif
       return

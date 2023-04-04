@@ -283,7 +283,9 @@ CONTAINS
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
                      call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr > rlimit) then
+                  ELSEIF (xrayr >= rlimit) then
+                     xrayCmap(i, xrayxpix, xrayypix) = 0.
+                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
@@ -634,7 +636,9 @@ CONTAINS
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr > rlimit) then
+                  ELSEIF (xrayr >= rlimit) then
+                     xrayCmap(i, xrayxpix, xrayypix) = 0.
+                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
@@ -941,7 +945,9 @@ CONTAINS
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr > rlimit) then
+                  ELSEIF (xrayr >= rlimit) THEN
+                     xrayCmap(i, xrayxpix, xrayypix) = 0.
+                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
