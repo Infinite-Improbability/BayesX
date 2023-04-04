@@ -60,15 +60,16 @@ MODULE params
 
 !========================================================================================
 
-   INTEGER, PARAMETER                                 ::  nx = 256, ny = 256
-   INTEGER                                              ::  n
-   INTEGER, PARAMETER                                  ::      aux_dim = 32 ! 136
-   REAL*8                                               ::  aux(NAtoms, aux_dim)
-   REAL*8, DIMENSION(:), ALLOCATABLE               ::  r, logr
-   REAL*8                                               ::  uu, loguu
+   INTEGER, PARAMETER                              :: nx = 256, ny = 256 ! are these actually used anywhere?
+   INTEGER                                         :: n
+   INTEGER, PARAMETER                              :: aux_dim = 32 ! 136
+   REAL*8                                          :: aux(NAtoms, aux_dim)
+   REAL*8, DIMENSION(:), ALLOCATABLE               :: r, logr
+   REAL*8                                          :: uu, loguu
    REAL*8                                          :: rmin = 0.01, rmax = 10.0, rlimit = 10.0
+   logical                                         :: rauto = .TRUE.
 
-   REAL*8                                                ::  rhocritz
+   REAL*8                                          ::  rhocritz
 
 ! cluster data and working arrays for DM_GNFW model
 

@@ -222,7 +222,7 @@ CONTAINS
          ELSE
             if (myID == 0) then
                WRITE (*, *) "ERROR: Can not use a prior other than delta, unfiorm, log uniform, Gaussian, &
-&                                        lognormal or mass function for the cluster redshift. Aborting."
+               &                                        lognormal or mass function for the cluster redshift. Aborting."
             end if
             Initialise = 1
             return
@@ -231,10 +231,10 @@ CONTAINS
          ! uniform sampling in triangle check
 
          IF ((Geo_PriorType(i, 1) == 9 .and. Geo_PriorType(i, 2) /= 9) .or. &
-             (Geo_PriorType(i, 1) /= 9 .and. Geo_PriorType(i, 2) == 9)) THEN
+            (Geo_PriorType(i, 1) /= 9 .and. Geo_PriorType(i, 2) == 9)) THEN
             if (myID == 0) then
                WRITE (*, *) "ERROR: Geo_PriorType should be set to 9 for both x and y positions if &
-&                                                uniform sampling in a triangle is desired"
+               &                                                uniform sampling in a triangle is desired"
             end if
             Initialise = 1
             return
@@ -308,7 +308,7 @@ CONTAINS
       xrayCpred = 0.d0
 
       xrayBG(1:LENx) = (xrayBG_predmax/xrayNch)* &
-                       (sexpotime)*(Aeffave)*(xraycell*xraycell*sec2min*sec2min)
+         (sexpotime)*(Aeffave)*(xraycell*xraycell*sec2min*sec2min)
 
       ! Calculating XRAYLhood0= sum[(c_obs)_i !]
 
@@ -343,6 +343,15 @@ CONTAINS
 
 !-----------------------------------------
 ! Initialise working arrays:
+      if (rauto == .TRUE. .and. Dn == 1) then
+         ! Init logr for fixed redshift
+         angfactor = sec2rad * lookD(1,2) ! Physical Mpc per arcsec
+         rlimit = dble(min(xraynx, xrayny)) / 2 * xraycell * angfactor ! radius in Mpc
+         rmax = rlimit ! TODO: Really figure out the difference between rmax and rlimit
+         rmin = 0.001 * rlimit ! TODO: Log values for debug, configurable scale, configure only one value?
+         write(*, *) 'Using dynamic radius limits'
+         write(*, *) 'rmin: ', rmin, ' rlimit = rmax = ', rlimit
+      end if
 
       DO i = 1, n
          logr(i) = log10(rmin) + (log10(rlimit) - log10(rmin))*(i - 1)/dble(n - 1)

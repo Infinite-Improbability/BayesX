@@ -144,6 +144,8 @@ contains
             read (funit, *) z_PriorType(1), z_Prior(1, 1), z_Prior(1, 2)
          elseif (tag == '#mass_function') then
             read (funit, *) mass_function
+         elseif (tag == '#rauto') then
+            read (funit, *) rauto
          elseif (tag == '#rmin') then
             read (funit, *) rmin
          elseif (tag == '#rmax') then
