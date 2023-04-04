@@ -13,17 +13,19 @@ def plot(
     chain_paths: Union[Path, Sequence[Path]],
     parameters: Iterable[str | tuple[str, float] | tuple[str, None]],
     plot_file: Optional[Path] = None,
+    chain_labels: Union[str, Sequence[str]] = [],
 ):
     """Plot chains
 
-    :param chain_paths: _description_
+    :param chain_paths: Path, or paths, to chains, including filename prefix, e.g. 'chains/subfolder/out' for files named 'outFILENAME'
     :type chain_paths: Union[Path, Sequence[Path]]
-    :param parameters: _description_
+    :param parameters: Parameter ids to plot, e.g. [p001]
     :type parameters: Iterable[str  |  tuple[str, float]  |  tuple[str, None]]
-    :param plot_file: _description_, defaults to None
+    :param plot_file: Path to save plot as, defaults to None
     :type plot_file: Optional[Path], optional
-    :raises Exception: _description_
-    :raises Exception: _description_
+    :param chain_labels: Labels for the chains. Used in the legend, must be the same length as chain_paths, defaults to []
+    :type chain_labels: Union[str, Sequence[str]], optional
+    :raises Exception: Parameter name definition file missing.
     """
     # Massage input
 
@@ -31,6 +33,9 @@ def plot(
     # sequence
     if isinstance(chain_paths, Path):
         chain_paths = [chain_paths]
+
+    if isinstance(chain_labels, str):
+        chain_labels = [chain_labels]
 
     # Set default output path
     if plot_file is None:
@@ -144,9 +149,13 @@ def plot(
         samps.setParamNames(parsi)  # This looks like it undoes all our changes
 
     # Setup for plots
-    legend = []
-    for c in chains:
-        legend.append(c.getName())
+    if chain_labels:
+        legend = chain_labels
+    else:
+        legend = []
+        for c in chains:
+            legend.append(c.getName())
+
     plotter = plots.get_subplot_plotter(width_inch=8)
     plotter.settings.axes_fontsize = 8
     plotter.settings.alpha_filled_add = 0.4
@@ -179,3 +188,18 @@ def plot(
 
     # Save as image
     plotter.export(str(plot_file))
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Generate plots from chains"
+    )
+    parser.add_argument("chain_paths", type=Path, help="Paths to chains", nargs="+")
+    parser.add_argument("-p" "--parameter", type=str, nargs="+", help="Parameter ids to plot")
+    parser.add_argument("-o", "--output", type=Path, default=None, help="Path to save plot as")
+    parser.add_argument("-l", "--label", type=str, nargs="+", default=[], help="Labels for chains")
+    args = parser.parse_args()
+    plot(args.chain_paths, args.p__parameter, args.output, args.label)
+
+
+    
