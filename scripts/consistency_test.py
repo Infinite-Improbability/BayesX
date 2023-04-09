@@ -226,7 +226,16 @@ with open(fixed_path.path, "w") as f:
 
 # And run for fixed case
 time = datetime.now()
-run(["mpiexec", "-n", str(cpu_count()), "bin/BayesX", fixed_path.path])
+run(
+    [
+        "mpiexec",
+        "-n",
+        str(cpu_count()),
+        "--oversubscribe",
+        "bin/BayesX",
+        fixed_path.path,
+    ]
+)
 fixed_time = datetime.now() - time
 print(f"\nFixed run complete in {fixed_time.total_seconds()} seconds\n\n")
 
@@ -253,7 +262,9 @@ with open(free_path.path, "w") as f:
 
 # Run with free priors
 time = datetime.now()
-run(["mpiexec", "-n", str(cpu_count()), "bin/BayesX", free_path.path])
+run(
+    ["mpiexec", "-n", str(cpu_count()), "--oversubscribe", "bin/BayesX", free_path.path]
+)
 free_time = datetime.now() - time
 print(f"\nFree run complete in {free_time.total_seconds()} seconds\n\n")
 
