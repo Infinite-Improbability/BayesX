@@ -229,3 +229,5 @@ scripts/sim_test.py
 !data/A262datafiles
 !data/MEKAL
 !data/simtestdatafiles
+scripts/pybayesx/docs/source/modules.rst
+scripts/pybayesx/docs/source/pybayesx.rst

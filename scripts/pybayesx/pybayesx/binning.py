@@ -26,7 +26,7 @@ def bin(
     If `mask = True` then instead bin passed on mask status.
 
     The current implementation of this function leaves a cross artefact on the binned
-     data.
+    data.
 
     :param x: 1D sequence of x coordinates of events. Should have an entry for every
      point.
@@ -36,7 +36,7 @@ def bin(
     :type y: numpy.typing.ArrayLike
     :param channel: Sequence of channels of events, assumed to use the same order as y.
      If `mask` is True then this value  should be 1 for all masked spatial coordinates
-      and 0 otherwise.
+     and 0 otherwise.
     :type channel: numpy.typing.ArrayLike
     :param nbins: The number of bins along each spatial axis
     :type nbins: int

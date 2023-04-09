@@ -13,7 +13,7 @@ from astropy.io.fits.hdu import PrimaryHDU
 from numpy.typing import ArrayLike
 from pybayesx.binning import bin
 
-from scripts.pybayesx.pybayesx.config import AnalysisConfig
+from pybayesx.config import AnalysisConfig
 
 log = getLogger(__name__)
 
