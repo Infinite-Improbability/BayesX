@@ -19,7 +19,14 @@ log = getLogger(__name__)
 
 
 class Data(ABC):
+    """Abstract base class for source data"""
+
     def __init__(self, data: ArrayLike) -> None:
+        """Basic initialiser
+
+        :param data: Array on input data
+        :type data: ArrayLike
+        """
         self.data = np.array(data)
         self.path = None  # path to data in format ready for BayesX
         pass
@@ -57,6 +64,17 @@ class Data(ABC):
     def bin(
         self, n_bins: int, cellsize: float, outfile: Optional[Path] = None, **kwargs
     ):
+        """Bin arbitary data with three dimensions in first two dimensions.
+
+        :param n_bins: Amount of bins in one dimension
+        :type n_bins: int
+        :param cellsize: Size of a single bin, in units of source data
+        :type cellsize: float
+        :param outfile: Path to write binned data to, defaults to None
+        :type outfile: Optional[Path], optional
+        :return: 1D array of binned data
+        :rtype: np.ndarray[Any, np.dtype[np.float64]]
+        """
         self.path = outfile
         return bin(
             self.data[:, 0],
@@ -76,6 +94,16 @@ class Data(ABC):
 
 class Events(Data):
     def __init__(self, data: ArrayLike, background: bool, exposure_time: float) -> None:
+        """X-ray event data
+
+        :param data: Source data array
+        :type data: ArrayLike
+        :param background: True if data is for the X-ray background
+        :type background: bool
+        :param exposure_time: Observation exposure time (live).
+        :type exposure_time: float
+        """
+        # TODO: Figure out consistent format for input data in docstring
         super().__init__(data)
         assert self.data.ndim == 3
         self.background = background
@@ -92,6 +120,22 @@ class Events(Data):
         nChannels: int,
         exposure_time: float,
     ) -> Events:
+        """
+        Load events in the 1D format used by BayesX.
+
+        :param path: Path to file
+        :type path: Path
+        :param background: True if data is for the X-ray background
+        :type background: bool
+        :param nx: Number of bins in the x dimension
+        :type nx: int
+        :param ny: Number of bins in the y dimension
+        :type ny: int
+        :param nChannels: Number of channels
+        :type nChannels: int
+        :param exposure_time: Observation exposure time (live).
+        :type exposure_time: float
+        """
         data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
         reshaped = np.reshape(
             data, (nx, ny, nChannels), order="C"
@@ -123,20 +167,19 @@ class Events(Data):
         y_key: str = "Y",
         channel_key: str = "PI",
         du_index=1,  # TODO: Confirm correct
-        **kwargs,
     ) -> Events:
         """Load events from a fits file.
         The file will be converted to the text format used by BayesX.
 
         :param path: Path to events fits file
         :type path: Path
-        :param x_key: _description_, defaults to "X"
+        :param x_key: Key of 'x' column in fits file, defaults to "X"
         :type x_key: str, optional
-        :param y_key: _description_, defaults to "Y"
+        :param y_key: Key of 'y' column in fits file, defaults to "Y"
         :type y_key: str, optional
-        :param channel_key: _description_, defaults to "PI"
+        :param channel_key: Key of channel column in fits file, defaults to "PI"
         :type channel_key: str, optional
-        :param du_index: List index of data unit with events (0-indexed)
+        :param du_index: List index of data unit in HDUList with events (0-indexed)
         :type du_index: int
         :param mode: `'evts'` for events, `bg` for background.
         :type mode: str
@@ -158,21 +201,20 @@ class Events(Data):
 
 
 class Mask(Data):
-    def __init__(self, data: ArrayLike, background: bool) -> None:
+    def __init__(self, data: ArrayLike) -> None:
         super().__init__(data)
         assert self.data.ndim == 2
-        self.background = background
         self.nx, self.ny, self.nChannels = self.data.shape  # TODO: Verify correctness
 
     @classmethod
     def load_from_txt(
-        cls, path: Path, background: bool, nx: int, ny: int, nChannels: int, **kwargs
+        cls, path: Path, nx: int, ny: int, nChannels: int, **kwargs
     ) -> Mask:
         data = np.loadtxt(path)
         reshaped = np.reshape(
             data, (nx, ny, nChannels), order="C"
         )  # TODO: Verify correctness
-        return cls(reshaped, background)
+        return cls(reshaped)
 
     @classmethod
     def load_from_reg(
@@ -383,7 +425,7 @@ def load_all_from_fits(
     cosmology = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.041)
     cellsize_arcsec = 0.492 * cellsize
     cellsize_radians = 4.8481368e-6 * cellsize_arcsec
-    distance_per_rad = cosmology.angular_diameter_distance(z)
+    distance_per_rad: float = cosmology.angular_diameter_distance(z)
     cellsize_Mpc = cellsize_radians * distance_per_rad
     area_radius = np.min(evts.nx, evts.ny) / 2 * cellsize_Mpc
 

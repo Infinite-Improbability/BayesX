@@ -67,7 +67,7 @@ MODULE params
    REAL*8, DIMENSION(:), ALLOCATABLE               :: r, logr
    REAL*8                                          :: uu, loguu
    REAL*8                                          :: rmin = 0.01, rmax = 10.0, rlimit = 10.0
-   logical                                         :: rauto = .TRUE.
+   LOGICAL                                         :: rauto = .TRUE.
 
    REAL*8                                          ::  rhocritz
 
