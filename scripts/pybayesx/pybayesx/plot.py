@@ -17,13 +17,15 @@ def plot(
 ):
     """Plot chains
 
-    :param chain_paths: Path, or paths, to chains, including filename prefix, e.g. 'chains/subfolder/out' for files named 'outFILENAME'
+    :param chain_paths: Path, or paths, to chains, including filename prefix,
+     e.g. 'chains/subfolder/out' for files named 'outFILENAME'
     :type chain_paths: Union[Path, Sequence[Path]]
     :param parameters: Parameter ids to plot, e.g. [p001]
     :type parameters: Iterable[str  |  tuple[str, float]  |  tuple[str, None]]
     :param plot_file: Path to save plot as, defaults to None
     :type plot_file: Optional[Path], optional
-    :param chain_labels: Labels for the chains. Used in the legend, must be the same length as chain_paths, defaults to []
+    :param chain_labels: Labels for the chains. Used in the legend, must be the same
+     length as chain_paths, defaults to []
     :type chain_labels: Union[str, Sequence[str]], optional
     :raises Exception: Parameter name definition file missing.
     """
@@ -189,17 +191,22 @@ def plot(
     # Save as image
     plotter.export(str(plot_file))
 
+
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(
-        description="Generate plots from chains"
-    )
+
+    parser = argparse.ArgumentParser(description="Generate plots from chains")
     parser.add_argument("chain_paths", type=Path, help="Paths to chains", nargs="+")
-    parser.add_argument("-p" "--parameter", type=str, nargs="+", help="Parameter ids to plot")
-    parser.add_argument("-o", "--output", type=Path, default=None, help="Path to save plot as")
-    parser.add_argument("-l", "--label", type=str, nargs="+", default=[], help="Labels for chains")
+    parser.add_argument(
+        "-p" "--parameter", type=str, nargs="+", help="Parameter ids to plot"
+    )
+    parser.add_argument(
+        "-o", "--output", type=Path, default=None, help="Path to save plot as"
+    )
+    parser.add_argument(
+        "-l", "--label", type=str, nargs="+", default=[], help="Labels for chains"
+    )
     args = parser.parse_args()
     plot(args.chain_paths, args.p__parameter, args.output, args.label)
 
-
-    
+    # TODO: Interactive mode

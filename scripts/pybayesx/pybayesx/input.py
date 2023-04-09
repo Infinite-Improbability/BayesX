@@ -175,11 +175,12 @@ class Mask(Data):
         return cls(reshaped, background)
 
     @classmethod
-    def load_from_fits(
+    def load_from_reg(
         cls,
         path: Path,
         **kwargs,
     ) -> Mask:
+        # TODO: Load using masking script
         raise NotImplementedError
 
     def bin(
@@ -227,9 +228,9 @@ class RMF(Data):
     @classmethod
     def load_from_txt(cls, path: Path, nBins: int, nChannels: int, **kwargs) -> RMF:
         data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
-        reshaped = np.reshape(
-            data, (nBins, nChannels), order="C"
-        )  # TODO: Verify correctness
+        # reshaped = np.reshape(
+        #     data, (nBins, nChannels), order="C"
+        # )  # TODO: Verify correctness
         return cls(data)
 
     @classmethod
