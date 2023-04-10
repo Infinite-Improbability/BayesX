@@ -1,6 +1,14 @@
 [project]
 name = "PyBayesX"
-version = "0.2-alpha"
+version = "0.3.0"
+description = "Wrapper about BayesX to aid in data preperation and automated analysis."
+dependencies = [
+    "numpy ~= 1.24",
+    "astropy ~= 5.2",
+    "getdist ~= 1.4"
+]
+license = "MIT"
+authors = "Ryan Cox ryan.cox@vuw.ac.nz"
 
 [project.scripts]
 pbx = "pybayesx:scripts.main"
