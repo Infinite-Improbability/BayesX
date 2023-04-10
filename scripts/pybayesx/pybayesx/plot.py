@@ -153,7 +153,7 @@ def plot(
                         pj.name = p_name
 
             if not found:
-                print(f"Warning: {p_label} not found in {chain_paths[i]}")
+                log.warn(f"Warning: {p_label} not found in {chain_paths[i]}")
 
         samps.setParamNames(parsi)  # This looks like it undoes all our changes
 
@@ -197,6 +197,7 @@ def plot(
 
     # Save as image
     if save:
+        # TODO: Clobber protection
         plotter.export(str(plot_file))
 
     if display and plotter.fig is not None:

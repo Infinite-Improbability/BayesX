@@ -7,7 +7,6 @@ from os import makedirs
 from pathlib import Path
 from subprocess import STDOUT
 from subprocess import run as sys_run
-from sys import stderr, stdout
 from typing import Optional, Union
 
 from .data import DataConfig
@@ -141,11 +140,13 @@ class Analysis:
             self.config_path = self.base_path.joinpath(f"infile_{self.label}.inp")
 
         # Append filenames to paths
-        self.output_path = self.base_path.joinpath("label", "out_")
+        self.output_path = self.base_path.joinpath("out", "out_")
 
         # Verify we have all required priors
         if not self.model.check_priors([p.property for p in self.priors]):
             raise ValueError("Missing required priors for model.")
+
+        makedirs(self.config_path.parent)
 
         with open(self.config_path, "w") as f:
             for key, value in (
@@ -233,10 +234,10 @@ class Analysis:
         # if True write BayesX output to a file
         if logfile:
             i = 0
-            log_path = self.output_path.joinpath("log.log")
+            log_path = self.output_path.parent.joinpath("log.log")
             while log_path.is_file():
                 i += 1
-                log_path = self.output_path.joinpath(f"log{i}.log")
+                log_path = self.output_path.parent.joinpath(f"log{i}.log")
             lf = log_path.open("w")
         else:
             lf = None
@@ -253,8 +254,10 @@ class Analysis:
         )
 
     def plot(self, plot_priors: list[str | tuple[str, float] | tuple[str, None]] = []):
-        plot_path = self.base_path.joinpath("plots")
-        makedirs(plot_path)
+        plot_path = self.base_path.joinpath(
+            "plots", f"plot_tri_{datetime.now().strftime('%Y%m%d%H%M%S')}.svg"
+        )
+        makedirs(plot_path.parent)
 
         log.info(f"Creating plot at {plot_path}")
 
@@ -282,16 +285,7 @@ class Analysis:
         self.plot()
 
 
-if __name__ == "__main__":
-    # Write logging to shell
-    log.setLevel(logging.INFO)  # log everything
-    infoHandler = logging.StreamHandler(stream=stdout)
-    infoHandler.setLevel(logging.INFO)  # write info to stdout
-    log.addHandler(infoHandler)
-    errorHandler = logging.StreamHandler(stream=stderr)
-    errorHandler.setLevel(logging.WARNING)  # warnings or errors go to stderr
-    log.addHandler(errorHandler)
-
+def demo():
     log.info("Running example analysis")
 
     dc = DataConfig(
