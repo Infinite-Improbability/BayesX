@@ -9,7 +9,7 @@
 project = "PyBayesX"
 copyright = "2023, Ryan Cox"
 author = "Ryan Cox"
-release = "0.1-alpha"
+release = "0.3.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
