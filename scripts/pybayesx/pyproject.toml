@@ -1,3 +1,6 @@
 [project]
 name = "PyBayesX"
 version = "0.2-alpha"
+
+[project.scripts]
+pbx = "pybayesx:scripts.main"

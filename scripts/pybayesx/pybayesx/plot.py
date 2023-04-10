@@ -12,6 +12,8 @@ log = getLogger(__name__)
 def plot(
     chain_paths: Union[Path, Sequence[Path]],
     parameters: Iterable[str | tuple[str, float] | tuple[str, None]],
+    display: bool = False,
+    save: bool = True,
     plot_file: Optional[Path] = None,
     chain_labels: Union[str, Sequence[str]] = [],
 ):
@@ -22,7 +24,12 @@ def plot(
     :type chain_paths: Union[Path, Sequence[Path]]
     :param parameters: Parameter ids to plot, e.g. [p001]
     :type parameters: Iterable[str  |  tuple[str, float]  |  tuple[str, None]]
-    :param plot_file: Path to save plot as, defaults to None
+    :param display: Show interactive plot, defaults to False
+    :type display: bool
+    :param save: Export plot to file, defaults to False
+    :type save: bool
+    :param plot_file: Path to export plot as. If None (default) file is saved in first
+     chains folder as an SVG with a name based on the timestamp.
     :type plot_file: Optional[Path], optional
     :param chain_labels: Labels for the chains. Used in the legend, must be the same
      length as chain_paths, defaults to []
@@ -42,7 +49,7 @@ def plot(
     # Set default output path
     if plot_file is None:
         plot_file = Path(chain_paths[0]).joinpath(
-            f"_{datetime.now().strftime('%Y%m%d%H%M%S')}_tri.png"
+            f"_{datetime.now().strftime('%Y%m%d%H%M%S')}_tri.svg"
         )
 
     # Convert all parameters to tuples of the form (id_number, true_value) using None
@@ -189,24 +196,8 @@ def plot(
                     ax.plot(markers[p], markers[p2], "*k")
 
     # Save as image
-    plotter.export(str(plot_file))
+    if save:
+        plotter.export(str(plot_file))
 
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Generate plots from chains")
-    parser.add_argument("chain_paths", type=Path, help="Paths to chains", nargs="+")
-    parser.add_argument(
-        "-p" "--parameter", type=str, nargs="+", help="Parameter ids to plot"
-    )
-    parser.add_argument(
-        "-o", "--output", type=Path, default=None, help="Path to save plot as"
-    )
-    parser.add_argument(
-        "-l", "--label", type=str, nargs="+", default=[], help="Labels for chains"
-    )
-    args = parser.parse_args()
-    plot(args.chain_paths, args.p__parameter, args.output, args.label)
-
-    # TODO: Interactive mode
+    if display and plotter.fig is not None:
+        plotter.fig.show()
