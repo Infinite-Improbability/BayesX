@@ -72,7 +72,7 @@ class Data(ABC):
         :rtype: np.ndarray[Any, np.dtype[np.float64]]
         """
         self.path = outfile
-        return self._bin(
+        b = self._bin(
             self.data[:, 0],
             self.data[:, 1],
             self.data[:, 2],
@@ -81,6 +81,8 @@ class Data(ABC):
             outfile=outfile,
             **kwargs,
         )
+        self.nx, self.ny, self.nChannels = b.shape
+        return b
 
     def _bin(
         self,
@@ -242,9 +244,9 @@ class Events(Data):
         """
         # TODO: Figure out consistent format for input data in docstring
         super().__init__(data)
-        assert self.data.ndim == 3
+        # assert self.data.ndim == 3
         self.background = background
-        self.nx, self.ny, self.nChannels = self.data.shape  # TODO: Verify correctness
+        # self.nx, self.ny, self.nChannels = self.data.shape  # TODO: Verify correctness
         self.exposure_time = exposure_time
 
     @classmethod
@@ -331,7 +333,7 @@ class Events(Data):
                     "Trying to load events from a data unit that lacks events extension"
                 )
 
-            data = np.column_stack((f[x_key], f[y_key], f[channel_key]))  # type: ignore
+            data = np.column_stack((f.data[x_key], f.data[y_key], f.data[channel_key]))  # type: ignore
             exposure_time: float = f.header["livetime"]  # type: ignore
 
             return cls(data, background, exposure_time)
@@ -341,7 +343,6 @@ class Mask(Data):
     def __init__(self, data: ArrayLike) -> None:
         super().__init__(data)
         assert self.data.ndim == 2
-        self.nx, self.ny, self.nChannels = self.data.shape  # TODO: Verify correctness
 
     @classmethod
     def load_from_txt(
@@ -372,7 +373,7 @@ class Mask(Data):
 class ARF(Data):
     def __init__(self, data: ArrayLike) -> None:
         super().__init__(data)
-        assert self.data.ndim == 2 and 1 in self.data.shape  # TODO: Better verification
+        assert self.data.ndim == 1  # TODO: Better verification
         self.xrayNbins = len(self.data)  # TODO: Verify correctness
 
     @classmethod
@@ -543,8 +544,8 @@ def load_all_from_fits(
     arf_path: Path,
     rmf_path: Path,
     out_path: Path,
+    z: float,
     mask_path: Optional[Path] = None,
-    z=float,
 ):
     evts = Events.load_from_fits(evts_path, False)
     bg = Events.load_from_fits(bg_path, True)
@@ -557,8 +558,10 @@ def load_all_from_fits(
     evts.bin(nbins, cellsize, out_path.joinpath("evts.txt"))
     bg.bin(nbins, cellsize, out_path.joinpath("bg.txt"))
 
+    log.info(f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.nChannels})")
+
     if mask_path is not None:
-        mask = Mask.load_from_file(mask_path)
+        mask = Mask.load_from_reg(mask_path)
         mask_path = out_path.joinpath("mask.txt")
         mask.bin(nbins, cellsize, mask_path)
 
