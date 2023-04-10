@@ -126,10 +126,11 @@ class Analysis:
         self.output_path: Optional[Path] = None
 
     def export_infile(self, path: Optional[Union[Path, str]] = None):
-        """Run BayesX with a given configuration.
+        """
+        Run BayesX with a given configuration.
 
         :param label: Label for the run and related output, defaults to current time in
-        format YYYYMMDDHHmmSS
+         format YYYYMMDDHHmmSS
         :type label: str, optional
         :raises ValueError: When missing priors required by model.
         """
