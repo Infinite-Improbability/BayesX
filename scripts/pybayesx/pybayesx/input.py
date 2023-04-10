@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
-from astropy.cosmology import FlatLambdaCDM
 from astropy.io import fits
 from astropy.io.fits.hdu import PrimaryHDU
 from numpy.typing import ArrayLike
@@ -322,6 +321,7 @@ class DataConfig:
         8.4e-6  # Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1,
     )
 
+    rauto: bool = True  # Automatic radius calculation
     rmin: float = 0.01  # Minimum radius, Mpc
     rmax: float = 10  # Maximum radius for xray emission and GNFW model, Mpc
     rlimit: float = (
@@ -422,13 +422,6 @@ def load_all_from_fits(
     rmf.export(out_path.joinpath("rmf.txt"))
     arf.export(out_path.joinpath("arf.txt"))
 
-    cosmology = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.041)
-    cellsize_arcsec = 0.492 * cellsize
-    cellsize_radians = 4.8481368e-6 * cellsize_arcsec
-    distance_per_rad: float = cosmology.angular_diameter_distance(z)
-    cellsize_Mpc = cellsize_radians * distance_per_rad
-    area_radius = np.min(evts.nx, evts.ny) / 2 * cellsize_Mpc
-
     dc = DataConfig(
         filBG=bg.path,  # type: ignore
         filevent=evts.path,  # type: ignore
@@ -438,14 +431,11 @@ def load_all_from_fits(
         ny=evts.ny,
         xrayNbin=rmf.data.shape[0],
         xrayNch=rmf.data.shape[1],
-        xraycell=cellsize_arcsec,
+        xraycell=cellsize * 0.492,
         xrayEmin=0,
         xrayEmax=0,
         sexpotime=evts.exposure_time,
         bexpotime=bg.exposure_time,
-        rmax=area_radius,
-        rlimit=area_radius,
-        rmin=0.001 * area_radius,
     )
 
     ac = AnalysisConfig(nlive=100)

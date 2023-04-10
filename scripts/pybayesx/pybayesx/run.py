@@ -24,6 +24,85 @@ from pybayesx.plot import plot
 log = logging.getLogger(__name__)
 
 
+def make_infile(
+    data_config: DataConfig,
+    analysis_config: AnalysisConfig,
+    model: Model,
+    priors: Iterable[Prior],
+    base_path: Union[Path, str],
+    label: str = ,
+) -> Path:
+    """Run BayesX with a given configuration.
+
+    :param data_config: Input data files and associated configuration
+    :type data_config: DataConfig
+    :param analysis_config: Data-independent configuration for this analysis
+    :type analysis_config: AnalysisConfig
+    :param model: Model being used.
+    :type model: Model
+    :param priors: Prior distributions. Must include all priors required by the model.
+    :type priors: Iterable[Prior]
+    :param base_path: Path to root folder for all output, e.g. chains.
+     Actual output will go into a subfolder determined by the label.
+    :type base_path: Union[Path, str]
+    :param label: Label for the run and related output, defaults to current time in
+     format YYYYMMDDHHmmSS
+    :type label: str, optional
+    :raises ValueError: When missing priors required by model.
+    """
+
+    log.info(f"Writing infile for {label}.")
+
+    # Convert input data to desired formats
+    base_path = Path(base_path) if isinstance(base_path, str) else base_path
+
+    # Generate paths for this run based on base_path and label
+    base_path = base_path.joinpath(label)
+    config_path = base_path.joinpath(f"infile_{label}.inp")
+    output_path = base_path.joinpath("out")
+
+    # Make output folders
+    mkdir(output_path)
+
+    # Append filenames to paths
+    output_path = output_path.joinpath("out_")
+
+    # Verify we have all required priors
+    if not model.check_priors([i.property for i in priors]):
+        raise ValueError("Missing required priors for model.")
+
+    with open(config_path, "w") as f:
+        for key, value in (asdict(data_config) | asdict(analysis_config)).items():
+            if value is None:
+                continue
+            elif isinstance(value, float):
+                value = str(value).replace(
+                    "e", "d"
+                )  # Output using fortran double notation 4.0d5 = 4.0 * 10^5
+            elif isinstance(value, Path):
+                value = f"'{value}'"
+            elif isinstance(value, bool):
+                if value:
+                    value = "T"
+                else:
+                    value = "F"
+
+            f.write(f"#{key}\n")
+            f.write(str(value) + "\n")
+        for prior in priors:
+            prior: Prior
+            f.write(f"#{prior.property.value}\n")
+            f.write(prior.export() + "\n")
+
+        f.write("#cluster_model\n")
+        f.write(str(model.num) + "\n")
+
+        f.write("#root\n")
+        f.write(f"'{output_path}'\n")
+
+    return config_path
+
+
 def run(
     data_config: DataConfig,
     analysis_config: AnalysisConfig,
@@ -62,7 +141,6 @@ def run(
 
     # Generate paths for this run based on base_path and label
     base_path = base_path.joinpath(label)
-    config_path = base_path.joinpath(f"infile_{label}.inp")
     output_path = base_path.joinpath("out")
     plot_path = base_path.joinpath("plots")
 
@@ -75,38 +153,7 @@ def run(
     output_path = output_path.joinpath("out_")
     plot_path = plot_path.joinpath("automatic_tri.svg")
 
-    # Verify we have all required priors
-    if not model.check_priors([i.property for i in priors]):
-        raise ValueError("Missing required priors for model.")
-
-    with open(config_path, "w") as f:
-        for key, value in (asdict(data_config) | asdict(analysis_config)).items():
-            if value is None:
-                continue
-            elif isinstance(value, float):
-                value = str(value).replace(
-                    "e", "d"
-                )  # Output using fortran double notation 4.0d5 = 4.0 * 10^5
-            elif isinstance(value, Path):
-                value = f"'{value}'"
-            elif isinstance(value, bool):
-                if value:
-                    value = "T"
-                else:
-                    value = "F"
-
-            f.write(f"#{key}\n")
-            f.write(str(value) + "\n")
-        for prior in priors:
-            prior: Prior
-            f.write(f"#{prior.property.value}\n")
-            f.write(prior.export() + "\n")
-
-        f.write("#cluster_model\n")
-        f.write(str(model.num) + "\n")
-
-        f.write("#root\n")
-        f.write(f"'{output_path}'\n")
+    config_path = make_infile(data_config, analysis_config, model, priors, base_path, label)
 
     log.info(f"Launching BayesX for run {label}")
     start_time = datetime.now()
