@@ -274,7 +274,7 @@ class Analysis:
         if self.output_path is None:
             raise Exception  # TODO: Error handling
 
-        plot(self.output_path, plot_priors, plot_path)
+        plot(self.output_path, plot_priors, plot_file=plot_path)
 
     def analyse(self):
         self.export_infile()

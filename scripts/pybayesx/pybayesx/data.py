@@ -543,19 +543,24 @@ def load_all_from_fits(
     arf_path: Path,
     rmf_path: Path,
     out_path: Path,
+    mask_path: Optional[Path] = None,
     z=float,
 ):
     evts = Events.load_from_fits(evts_path, False)
     bg = Events.load_from_fits(bg_path, True)
     arf = ARF.load_from_fits(arf_path)
     rmf = RMF.load_from_fits(rmf_path)
-    # Missing mask
 
     cellsize = 4
     nbins = 256
 
     evts.bin(nbins, cellsize, out_path.joinpath("evts.txt"))
     bg.bin(nbins, cellsize, out_path.joinpath("bg.txt"))
+
+    if mask_path is not None:
+        mask = Mask.load_from_file(mask_path)
+        mask_path = out_path.joinpath("mask.txt")
+        mask.bin(nbins, cellsize, mask_path)
 
     rmf.export(out_path.joinpath("rmf.txt"))
     arf.export(out_path.joinpath("arf.txt"))
@@ -574,6 +579,7 @@ def load_all_from_fits(
         xrayEmax=0,
         sexpotime=evts.exposure_time,
         bexpotime=bg.exposure_time,
+        filmask=mask_path,
     )
 
     return dc
