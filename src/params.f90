@@ -60,15 +60,16 @@ MODULE params
 
 !========================================================================================
 
-   INTEGER, PARAMETER                                 ::  nx = 256, ny = 256
-   INTEGER                                              ::  n
-   INTEGER, PARAMETER                                  ::      aux_dim = 32 ! 136
-   REAL*8                                               ::  aux(NAtoms, aux_dim)
-   REAL*8, DIMENSION(:), ALLOCATABLE               ::  r, logr
-   REAL*8                                               ::  uu, loguu
+   INTEGER, PARAMETER                              :: nx = 256, ny = 256 ! are these actually used anywhere?
+   INTEGER                                         :: n
+   INTEGER, PARAMETER                              :: aux_dim = 32 ! 136
+   REAL*8                                          :: aux(NAtoms, aux_dim)
+   REAL*8, DIMENSION(:), ALLOCATABLE               :: r, logr
+   REAL*8                                          :: uu, loguu
    REAL*8                                          :: rmin = 0.01, rmax = 10.0, rlimit = 10.0
+   LOGICAL                                         :: rauto = .TRUE.
 
-   REAL*8                                                ::  rhocritz
+   REAL*8                                          ::  rhocritz
 
 ! cluster data and working arrays for DM_GNFW model
 
@@ -163,8 +164,8 @@ MODULE params
    INTEGER, PARAMETER  ::  NL_MAX = 5500
 
    CHARACTER(LEN=3), PARAMETER   ::  Elements(1:15) = &
-                                    (/'H  ', 'He ', 'C  ', 'N  ', 'O  ', 'Ne ', 'Na ', 'Mg ', 'Al ', &
-                                      'Si ', 'S  ', 'Ar ', 'Ca ', 'Fe ', 'Ni '/)
+      (/'H  ', 'He ', 'C  ', 'N  ', 'O  ', 'Ne ', 'Na ', 'Mg ', 'Al ', &
+      'Si ', 'S  ', 'Ar ', 'Ca ', 'Fe ', 'Ni '/)
    REAL*8              ::  abund, nuc_tot, Z_tot, xe, xzin, elx, flx
    DIMENSION abund(NOEL), nuc_tot(NOEL), Z_tot(NOEL), xe(NOEL), xzin(NUMION), elx(NL_MAX)
    DIMENSION flx(NL_MAX)
@@ -211,7 +212,7 @@ MODULE params
    INTEGER, DIMENSION(:), ALLOCATABLE :: xrayCobs, xrayBG_obs
    REAL*8                    :: XRAYLhood0
 !Hydrogen Column Density
-   REAL                    ::  N_H_col
+   REAL                    ::  N_H_col ! cm^2
 !Background model
    REAL*8                 ::  xrayBG_predmax
 

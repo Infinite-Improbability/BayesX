@@ -31,11 +31,13 @@ Run this script from the BayesX root folder:
 * To set priors look around line 150.
 """
 
-import numpy as np
-from subprocess import run
-from os import cpu_count, mkdir
-from datetime import datetime
 from argparse import ArgumentParser
+from datetime import datetime
+from os import cpu_count, mkdir
+from subprocess import run
+from typing import Optional
+
+import numpy as np
 
 rng = np.random.default_rng()
 
@@ -74,7 +76,9 @@ class Prior:
     for information on type, param1 and param2.
     """
 
-    def __init__(self, type_: int, param1: float, param2: float, value: float = None):
+    def __init__(
+        self, type_: int, param1: float, param2: float, value: Optional[float] = None
+    ):
         """
         Parameters
         ----------
@@ -114,6 +118,8 @@ class Prior:
         elif self.type == 4:
             # LogGaussian
             value = rng.lognormal(self.param1, self.param2)
+        else:
+            raise Exception("Invalid prior type")
         return value
 
     def free(self) -> str:
@@ -220,7 +226,16 @@ with open(fixed_path.path, "w") as f:
 
 # And run for fixed case
 time = datetime.now()
-run(["mpiexec", "-n", str(cpu_count()), "bin/BayesX", fixed_path.path])
+run(
+    [
+        "mpiexec",
+        "-n",
+        str(cpu_count()),
+        "--oversubscribe",
+        "bin/BayesX",
+        fixed_path.path,
+    ]
+)
 fixed_time = datetime.now() - time
 print(f"\nFixed run complete in {fixed_time.total_seconds()} seconds\n\n")
 
@@ -247,7 +262,9 @@ with open(free_path.path, "w") as f:
 
 # Run with free priors
 time = datetime.now()
-run(["mpiexec", "-n", str(cpu_count()), "bin/BayesX", free_path.path])
+run(
+    ["mpiexec", "-n", str(cpu_count()), "--oversubscribe", "bin/BayesX", free_path.path]
+)
 free_time = datetime.now() - time
 print(f"\nFree run complete in {free_time.total_seconds()} seconds\n\n")
 

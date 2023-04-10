@@ -83,13 +83,13 @@ Parameter values corresponding to a given tag are specified in the following lin
 is as follows:
 
 
-#XrayTelescope:		The first three letters of the X-ray telescope name, e.g. XrayTelescope = 'CHA' for Chandra, 'XMM' for XMM, etc
+#XrayTelescope:		The first three letters of the X-ray telescope name, e.g. XrayTelescope = 'CHA' for Chandra, 'XMM' for XMM, etc. Not actually used?
 #nx:			Number of pixels in x direction, e.g. nx = 256
 #ny:			Number of pixels in y direction, e.g. ny = 256
 #xrayNbin:		Number of energy bins, e.g. Nbin = 63
 #xrayNch:		Number of energy channels, e.g. Nch = 63
 #n:			Number of steps for discretising r, e.g. n = 100
-#Aeffave:		Average effective area of the telescope in cm^{2}, e.g. Aeffave = 250 for Chandra
+#Aeffave:		Average effective area of the telescope in cm^{2}, e.g. Aeffave = 250 for Chandra. Only used for calculating background.
 #xraycell:		Spatial pixel size in arcsecond, e.g. xraycell = 0.492
 #xrayEmin:		Minimum value of the energy range in keV, e.g. xrayEmin = 0.7
 #xrayEmax:		Maximum value of the energy range in keV, e.g. xrayEmax = 7.0
@@ -99,6 +99,7 @@ is as follows:
 #xrayBG_model           Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1, e.g.  xrayBG_model=8.4d-6
 
 Limits on the radius considered:
+#rauto:     Do dynamic limit calculation [T/F]. Overrides following options, default value T
 #rmin:      real, Minimum radius, Mpc
 #rmax:      real, Maximum radius for xray emission and GNFW model, Mpc
 #rlimit:    real, Used to calculate logr, may need to be slightly higher than rmax, Mpc
@@ -126,7 +127,7 @@ The root for the event file:
 The root for the mask file
 #filmask:       The mask file contains 1 where pixels are masked and 0 where they are not. The dimensions match the event file.
 
-#mass_function:	Type of the mass function (with mass_function = 1, 2 & 3 for Evrard, Jenkins & Tinker mass functions respectively).
+#mass_function:	Type of the mass function (with mass_function = 1, 2 & 3 for Evrard, Jenkins & Tinker mass functions respectively). Used with joint M z prior.
 #cluster_model:  Type of the clust model (with cluster_model =1, 2 or 3 for NFW, Einasto or polytropic profiles respectively). The polytropic model is based on Ghirardini2019 [A&A 627, A19 (2019)]
 
 Priors for the free parameters:
@@ -148,9 +149,9 @@ In the line following the prior tag, users should list 3 values as follows:
 a	b	c
 where a is the prior type, b & c are the parameters specific to the prior type. Allowed prior types & their specific parameters are as follows:
 
-Delta function prior					0   [parameter value]   [parameter value]
+Delta function prior				0   [parameter value]   [parameter value]
 Uniform prior						1   [minimum value]     [maximum value]
-Uniform prior in log					2   [minimum value]     [maximum value]
+Uniform prior in log				2   [minimum value]     [maximum value]
 Gaussian prior						3   [mean]              [standard deviation]
 Log-normal prior					4   [mean]              [width]
 Joint prior for M_{200} & z using the mass function	8   [minimum value]     [maximum value]

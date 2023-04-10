@@ -25,7 +25,7 @@
 FC = mpifort
 CC = mpicc
 CXX = mpic++
-FFLAGS = -w -O3 -ffree-line-length-none -DMPI
+FFLAGS = -w -O3 -ffree-line-length-none -DMPI -fallow-argument-mismatch
 CFLAGS = -I. -O3
 CXXFLAGS = -I. -O3
 LIBS = -llapack -lcfitsio
