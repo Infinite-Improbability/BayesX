@@ -185,7 +185,7 @@ CONTAINS
 
       IMPLICIT NONE
       INTEGER                         ::  i, j, k, m, index, iend, idx(1), iostatus
-      REAL*8                           :: Lhood, XRAYLhood, log_Cobs_factorial, log_BGobs_factorial, nullev
+      REAL*8                           :: Lhood, XRAYLhood, log_Cobs_factorial, log_BGobs_factorial, nullev, angfactor
       REAL*8                           :: Mmin, Mmax, d1, d2
       CHARACTER(LEN=100)    :: string
 
@@ -343,7 +343,7 @@ CONTAINS
 
 !-----------------------------------------
 ! Initialise working arrays:
-      if (rauto == .TRUE. .and. Dn == 1) then
+      if (rauto .eqv. .TRUE. .and. Dn == 1) then
          ! Init logr for fixed redshift
          angfactor = sec2rad * lookD(1,2) ! Physical Mpc per arcsec
          rlimit = dble(min(xraynx, xrayny)) / 2 * xraycell * angfactor ! radius in Mpc
