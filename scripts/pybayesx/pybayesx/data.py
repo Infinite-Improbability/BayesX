@@ -1,6 +1,5 @@
 from __future__ import annotations  # python 3.7 and up
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from logging import getLogger
 from pathlib import Path
@@ -16,7 +15,7 @@ log = getLogger(__name__)
 # TODO: Refactor into BinnableData subclassS
 
 
-class Data(ABC):
+class Data:
     """Abstract base class for source data"""
 
     def __init__(self, data: ArrayLike) -> None:
@@ -372,10 +371,11 @@ class RMF(Data):
         return cls(mat)
 
     def export(self, outfile: Path):
+        self.path = outfile
         np.savetxt(outfile, np.ravel(self.data))
 
     def bin(self):
-        raise NotImplementedError("ARF is not binnable")
+        raise NotImplementedError("RMF is not binnable")
 
 
 @dataclass
