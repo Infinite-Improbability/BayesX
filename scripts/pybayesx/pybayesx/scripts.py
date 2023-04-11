@@ -147,7 +147,15 @@ def interactive_plot(args: Namespace):
 
 
 def _mask(args):
-    mask(args)
+    mask(
+        args.xMin,
+        args.xMax,
+        args.yMin,
+        args.yMax,
+        args.maskFiles,
+        args.overdraw,
+        args.outputFile,
+    )
 
 
 def _demo(args):

@@ -5,7 +5,7 @@ import importlib.metadata
 from logging import NullHandler, getLogger
 
 from .analysis import Analysis, AnalysisConfig
-from .data import ARF, RMF, DataConfig, Events, Mask, load_all_from_fits
+from .data import ARF, RMF, DataConfig, Events, Mask
 from .model import (
     DeltaPrior,
     LogNormalPrior,

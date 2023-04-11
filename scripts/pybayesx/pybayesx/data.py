@@ -13,6 +13,8 @@ from numpy.typing import ArrayLike
 
 log = getLogger(__name__)
 
+# TODO: Refactor into BinnableData subclassS
+
 
 class Data(ABC):
     """Abstract base class for source data"""
@@ -25,37 +27,6 @@ class Data(ABC):
         """
         self.data = np.array(data)
         self.path = None  # path to data in format ready for BayesX
-        pass
-
-    @classmethod
-    def load_from_file(cls, path: Path, file_type: Optional[str] = None):
-        """Try to intelligently handle events input from a number of file types.
-
-        :param path: Path to events file
-        :type path: Path
-        :param file_type: Override type detection by providing a file extension.
-        :type file_type: str, optional
-        :raises ValueError: If the file type cannot be recognised.
-        """
-        ext = Path.suffix
-        if file_type:
-            ext = file_type if file_type[0] == "." else "." + file_type
-        if ext == ".txt":
-            return cls.load_from_txt(path)
-        elif ext == ".fits":
-            return cls.load_from_fits(path)
-        else:
-            raise ValueError("Unrecognised data file extension.")
-
-    @classmethod
-    @abstractmethod
-    def load_from_txt(cls, path: Path) -> Data:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def load_from_fits(cls, path: Path) -> Data:
-        raise NotImplementedError
 
     def bin(
         self, n_bins: int, cellsize: float, outfile: Optional[Path] = None, **kwargs
@@ -81,7 +52,7 @@ class Data(ABC):
             outfile=outfile,
             **kwargs,
         )
-        self.nx, self.ny, self.nChannels = b.shape
+        self.nx, self.ny, self.n_channels = b.shape
         return b
 
     def _bin(
@@ -223,19 +194,23 @@ class Data(ABC):
         if outfile:
             np.savetxt(outfile, counts_1d, "%5d")
 
-        return counts_1d
+        return counts
 
     def __str__(self) -> str:
         if self.path is None:
             raise ValueError("Data class has no file set. Please export to file.")
         return str(self.path)
 
+    # @abstractmethod
+    # def export():
+    #     raise NotImplementedError
+
 
 class Events(Data):
     def __init__(self, data: ArrayLike, background: bool, exposure_time: float) -> None:
         """X-ray event data
 
-        :param data: Source data array
+        :param data: Source data array. Three columns, with each row containing (x, y, channel).
         :type data: ArrayLike
         :param background: True if data is for the X-ray background
         :type background: bool
@@ -244,58 +219,27 @@ class Events(Data):
         """
         # TODO: Figure out consistent format for input data in docstring
         super().__init__(data)
-        # assert self.data.ndim == 3
         self.background = background
-        # self.nx, self.ny, self.nChannels = self.data.shape  # TODO: Verify correctness
         self.exposure_time = exposure_time
 
     @classmethod
-    def load_from_txt(
-        cls,
-        path: Path,
-        background: bool,
-        nx: int,
-        ny: int,
-        nChannels: int,
-        exposure_time: float,
+    def load_txt(
+        cls, path: Path, background: bool, exposure_time: float, **kwargs
     ) -> Events:
         """
-        Load events in the 1D format used by BayesX.
+        Load events from a text file with x, y and ch columns.
 
         :param path: Path to file
         :type path: Path
         :param background: True if data is for the X-ray background
         :type background: bool
-        :param nx: Number of bins in the x dimension
-        :type nx: int
-        :param ny: Number of bins in the y dimension
-        :type ny: int
-        :param nChannels: Number of channels
-        :type nChannels: int
         :param exposure_time: Observation exposure time (live).
         :type exposure_time: float
-        """
-        data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
-        reshaped = np.reshape(
-            data, (nx, ny, nChannels), order="C"
-        )  # TODO: Verify correctness
-        """
-        Used order C, where
-            "read / write the elements using C-like index order,
-            with the last axis index changing fastest, back to the first
-            axis index changing slowest"
-        based on the following from the Fortran code:
 
-        DO xrayxpix = 1, xraynx
-                DO xrayypix = 1, xrayny
-                DO i = 1, xrayNch
-                    xLENi = xLENi + 1
-                    xrayCpred(xLENi) = xrayCmap(i, xrayxpix, xrayypix) + xrayBG(xLENi)
-                END DO
-                END DO
-            END DO
+        Additional keyword arguments are passed to `numpy.loadtxt`.
         """
-        return cls(reshaped, background, exposure_time)
+        data = np.loadtxt(path, **kwargs)
+        return cls(data, background, exposure_time)
 
     @classmethod
     def load_from_fits(
@@ -345,14 +289,9 @@ class Mask(Data):
         assert self.data.ndim == 2
 
     @classmethod
-    def load_from_txt(
-        cls, path: Path, nx: int, ny: int, nChannels: int, **kwargs
-    ) -> Mask:
-        data = np.loadtxt(path)
-        reshaped = np.reshape(
-            data, (nx, ny, nChannels), order="C"
-        )  # TODO: Verify correctness
-        return cls(reshaped)
+    def load_from_npz(cls, path: Path):
+        data = np.load(path)["arr_0"]
+        return cls(data)
 
     @classmethod
     def load_from_reg(
@@ -364,10 +303,15 @@ class Mask(Data):
         raise NotImplementedError
 
     def bin(
-        self, n_bins: int, cellsize: float, outfile: Optional[Path] = None, **kwargs
+        self,
+        n_bins: int,
+        cellsize: float,
+        n_channels: int,
+        outfile: Optional[Path] = None,
+        **kwargs,
     ):
         kwargs["mask"] = True
-        super().bin(n_bins, cellsize, outfile, **kwargs)
+        super().bin(n_bins, cellsize, outfile, n_channels=n_channels, **kwargs)
 
 
 class ARF(Data):
@@ -379,9 +323,7 @@ class ARF(Data):
     @classmethod
     def load_from_txt(cls, path: Path, **kwargs) -> ARF:
         data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
-        # reshaped = np.reshape(
-        #     data, (nx, ny, nChannels), order="C"
-        # )  # TODO: Verify correctness
+
         return cls(data)
 
     @classmethod
@@ -398,6 +340,9 @@ class ARF(Data):
         self.path = outfile
         np.savetxt(outfile, self.data)
 
+    def bin(self):
+        raise NotImplementedError("ARF is not binnable")
+
 
 class RMF(Data):
     def __init__(self, data: ArrayLike) -> None:
@@ -406,10 +351,10 @@ class RMF(Data):
         self.xrayNbins, self.xrayNch = self.data.shape  # TODO: Verify correctness
 
     @classmethod
-    def load_from_txt(cls, path: Path, nBins: int, nChannels: int, **kwargs) -> RMF:
+    def load_from_txt(cls, path: Path) -> RMF:
         data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
         # reshaped = np.reshape(
-        #     data, (nBins, nChannels), order="C"
+        #     data, (nBins, n_channels), order="C"
         # )  # TODO: Verify correctness
         return cls(data)
 
@@ -428,6 +373,9 @@ class RMF(Data):
 
     def export(self, outfile: Path):
         np.savetxt(outfile, np.ravel(self.data))
+
+    def bin(self):
+        raise NotImplementedError("ARF is not binnable")
 
 
 @dataclass
@@ -461,128 +409,62 @@ class DataConfig:
     )
 
     rauto: bool = True  # Automatic radius calculation
-    rmin: float = 0.01  # Minimum radius, Mpc
-    rmax: float = 10  # Maximum radius for xray emission and GNFW model, Mpc
-    rlimit: float = (
-        10  # Used to calculate logr, may need to be slightly higher than rmax, Mpc
-    )
+    rmin: Optional[float] = None  # Minimum radius, Mpc
+    rmax: Optional[float] = None  # Maximum radius for xray emission and GNFW model, Mpc
+    rlimit: Optional[
+        float
+    ] = None  # Used to calculate logr, may need to be slightly higher than rmax, Mpc
 
-    def load_all(self) -> tuple[Events, Events, Mask | None]:
-        # This function is getting a little heavy on the error handling.
-        # Can we make it more elegant?
-        events_file = (
-            self.filevent.path if isinstance(self.filevent, Events) else self.filevent
+    @classmethod
+    def generate(
+        cls,
+        evts: Events,
+        bg: Events,
+        arf: ARF,
+        rmf: RMF,
+        out_path: Union[str, Path],
+        bin_cellsize: int,
+        nbins: int,
+        energy_min: float,
+        energy_max: float,
+        mask: Optional[Mask] = None,
+    ):
+        # TODO: Automatic energy range
+
+        out_path = Path(out_path)
+
+        log.info("Binning events")
+        evts.bin(nbins, bin_cellsize, out_path.joinpath("evts.txt"))
+        log.info("Binning background")
+        bg.bin(nbins, bin_cellsize, out_path.joinpath("bg.txt"))
+
+        log.info(f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})")
+
+        if (evts.nx, evts.ny, evts.n_channels) != (bg.nx, bg.ny, bg.n_channels):
+            raise ValueError("Mismatched binned datasets.")
+
+        mask_path = None
+        if mask is not None:
+            log.info("Binning mask")
+            mask_path = out_path.joinpath("mask.txt")
+            mask.bin(nbins, bin_cellsize, outfile=mask_path, n_channels=evts.n_channels)
+
+        rmf.export(out_path.joinpath("rmf.txt"))
+        arf.export(out_path.joinpath("arf.txt"))
+
+        return cls(
+            filBG=bg.path,  # type: ignore
+            filevent=evts.path,  # type: ignore
+            filARF=arf.path,
+            filRMF=rmf.path,  # type: ignore
+            nx=evts.nx,
+            ny=evts.ny,
+            xrayNbin=rmf.data.shape[0],
+            xrayNch=rmf.data.shape[1],
+            xraycell=bin_cellsize * 0.492,
+            xrayEmin=energy_min,
+            xrayEmax=energy_max,
+            sexpotime=evts.exposure_time,
+            bexpotime=bg.exposure_time,
+            filmask=mask_path,
         )
-        bg_file = self.filBG.path if isinstance(self.filBG, Events) else self.filBG
-
-        if events_file is None or bg_file is None:
-            raise ValueError(
-                "Cannot load events or bg data: path to exported data not set."
-            )
-
-        events = Events.load_from_file(events_file)
-        bg = Events.load_from_file(bg_file)
-
-        mask = None
-        if self.filmask is not None:
-            mask_file = (
-                self.filmask.path if isinstance(self.filmask, Mask) else self.filmask
-            )
-            if mask_file is None:
-                raise ValueError(
-                    "Cannot load mask data: path to exported data not set."
-                )
-            mask = Mask.load_from_file(mask_file)
-
-        return events, bg, mask  # type: ignore
-
-    def bin_all(self, nbins: int, cellsize: int, outdir: Path, **kwargs):
-        (
-            events,
-            bg,
-            mask,
-        ) = self.load_all()  # should we load and discard each to lower memory use?
-
-        filevent = outdir.joinpath(f"events_binned{nbins}of{cellsize}.txt")
-        events.bin(
-            nbins,
-            cellsize,
-            outfile=filevent,
-            **kwargs,
-        )
-        self.filevent = (
-            filevent  # run after so it doesn't get changed if the binning fails
-        )
-
-        filBG = outdir.joinpath(f"background_binned{nbins}of{cellsize}.txt")
-        bg.bin(
-            nbins,
-            cellsize,
-            outfile=filBG,
-            **kwargs,
-        )
-        self.filBG = filBG
-
-        filmask = outdir.joinpath(f"mask_binned{nbins}of{cellsize}.txt")
-        if mask:
-            mask.bin(
-                nbins,
-                cellsize,
-                outfile=filmask,
-                **kwargs,
-            )
-        self.filmask = filmask
-
-        self.xraycell *= cellsize
-        self.nx = nbins
-        self.ny = nbins
-
-
-def load_all_from_fits(
-    evts_path: Path,
-    bg_path: Path,
-    arf_path: Path,
-    rmf_path: Path,
-    out_path: Path,
-    z: float,
-    mask_path: Optional[Path] = None,
-):
-    evts = Events.load_from_fits(evts_path, False)
-    bg = Events.load_from_fits(bg_path, True)
-    arf = ARF.load_from_fits(arf_path)
-    rmf = RMF.load_from_fits(rmf_path)
-
-    cellsize = 4
-    nbins = 256
-
-    evts.bin(nbins, cellsize, out_path.joinpath("evts.txt"))
-    bg.bin(nbins, cellsize, out_path.joinpath("bg.txt"))
-
-    log.info(f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.nChannels})")
-
-    if mask_path is not None:
-        mask = Mask.load_from_reg(mask_path)
-        mask_path = out_path.joinpath("mask.txt")
-        mask.bin(nbins, cellsize, mask_path)
-
-    rmf.export(out_path.joinpath("rmf.txt"))
-    arf.export(out_path.joinpath("arf.txt"))
-
-    dc = DataConfig(
-        filBG=bg.path,  # type: ignore
-        filevent=evts.path,  # type: ignore
-        filARF=arf.path,
-        filRMF=rmf.path,  # type: ignore
-        nx=evts.nx,
-        ny=evts.ny,
-        xrayNbin=rmf.data.shape[0],
-        xrayNch=rmf.data.shape[1],
-        xraycell=cellsize * 0.492,
-        xrayEmin=0,
-        xrayEmax=0,
-        sexpotime=evts.exposure_time,
-        bexpotime=bg.exposure_time,
-        filmask=mask_path,
-    )
-
-    return dc

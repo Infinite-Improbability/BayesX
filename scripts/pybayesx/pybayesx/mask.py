@@ -1,4 +1,6 @@
 from argparse import Namespace
+from pathlib import Path
+from typing import Iterable, Optional
 
 import numpy as np
 
@@ -38,8 +40,16 @@ class Ellipse:
         )
 
 
-def mask(args: Namespace):
-    def coord2index(x, y, referenceCoordinates=(args.xMin, args.yMin)):
+def mask(
+    xMin: float,
+    xMax: float,
+    yMin: float,
+    yMax: float,
+    maskFiles: Iterable[Path],
+    overdraw: float,
+    output_file: Optional[Path] = None,
+):
+    def coord2index(x, y, referenceCoordinates=(xMin, yMin)):
         """
         Convert a coordinate to index.
 
@@ -59,13 +69,13 @@ def mask(args: Namespace):
             for coord, ref in zip((x, y), referenceCoordinates)
         ]
 
-    size = (int(args.yMax - args.yMin), int(args.xMax - args.xMin))
+    size = (int(yMax - yMin), int(xMax - xMin))
     # TODO: Custom step size support. Currently assumes step of 1.
 
     # Convert lines of ellipse definitions in input file to a list of Ellipse objects.
     print("Loading ellipses.")
     ellipses = []
-    for filePath in args.maskFiles:
+    for filePath in maskFiles:
         with open(filePath, "r") as f:
             for line in f:
                 line = line.strip()
@@ -82,7 +92,7 @@ def mask(args: Namespace):
 
     for el in ellipses:
         # Convert ellipse into matrix
-        elM = el.generate_matrix(args.overdraw)
+        elM = el.generate_matrix(overdraw)
 
         # Get indices to place the ellipse on the mask matrix
         radius = elM.shape[0] / 2  # elM is square
@@ -110,31 +120,31 @@ def mask(args: Namespace):
 
     print("Preparing array for export.")
     # Rearrange for export
-    x = np.tile(np.arange(args.xMin, args.xMax), size[0])  # [1,2,3,1,2,3,...]
-    y = np.repeat(np.arange(args.yMin, args.yMax), size[1])  # [1,1,1,2,2,2,...]
+    x = np.tile(np.arange(xMin, xMax), size[0])  # [1,2,3,1,2,3,...]
+    y = np.repeat(np.arange(yMin, yMax), size[1])  # [1,1,1,2,2,2,...]
     mask1D = np.column_stack((x, y, np.ravel(mask)))
     # Don't need to export umasked regions
     mask1D = mask1D[mask1D[:, 2] == 1]
 
-    filename_parts = args.outputFile.name.strip().split(".")
-    file_type = filename_parts[-1]
+    if output_file is not None:
+        filename_parts = output_file.name.strip().split(".")
+        file_type = filename_parts[-1]
 
-    if file_type == "gz":
-        file_type = filename_parts[-2]
-    if file_type == "txt":
-        print("Exporting to .txt file.")
-        np.savetxt(args.outputFile, mask1D, fmt=["%.10g", "%.10g", "%.1d"])
-    elif file_type == "npy":
-        print("Exporting to .npy file.")
-        np.save(args.outputFile, mask1D)
-    elif file_type == "matxt":
-        print("Exporting entire mask matrix to text file.")
-        np.savetxt(args.outputFile, mask, fmt="%.1d")
-    else:
-        print("Exporting to compressed .npz file.")
-        np.savez_compressed(args.outputFile, mask1D)
-
-    print("File saved as {}.".format(args.outputFile.name))
+        if file_type == "gz":
+            file_type = filename_parts[-2]
+        if file_type == "txt":
+            print("Exporting to .txt file.")
+            np.savetxt(output_file, mask1D, fmt=["%.10g", "%.10g", "%.1d"])
+        elif file_type == "npy":
+            print("Exporting to .npy file.")
+            np.save(output_file, mask1D)
+        elif file_type == "matxt":
+            print("Exporting entire mask matrix to text file.")
+            np.savetxt(output_file, mask, fmt="%.1d")
+        else:
+            print("Exporting to compressed .npz file.")
+            np.savez_compressed(output_file, mask1D)
+        print("File saved as {}.".format(output_file.name))
 
     # Visual output
     try:
@@ -163,10 +173,10 @@ def mask(args: Namespace):
             break
 
     # Convert indices to coordinates
-    yMin = i + args.yMin  # type: ignore
-    yMax = args.yMax - j  # type: ignore
-    xMin = k + args.xMin  # type: ignore
-    xMax = args.xMax - n  # type: ignore
+    yMin += i  # type: ignore
+    yMax -= j  # type: ignore
+    xMin += k  # type: ignore
+    xMax -= n  # type: ignore
 
     # Get ellipse centres
     ox = []

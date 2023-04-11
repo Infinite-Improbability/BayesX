@@ -180,6 +180,8 @@ class Analysis:
             f.write("#root\n")
             f.write(f"'{self.output_path}'\n")
 
+        log.info(f"Exported infile to {self.config_path}")
+
         return self.config_path
 
     def run(
