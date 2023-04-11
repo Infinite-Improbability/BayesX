@@ -3158,7 +3158,7 @@ CONTAINS
       IF (rr < rmin) THEN
          rr = rmin
          XraySintegrand = Xrayemissfunc1(rr)
-      ELSEIF (rr > rmax) THEN
+      ELSEIF (rr >= rmax) THEN
          XraySintegrand = 0.d0
       ELSE
          XraySintegrand = Xrayemissfunc1(rr)
@@ -3180,7 +3180,7 @@ CONTAINS
          !CALL interp1d(logX_emiss1D, logr, n, phlog10(rmin), result)
          CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rmin), result)
 
-      ELSEIF (rr > rmax) THEN
+      ELSEIF (rr >= rmax) THEN
          Xrayemissfunc1 = 0.d0
          RETURN
       ELSE

@@ -358,6 +358,12 @@ CONTAINS
          r(i) = 10.d0**logr(i)
       END DO
 
+      if (logr(n) < rlimit) then
+         write(*, *) 'Logr smaller than limit, adjusting'
+         rlimit = logr(n)
+         rmax = rlimit
+      end if
+
       !if( myID == 0 ) WRITE(*,*) '         Lhood0 =', XRAYLhood0
 
       XRAYLhood = 0.d0
