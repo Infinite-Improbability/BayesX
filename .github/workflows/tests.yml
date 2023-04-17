@@ -1,6 +1,5 @@
 # Workflow to build and run tests
-name: Deploy static content to Pages
-
+name: Run tests
 
 # Eventually we'll want to run on any push
 # But for now we just want the branch that actually has the tests
@@ -28,15 +27,15 @@ jobs:
     steps:
       - name: Install dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
-          with:
-            packages: liblapack-dev libcfitsio-dev
-            version: 1.0
+        with:
+          packages: liblapack-dev libcfitsio-dev
+          version: 1.0
     
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Build
-        uses: make test
+        run: make test
 
       - name: Run tests
         run: ./bin/BayesX-tests
