@@ -1,0 +1,42 @@
+# Workflow to build and run tests
+name: Deploy static content to Pages
+
+
+# Eventually we'll want to run on any push
+# But for now we just want the branch that actually has the tests
+# on: push
+on:
+  push:
+    branches: ["tests"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  FC: gfortran
+  CC: gcc
+  CXX: g++
+  FFLAGS: -w -O3 -ffree-line-length-none
+  CFLAGS: -I. -O3
+  CXFLAGS: -I. -O3
+  LIBS: -llapack -lcfitsio
+
+jobs:
+  test:
+    name: Build and run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+          with:
+            packages: liblapack-dev libcfitsio-dev
+            version: 1.0
+    
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build
+        uses: make test
+
+      - name: Run tests
+        run: ./bin/BayesX-tests
