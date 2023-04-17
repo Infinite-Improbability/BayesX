@@ -2,7 +2,7 @@ PROGS = BayesX
 
 INCLUDEDIRS = -I../multinest
  
-FFLAGS += $(INCLUDEDIRS)
+override FFLAGS += $(INCLUDEDIRS)
  
 AR = ar r  
 LINKLIB = ld -shared  

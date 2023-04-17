@@ -2,7 +2,7 @@ PROGS = BayesX-tests
 
 INCLUDEDIRS = -I../src
  
-FFLAGS += $(INCLUDEDIRS)
+override FFLAGS += $(INCLUDEDIRS)
  
 AR = ar r  
 LINKLIB = ld -shared  
