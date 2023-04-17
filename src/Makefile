@@ -29,7 +29,15 @@ BayesX: $(MOBJECTS)
 	$(FC) $(FFLAGS) -o BayesX $(MOBJECTS) $(MCLIBS)
 	-mv $@ $(BINDIR)
 	-rm *.o
+
+libbayesx.a: $(MOBJECTS) 
+	$(AR) $@ $^ 
+	-mv $@ $(LIBDIR)
+	-rm *.o
  
 clean: 
 	-rm *.o *.mod
 	-rm $(BINDIR)/BayesX
+
+ 
+

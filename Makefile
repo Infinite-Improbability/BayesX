@@ -52,11 +52,9 @@ LIBS = -llapack -lcfitsio
 # CXXFLAGS = -I. -Og
 # LIBS = -llapack -lcfitsio
 
-
-
 export FC FFLAGS CC CFLAGS CXX CXXFLAGS LIBS
 
-.PHONY: multinest BayesX
+.PHONY: multinest BayesX tests
 
 BINDIR = bin
 
@@ -73,6 +71,10 @@ BayesX: | BayesXdirs
 
 BayesXdirs:
 	mkdir -p $(BINDIR) chains
+
+tests: | BayesXdirs
+	$(MAKE) -C src libbayesx.a
+	$(MAKE) -C tests tests
 
 clean:
 	$(MAKE) -C src clean
