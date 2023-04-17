@@ -52,6 +52,9 @@ contains
       call check(error, value, 3.8d0, thr=1.d-3, rel=.true.)
       if (allocated(error)) return
 
+      call(error, 1=2)
+      if (allocated(error)) return
+
    end subroutine test_interp2d
 
 end module test_utilities
