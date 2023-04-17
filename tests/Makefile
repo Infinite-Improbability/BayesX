@@ -11,7 +11,7 @@ BINDIR = ../bin
  
 MCLIBS = -L$(LIBDIR) -lnest3 -lbayesx $(LIBS)
  
-MOBJECTS = testdrive.o testdrive_version.o test_suite1.o main.o
+MOBJECTS = testdrive.o testdrive_version.o test_utilities.o main.o
  
 %.o: %.f90
 	$(FC) $(FFLAGS) -c -o $@ $^

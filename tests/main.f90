@@ -1,7 +1,7 @@
 program tester
-   use, intrinsic :: iso_fortran_env, only : error_unit
-   use testdrive, only : run_testsuite, new_testsuite, testsuite_type
-   use test_suite1, only : collect_suite1
+   use, intrinsic :: iso_fortran_env, only: error_unit
+   use testdrive, only: run_testsuite, new_testsuite, testsuite_type
+   use test_utilities, only: collect_utilities
    implicit none
    integer :: stat, is
    type(testsuite_type), allocatable :: testsuites(:)
@@ -9,15 +9,15 @@ program tester
 
    stat = 0
 
-   testsuites = [new_testsuite("suite1", collect_suite1)]
+   testsuites = [new_testsuite("suite1", collect_utilities)]
 
    do is = 1, size(testsuites)
-      write(error_unit, fmt) "Testing:", testsuites(is)%name
+      write (error_unit, fmt) "Testing:", testsuites(is)%name
       call run_testsuite(testsuites(is)%collect, error_unit, stat)
    end do
 
    if (stat > 0) then
-      write(error_unit, '(i0, 1x, a)') stat, "test(s) failed!"
+      write (error_unit, '(i0, 1x, a)') stat, "test(s) failed!"
       error stop
    end if
 
