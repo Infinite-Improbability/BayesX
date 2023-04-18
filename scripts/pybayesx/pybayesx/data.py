@@ -10,6 +10,8 @@ from astropy.io import fits
 from astropy.io.fits.hdu import PrimaryHDU
 from numpy.typing import ArrayLike
 
+from .mask import mask
+
 log = getLogger(__name__)
 
 
@@ -310,14 +312,14 @@ class Events(BinnableData):
             energy_max = np.max(f.data[energy_key])  # type: ignore
 
             log.info(
-                f"Detected energy range {energy_min / 1000} to {energy_max / 1000} keV"
+                f"Detected energy range {energy_min / 1000}:{energy_max / 1000} keV"
             )
 
             # Convert from eV to 10eV then convert to keV
             energy_min = np.floor(energy_min / 10) / 100
             energy_max = np.ceil(energy_max / 10) / 100
 
-            log.info(f"Rounded energy range {energy_min} to {energy_max} keV")
+            log.info(f"Rounded energy range to {energy_min}:{energy_max} keV")
 
             return cls(data, exposure_time, background, (energy_min, energy_max))
 
@@ -344,6 +346,11 @@ class Mask(BinnableData):
     def load_reg(
         cls,
         path: Union[Path, str],
+        xMin: float,
+        xMax: float,
+        yMin: float,
+        yMax: float,
+        overdraw: float,
     ):
         """Load mask as boolean array from ds9 reg. Only supports ellipses at present
 
@@ -351,10 +358,12 @@ class Mask(BinnableData):
         :type path: Union[Path, str]
         :return: Returns a new Mask object
         :rtype: Mask
+
+        For other parameters see `Mask.mask()`
         """
-        # TODO: Load using masking script
         path = Path(path)
-        raise NotImplementedError
+        data = mask(xMin, xMax, yMin, yMax, [path], overdraw)
+        return cls(data)
 
     def bin(
         self,

@@ -12,3 +12,8 @@ authors = [{name = "Ryan Cox", email = "ryan.cox@vuw.ac.nz"}]
 
 [project.scripts]
 pbx = "pybayesx:scripts.main"
+
+[project.optional-dependencies]
+plots = [
+  'matplotlib ~= 3.7',
+]

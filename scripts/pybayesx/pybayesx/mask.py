@@ -1,10 +1,12 @@
-from argparse import Namespace
+from logging import getLogger
 from pathlib import Path
 from typing import Iterable, Optional
 
 import numpy as np
 
 # TODO: Properly integrate with Mask class
+
+log = getLogger(__name__)
 
 
 class Ellipse:
@@ -48,6 +50,7 @@ def mask(
     maskFiles: Iterable[Path],
     overdraw: float,
     output_file: Optional[Path] = None,
+    display: bool = True,
 ):
     def coord2index(x, y, referenceCoordinates=(xMin, yMin)):
         """
@@ -73,12 +76,14 @@ def mask(
     # TODO: Custom step size support. Currently assumes step of 1.
 
     # Convert lines of ellipse definitions in input file to a list of Ellipse objects.
-    print("Loading ellipses.")
+    log.info("Loading ellipses.")
     ellipses = []
     for filePath in maskFiles:
         with open(filePath, "r") as f:
             for line in f:
                 line = line.strip()
+                if line[:8] != "ellipse":
+                    continue
                 # Currently assuming pixel coordinates. In theory this isn't guaranteed.
                 x, y, r1, r2, angle = [
                     float(el.strip(" )")) for el in line.split("(")[1].split(",")
@@ -86,7 +91,7 @@ def mask(
                 ellipses.append(Ellipse(x, y, r1, r2, angle * np.pi / 180))
 
     # Print ellipses on a matrix
-    print("Generating mask array.")
+    log.info("Generating mask array.")
     # Generate matrix of zeros (no masking) covering the entire region of data
     mask = np.full(size, False)
 
@@ -118,7 +123,7 @@ def mask(
         # Add matrix on mask by numpy.logical_or
         mask[y0:y1, x0:x1] = mask[y0:y1, x0:x1] | elM
 
-    print("Preparing array for export.")
+    log.info("Preparing array for export.")
     # Rearrange for export
     x = np.tile(np.arange(xMin, xMax), size[0])  # [1,2,3,1,2,3,...]
     y = np.repeat(np.arange(yMin, yMax), size[1])  # [1,1,1,2,2,2,...]
@@ -133,62 +138,65 @@ def mask(
         if file_type == "gz":
             file_type = filename_parts[-2]
         if file_type == "txt":
-            print("Exporting to .txt file.")
+            log.info("Exporting to .txt file.")
             np.savetxt(output_file, mask1D, fmt=["%.10g", "%.10g", "%.1d"])
         elif file_type == "npy":
-            print("Exporting to .npy file.")
+            log.info("Exporting to .npy file.")
             np.save(output_file, mask1D)
         elif file_type == "matxt":
-            print("Exporting entire mask matrix to text file.")
+            log.info("Exporting entire mask matrix to text file.")
             np.savetxt(output_file, mask, fmt="%.1d")
         else:
-            print("Exporting to compressed .npz file.")
+            log.info("Exporting to compressed .npz file.")
             np.savez_compressed(output_file, mask1D)
-        print("File saved as {}.".format(output_file.name))
+        log.info("File saved as {}.".format(output_file.name))
 
-    # Visual output
-    try:
-        import matplotlib.pyplot as plt
-    except ImportError:
-        print("Couldn't import matplotlib, exiting without plotting.")
-        exit()
+    if display:
+        # Visual output
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            log.warn("Couldn't import matplotlib, exiting without plotting.")
+            exit()
 
-    # Trim to masked region
-    for i in range(0, size[0]):
-        if mask[i, :].any():
-            mask = mask[i:, :]
-            break
-    for j in range(1, size[0]):
-        if mask[-j, :].any():
-            j -= 1
-            mask = mask[:-j, :]
-            break
-    for k in range(0, size[1]):
-        if mask[:, k].any():
-            mask = mask[:, k:]
-            break
-    for n in range(1, size[1]):
-        if mask[:, -n].any():
-            mask = mask[:, :-n]
-            break
+        # Trim to masked region
+        for i in range(0, size[0]):
+            if mask[i, :].any():
+                mask = mask[i:, :]
+                break
+        for j in range(1, size[0]):
+            if mask[-j, :].any():
+                j -= 1
+                mask = mask[:-j, :]
+                break
+        for k in range(0, size[1]):
+            if mask[:, k].any():
+                mask = mask[:, k:]
+                break
+        for n in range(1, size[1]):
+            if mask[:, -n].any():
+                mask = mask[:, :-n]
+                break
 
-    # Convert indices to coordinates
-    yMin += i  # type: ignore
-    yMax -= j  # type: ignore
-    xMin += k  # type: ignore
-    xMax -= n  # type: ignore
+        # Convert indices to coordinates
+        yMin += i  # type: ignore
+        yMax -= j  # type: ignore
+        xMin += k  # type: ignore
+        xMax -= n  # type: ignore
 
-    # Get ellipse centres
-    ox = []
-    oy = []
+        # Get ellipse centres
+        ox = []
+        oy = []
 
-    for el in ellipses:
-        ox.append(el.x)
-        oy.append(el.y)
+        for el in ellipses:
+            ox.append(el.x)
+            oy.append(el.y)
 
-    fig, ax = plt.subplots()
+        fig, ax = plt.subplots()
 
-    ax.imshow(mask, extent=(xMin, xMax, yMin, yMax), origin="lower")
-    ax.scatter(ox, oy, marker="+")  # type: ignore
+        ax.imshow(mask, extent=(xMin, xMax, yMin, yMax), origin="lower")
+        ax.scatter(ox, oy, marker="+")  # type: ignore
 
-    plt.show()
+        plt.show()
+
+    return mask1D
