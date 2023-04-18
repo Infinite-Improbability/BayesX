@@ -362,7 +362,7 @@ class Mask(BinnableData):
         For other parameters see `Mask.mask()`
         """
         path = Path(path)
-        data = mask(xMin, xMax, yMin, yMax, [path], overdraw)
+        data = mask(xMin, xMax, yMin, yMax, [path])
         return cls(data)
 
     def bin(
