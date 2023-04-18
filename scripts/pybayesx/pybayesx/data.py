@@ -372,12 +372,13 @@ class ARF(Data):
     def __init__(
         self,
         data: ArrayLike,
-        energy_range: Optional[Sequence[float]] = None,
     ) -> None:
         super().__init__(data)
         assert self.data.ndim == 1  # TODO: Better verification
         self.xrayNbins = len(self.data)  # TODO: Verify correctness
-        self.energy_range = energy_range
+
+        self.energy_low = None
+        self.energy_high = None
 
     @classmethod
     def load_txt(cls, path: Union[Path, str], **kwargs) -> ARF:
@@ -392,27 +393,48 @@ class ARF(Data):
         with fits.open(path) as f:
             data = f[1].data["specresp"]  # type: ignore
 
-            # self.xrayEmin = np.min(f[1].data["energ_lo"])
-            # self.xrayEmax = np.max(f[1].data["energ_hi"])
+            # Energy bounds on the bins
+            energy_low = np.min(f[1].data["energ_lo"])  # type: ignore
+            energy_high = np.max(f[1].data["energ_hi"])  # type: ignore
 
-        return cls(data)
+        new = cls(data)
+        new.energy_low = energy_low
+        new.energy_high = energy_high
 
-    def export(self, outfile: Union[Path, str]):
+        return new
+
+    def export(
+        self, outfile: Union[Path, str], energy_range: Optional[Sequence[float]] = None
+    ):
         outfile = Path(outfile)
         self.path = outfile
-        np.savetxt(outfile, self.data)
+
+        min_index = 0
+        max_index = self.data.size
+        if energy_range is not None:
+            if self.energy_low is not None and self.energy_high is not None:
+                # Very unoptimised
+                for i, e in enumerate(self.energy_low):
+                    if e >= energy_range[0]:
+                        min_index = i
+                        break
+                for i, e in enumerate(self.energy_high):
+                    if e >= energy_range[1]:
+                        max_index = i
+                        break
+            else:
+                log.warn("Unable to constrain energy range on ARF")
+
+        np.savetxt(outfile, self.data[min_index, max_index])
 
 
 class RMF(Data):
-    def __init__(
-        self,
-        data: ArrayLike,
-        energy_range: Optional[Sequence[float]] = None,
-    ) -> None:
+    def __init__(self, data: ArrayLike) -> None:
         super().__init__(data)
         assert self.data.ndim == 2  # TODO: Better verification
         self.xrayNbins, self.xrayNch = self.data.shape  # TODO: Verify correctness
-        self.energy_range = energy_range
+        self.energy_low = None
+        self.energy_high = None
 
     @classmethod
     def load_txt(cls, path: Union[Path, str]) -> RMF:
@@ -432,15 +454,51 @@ class RMF(Data):
             xrayNbin = len(rmf)
             mat = np.zeros((xrayNbin, xrayNch))
 
-            for i in range(0, len(rmf)):
+            for i in range(0, xrayNbin):
+                if len(rmf[i]) > xrayNch:
+                    # If this happens then our assumption that the last entry has the most channels was flawed
+                    # We'll probably need to adjust xrayNch to check every entry, which sounds slow
+                    raise ValueError(
+                        "RMF size calculations failed, bad assumption. See source."
+                    )
                 mat[i, : len(rmf[i])] = rmf[i]
 
-        return cls(mat)
+            energy_low = np.min(f[1].data["energ_lo"])  # type: ignore
+            energy_high = np.max(f[1].data["energ_hi"])  # type: ignore
 
-    def export(self, outfile: Union[Path, str]):
+        new = cls(mat)
+
+        new.energy_low = energy_low
+        new.energy_high = energy_high
+
+        return new
+
+    def export(
+        self, outfile: Union[Path, str], energy_range: Optional[Sequence[float]] = None
+    ):
         outfile = Path(outfile)
         self.path = outfile
-        np.savetxt(outfile, self.data)
+
+        data = self.data
+
+        # Trim bins
+        min_index = 0
+        max_index = self.data.size
+        if energy_range is not None:
+            if self.energy_low is not None and self.energy_high is not None:
+                # Very unoptimised
+                for i, e in enumerate(self.energy_low):
+                    min_index = i
+                    break
+                for i, e in enumerate(self.energy_high):
+                    if e >= energy_range[1]:
+                        max_index = i
+                        break
+                data = self.data[min_index:max_index, :]
+            else:
+                log.warn("Unable to constrain energy range on RMF")
+
+        np.savetxt(outfile, np.ravel(data))
 
 
 @dataclass
@@ -551,8 +609,10 @@ class DataConfig:
             mask_path = out_path.joinpath("mask.txt")
             mask.bin(nbins, bin_size, outfile=mask_path, n_channels=evts.n_channels)
 
-        rmf.export(out_path.joinpath("rmf.txt"))
-        arf.export(out_path.joinpath("arf.txt"))
+        rmf.export(out_path.joinpath("rmf.txt"), energy_range=energy_range)
+        arf.export(out_path.joinpath("arf.txt"), energy_range=energy_range)
+
+        # TODO: Validate matching dimensions of rmf and arf on appropriate axes
 
         return cls(
             filBG=bg.path,
