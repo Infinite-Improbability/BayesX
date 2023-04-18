@@ -3,7 +3,7 @@ from __future__ import annotations  # python 3.7 and up
 from dataclasses import dataclass
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Sequence, Union
 
 import numpy as np
 from astropy.io import fits
@@ -211,7 +211,13 @@ class BinnableData(Data):
 
 
 class Events(BinnableData):
-    def __init__(self, data: ArrayLike, exposure_time: float, background: bool) -> None:
+    def __init__(
+        self,
+        data: ArrayLike,
+        exposure_time: float,
+        background: bool,
+        energy_range: Optional[Sequence[float]] = None,
+    ) -> None:
         """X-ray event data
 
         :param data: Source data array. Three columns, with each row containing (x, y, channel).
@@ -220,11 +226,14 @@ class Events(BinnableData):
         :type exposure_time: float
         :param background: True if data is for the X-ray background
         :type background: bool
+        :param energy_range: Range of input energies, lower limit followed by upper limit in keV, defaults to None
+        :type energy_range: Sequence[float], optional
         """
         # TODO: Figure out consistent format for input data in docstring
         super().__init__(data)
         self.background = background
         self.exposure_time = exposure_time
+        self.energy_range = energy_range
 
     @classmethod
     def load_txt(
@@ -258,6 +267,7 @@ class Events(BinnableData):
         x_key: str = "X",
         y_key: str = "Y",
         channel_key: str = "PI",
+        energy_key: str = "energy",
         du_index=1,  # TODO: Confirm correct
     ) -> Events:
         """Load events from a fits file.
@@ -267,12 +277,14 @@ class Events(BinnableData):
         :type path: Path | str
         :param background: True if data is for the X-ray background, defaults to False.
         :type background: bool
-        :param x_key: Key of 'x' column in fits file, defaults to "X"
+        :param x_key: Key of 'x' column (assumes pixels) in fits file, defaults to "X"
         :type x_key: str, optional
-        :param y_key: Key of 'y' column in fits file, defaults to "Y"
+        :param y_key: Key of 'y' column (assumes pixels) in fits file, defaults to "Y"
         :type y_key: str, optional
         :param channel_key: Key of channel column in fits file, defaults to "PI"
         :type channel_key: str, optional
+        :param energy_key: Key of energy column (assumes eV) in fits file, defaults to "energy"
+        :type energy_key: str, optional
         :param du_index: List index of data unit in HDUList with events (0-indexed)
         :type du_index: int
         :param mode: `'evts'` for events, `bg` for background.
@@ -293,7 +305,21 @@ class Events(BinnableData):
             data = np.column_stack((f.data[x_key], f.data[y_key], f.data[channel_key]))  # type: ignore
             exposure_time: float = f.header["livetime"]  # type: ignore
 
-            return cls(data, exposure_time, background)
+            # Assuming eV
+            energy_min = np.min(f.data[energy_key])  # type: ignore
+            energy_max = np.max(f.data[energy_key])  # type: ignore
+
+            log.info(
+                f"Detected energy range {energy_min / 1000} to {energy_max / 1000} keV"
+            )
+
+            # Convert from eV to 10eV then convert to keV
+            energy_min = np.floor(energy_min / 10) / 100
+            energy_max = np.ceil(energy_max / 10) / 100
+
+            log.info(f"Rounded energy range {energy_min} to {energy_max} keV")
+
+            return cls(data, exposure_time, background, (energy_min, energy_max))
 
 
 class Mask(BinnableData):
@@ -343,10 +369,15 @@ class Mask(BinnableData):
 
 
 class ARF(Data):
-    def __init__(self, data: ArrayLike) -> None:
+    def __init__(
+        self,
+        data: ArrayLike,
+        energy_range: Optional[Sequence[float]] = None,
+    ) -> None:
         super().__init__(data)
         assert self.data.ndim == 1  # TODO: Better verification
         self.xrayNbins = len(self.data)  # TODO: Verify correctness
+        self.energy_range = energy_range
 
     @classmethod
     def load_txt(cls, path: Union[Path, str], **kwargs) -> ARF:
@@ -373,10 +404,15 @@ class ARF(Data):
 
 
 class RMF(Data):
-    def __init__(self, data: ArrayLike) -> None:
+    def __init__(
+        self,
+        data: ArrayLike,
+        energy_range: Optional[Sequence[float]] = None,
+    ) -> None:
         super().__init__(data)
         assert self.data.ndim == 2  # TODO: Better verification
         self.xrayNbins, self.xrayNch = self.data.shape  # TODO: Verify correctness
+        self.energy_range = energy_range
 
     @classmethod
     def load_txt(cls, path: Union[Path, str]) -> RMF:
@@ -454,8 +490,7 @@ class DataConfig:
         out_path: Union[str, Path],
         bin_size: int,
         nbins: int,
-        energy_min: float,
-        energy_max: float,
+        energy_range: Optional[Sequence[float]] = None,
         mask: Optional[Mask] = None,
         cell_size: float = 0.492,
     ):
@@ -475,10 +510,8 @@ class DataConfig:
         :type bin_size: int
         :param nbins: Number of bins kept (side length)
         :type nbins: int
-        :param energy_min: Minimum energy of data
-        :type energy_min: float
-        :param energy_max: Maximum energy of data
-        :type energy_max: float
+        :param energy_range: Range of input energies, lower limit followed by upper limit in keV, defaults to None
+        :type energy_range: Sequence[float], optional
         :param mask: Mask file of regions, defaults to None
         :type mask: Mask, optional
         :param cell_size: Size (side length) of pixel in arcseconds before binning, defaults to 0.492 (as for Chandra ACIS)
@@ -487,13 +520,24 @@ class DataConfig:
         :return: A new DataConfig object
         :rtype: DataConfig
         """
-        # TODO: Automatic energy range
 
         out_path = Path(out_path)
 
-        log.info("Binning events")
+        if energy_range is None:
+            if evts.energy_range is not None:
+                energy_range = evts.energy_range
+                if evts.energy_range != bg.energy_range:
+                    log.warn(
+                        "Background and source energy ranges don't match, using source range."
+                    )
+            elif bg.energy_range is not None:
+                energy_range = bg.energy_range
+            else:
+                raise ValueError("Unable to detect energy range, please specify.")
+
+        log.info("Binning events...")
         evts.bin(nbins, bin_size, out_path.joinpath("evts.txt"))
-        log.info("Binning background")
+        log.info("Binning background...")
         bg.bin(nbins, bin_size, out_path.joinpath("bg.txt"))
 
         log.info(f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})")
@@ -520,8 +564,8 @@ class DataConfig:
             xrayNbin=rmf.data.shape[0],
             xrayNch=rmf.data.shape[1],
             xraycell=bin_size * cell_size,
-            xrayEmin=energy_min,
-            xrayEmax=energy_max,
+            xrayEmin=energy_range[0],
+            xrayEmax=energy_range[1],
             sexpotime=evts.exposure_time,
             bexpotime=bg.exposure_time,
             filmask=mask_path,
