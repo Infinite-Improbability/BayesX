@@ -12,8 +12,6 @@ from numpy.typing import ArrayLike
 
 log = getLogger(__name__)
 
-# TODO: Refactor into BinnableData subclassS
-
 
 class Data:
     """Abstract base class for source data"""
@@ -27,8 +25,22 @@ class Data:
         self.data = np.array(data)
         self.path = None  # path to data in format ready for BayesX
 
+    def __str__(self) -> str:
+        if self.path is None:
+            raise ValueError("Data class has no file set. Please export to file.")
+        return str(self.path)
+
+
+class BinnableData(Data):
+    def __init__(self, data: ArrayLike) -> None:
+        super().__init__(data)
+
     def bin(
-        self, n_bins: int, cellsize: float, outfile: Optional[Path] = None, **kwargs
+        self,
+        n_bins: int,
+        cellsize: float,
+        outfile: Optional[Union[Path, str]] = None,
+        **kwargs,
     ):
         """Bin arbitary data with three dimensions in first two dimensions.
 
@@ -37,11 +49,13 @@ class Data:
         :param cellsize: Size of a single bin, in units of source data
         :type cellsize: float
         :param outfile: Path to write binned data to, defaults to None
-        :type outfile: Optional[Path], optional
+        :type outfile: Path | str, optional
         :return: 1D array of binned data
         :rtype: np.ndarray[Any, np.dtype[np.float64]]
         """
-        self.path = outfile
+        if outfile is not None:
+            outfile = Path(outfile)
+            self.path = outfile
         b = self._bin(
             self.data[:, 0],
             self.data[:, 1],
@@ -195,26 +209,17 @@ class Data:
 
         return counts
 
-    def __str__(self) -> str:
-        if self.path is None:
-            raise ValueError("Data class has no file set. Please export to file.")
-        return str(self.path)
 
-    # @abstractmethod
-    # def export():
-    #     raise NotImplementedError
-
-
-class Events(Data):
-    def __init__(self, data: ArrayLike, background: bool, exposure_time: float) -> None:
+class Events(BinnableData):
+    def __init__(self, data: ArrayLike, exposure_time: float, background: bool) -> None:
         """X-ray event data
 
         :param data: Source data array. Three columns, with each row containing (x, y, channel).
         :type data: ArrayLike
-        :param background: True if data is for the X-ray background
-        :type background: bool
         :param exposure_time: Observation exposure time (live).
         :type exposure_time: float
+        :param background: True if data is for the X-ray background
+        :type background: bool
         """
         # TODO: Figure out consistent format for input data in docstring
         super().__init__(data)
@@ -223,28 +228,33 @@ class Events(Data):
 
     @classmethod
     def load_txt(
-        cls, path: Path, background: bool, exposure_time: float, **kwargs
+        cls,
+        path: Union[Path, str],
+        exposure_time: float,
+        background: bool = False,
+        **kwargs,
     ) -> Events:
         """
         Load events from a text file with x, y and ch columns.
 
         :param path: Path to file
-        :type path: Path
-        :param background: True if data is for the X-ray background
+        :type path: Path | str
+        :param background: True if data is for the X-ray background, defaults to False.
         :type background: bool
         :param exposure_time: Observation exposure time (live).
         :type exposure_time: float
 
         Additional keyword arguments are passed to `numpy.loadtxt`.
         """
+        path = Path(path)
         data = np.loadtxt(path, **kwargs)
-        return cls(data, background, exposure_time)
+        return cls(data, exposure_time, background)
 
     @classmethod
-    def load_from_fits(
+    def load_fits(
         cls,
-        path: Path,
-        background: bool,
+        path: Union[Path, str],
+        background: bool = False,
         x_key: str = "X",
         y_key: str = "Y",
         channel_key: str = "PI",
@@ -254,7 +264,9 @@ class Events(Data):
         The file will be converted to the text format used by BayesX.
 
         :param path: Path to events fits file
-        :type path: Path
+        :type path: Path | str
+        :param background: True if data is for the X-ray background, defaults to False.
+        :type background: bool
         :param x_key: Key of 'x' column in fits file, defaults to "X"
         :type x_key: str, optional
         :param y_key: Key of 'y' column in fits file, defaults to "Y"
@@ -266,6 +278,8 @@ class Events(Data):
         :param mode: `'evts'` for events, `bg` for background.
         :type mode: str
         """
+        path = Path(path)
+
         with fits.open(path) as fi:
             assert du_index < len(fi)
 
@@ -279,26 +293,41 @@ class Events(Data):
             data = np.column_stack((f.data[x_key], f.data[y_key], f.data[channel_key]))  # type: ignore
             exposure_time: float = f.header["livetime"]  # type: ignore
 
-            return cls(data, background, exposure_time)
+            return cls(data, exposure_time, background)
 
 
-class Mask(Data):
+class Mask(BinnableData):
     def __init__(self, data: ArrayLike) -> None:
         super().__init__(data)
         assert self.data.ndim == 2
 
     @classmethod
-    def load_from_npz(cls, path: Path):
+    def load_npz(cls, path: Union[Path, str]):
+        """Load mask as boolean array from numpy export.
+
+        :param path: Path to array file
+        :type path: Path | str
+        :return: Returns a new Mask object
+        :rtype: Mask
+        """
+        path = Path(path)
         data = np.load(path)["arr_0"]
         return cls(data)
 
     @classmethod
-    def load_from_reg(
+    def load_reg(
         cls,
-        path: Path,
-        **kwargs,
-    ) -> Mask:
+        path: Union[Path, str],
+    ):
+        """Load mask as boolean array from ds9 reg. Only supports ellipses at present
+
+        :param path: Path to array file
+        :type path: Union[Path, str]
+        :return: Returns a new Mask object
+        :rtype: Mask
+        """
         # TODO: Load using masking script
+        path = Path(path)
         raise NotImplementedError
 
     def bin(
@@ -306,7 +335,7 @@ class Mask(Data):
         n_bins: int,
         cellsize: float,
         n_channels: int,
-        outfile: Optional[Path] = None,
+        outfile: Optional[Union[Path, str]] = None,
         **kwargs,
     ):
         kwargs["mask"] = True
@@ -320,13 +349,15 @@ class ARF(Data):
         self.xrayNbins = len(self.data)  # TODO: Verify correctness
 
     @classmethod
-    def load_from_txt(cls, path: Path, **kwargs) -> ARF:
+    def load_txt(cls, path: Union[Path, str], **kwargs) -> ARF:
+        path = Path(path)
         data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
 
         return cls(data)
 
     @classmethod
-    def load_from_fits(cls, path: Path) -> ARF:
+    def load_fits(cls, path: Union[Path, str]) -> ARF:
+        path = Path(path)
         with fits.open(path) as f:
             data = f[1].data["specresp"]  # type: ignore
 
@@ -335,12 +366,10 @@ class ARF(Data):
 
         return cls(data)
 
-    def export(self, outfile: Path):
+    def export(self, outfile: Union[Path, str]):
+        outfile = Path(outfile)
         self.path = outfile
         np.savetxt(outfile, self.data)
-
-    def bin(self):
-        raise NotImplementedError("ARF is not binnable")
 
 
 class RMF(Data):
@@ -350,7 +379,8 @@ class RMF(Data):
         self.xrayNbins, self.xrayNch = self.data.shape  # TODO: Verify correctness
 
     @classmethod
-    def load_from_txt(cls, path: Path) -> RMF:
+    def load_txt(cls, path: Union[Path, str]) -> RMF:
+        path = Path(path)
         data = np.loadtxt(path)  # TODO: Update fornat for tabular text export
         # reshaped = np.reshape(
         #     data, (nBins, n_channels), order="C"
@@ -358,7 +388,8 @@ class RMF(Data):
         return cls(data)
 
     @classmethod
-    def load_from_fits(cls, path: Path) -> RMF:
+    def load_fits(cls, path: Union[Path, str]) -> RMF:
+        path = Path(path)
         with fits.open(path) as f:
             rmf = f[1].data["matrix"]  # type: ignore
             xrayNch = len(rmf[-1])
@@ -370,12 +401,10 @@ class RMF(Data):
 
         return cls(mat)
 
-    def export(self, outfile: Path):
+    def export(self, outfile: Union[Path, str]):
+        outfile = Path(outfile)
         self.path = outfile
-        np.savetxt(outfile, np.ravel(self.data))
-
-    def bin(self):
-        raise NotImplementedError("RMF is not binnable")
+        np.savetxt(outfile, self.data)
 
 
 @dataclass
@@ -423,20 +452,49 @@ class DataConfig:
         arf: ARF,
         rmf: RMF,
         out_path: Union[str, Path],
-        bin_cellsize: int,
+        bin_size: int,
         nbins: int,
         energy_min: float,
         energy_max: float,
         mask: Optional[Mask] = None,
+        cell_size: float = 0.492,
     ):
+        """Generate DataConfig from a collection of Data objects
+
+        :param evts: Source events
+        :type evts: Events
+        :param bg: Background events
+        :type bg: Events
+        :param arf: Ancillary Response File
+        :type arf: ARF
+        :param rmf: Response/Redistribution Matrix File
+        :type rmf: RMF
+        :param out_path: Folder in which to save exported data
+        :type out_path: Union[str, Path]
+        :param bin_size: Size of bin (side length) in units of pixels
+        :type bin_size: int
+        :param nbins: Number of bins kept (side length)
+        :type nbins: int
+        :param energy_min: Minimum energy of data
+        :type energy_min: float
+        :param energy_max: Maximum energy of data
+        :type energy_max: float
+        :param mask: Mask file of regions, defaults to None
+        :type mask: Mask, optional
+        :param cell_size: Size (side length) of pixel in arcseconds before binning, defaults to 0.492 (as for Chandra ACIS)
+        :type cell_size: float, optional
+        :raises ValueError: Raised if events and background have different shapes after binning.
+        :return: A new DataConfig object
+        :rtype: DataConfig
+        """
         # TODO: Automatic energy range
 
         out_path = Path(out_path)
 
         log.info("Binning events")
-        evts.bin(nbins, bin_cellsize, out_path.joinpath("evts.txt"))
+        evts.bin(nbins, bin_size, out_path.joinpath("evts.txt"))
         log.info("Binning background")
-        bg.bin(nbins, bin_cellsize, out_path.joinpath("bg.txt"))
+        bg.bin(nbins, bin_size, out_path.joinpath("bg.txt"))
 
         log.info(f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})")
 
@@ -447,21 +505,21 @@ class DataConfig:
         if mask is not None:
             log.info("Binning mask")
             mask_path = out_path.joinpath("mask.txt")
-            mask.bin(nbins, bin_cellsize, outfile=mask_path, n_channels=evts.n_channels)
+            mask.bin(nbins, bin_size, outfile=mask_path, n_channels=evts.n_channels)
 
         rmf.export(out_path.joinpath("rmf.txt"))
         arf.export(out_path.joinpath("arf.txt"))
 
         return cls(
-            filBG=bg.path,  # type: ignore
-            filevent=evts.path,  # type: ignore
+            filBG=bg.path,
+            filevent=evts.path,
             filARF=arf.path,
-            filRMF=rmf.path,  # type: ignore
+            filRMF=rmf.path,
             nx=evts.nx,
             ny=evts.ny,
             xrayNbin=rmf.data.shape[0],
             xrayNch=rmf.data.shape[1],
-            xraycell=bin_cellsize * 0.492,
+            xraycell=bin_size * cell_size,
             xrayEmin=energy_min,
             xrayEmax=energy_max,
             sexpotime=evts.exposure_time,
