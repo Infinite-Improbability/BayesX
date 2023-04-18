@@ -1,6 +1,6 @@
 from logging import getLogger
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable
 
 import numpy as np
 
@@ -52,7 +52,6 @@ def mask(
     yMin: float,
     yMax: float,
     maskFiles: Iterable[Path],
-    display: bool = True,
 ):
     # Convert lines of ellipse definitions in input file to a list of Ellipse objects.
     log.info("Loading ellipses.")
@@ -61,7 +60,7 @@ def mask(
         with open(filePath, "r") as f:
             for line in f:
                 line = line.strip()
-                if line[:8] != "ellipse":
+                if "ellipse" not in line:
                     continue
                 # Currently assuming pixel coordinates. In theory this isn't guaranteed.
                 x, y, r1, r2, angle = [
@@ -95,4 +94,6 @@ def mask(
                     x_list.append(x)
                     y_list.append(y)
 
-    return np.column_stack((x_list, y_list))
+    ones = np.ones(len(x_list))
+
+    return np.column_stack((x_list, y_list, ones))

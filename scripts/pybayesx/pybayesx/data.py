@@ -350,7 +350,6 @@ class Mask(BinnableData):
         xMax: float,
         yMin: float,
         yMax: float,
-        overdraw: float,
     ):
         """Load mask as boolean array from ds9 reg. Only supports ellipses at present
 
@@ -403,8 +402,8 @@ class ARF(Data):
             data = f[1].data["specresp"]  # type: ignore
 
             # Energy bounds on the bins
-            energy_low = np.min(f[1].data["energ_lo"])  # type: ignore
-            energy_high = np.max(f[1].data["energ_hi"])  # type: ignore
+            energy_low = f[1].data["energ_lo"]  # type: ignore
+            energy_high = f[1].data["energ_hi"]  # type: ignore
 
         new = cls(data)
         new.energy_low = energy_low
@@ -434,7 +433,7 @@ class ARF(Data):
             else:
                 log.warn("Unable to constrain energy range on ARF")
 
-        np.savetxt(outfile, self.data[min_index, max_index])
+        np.savetxt(outfile, self.data[min_index:max_index])
 
 
 class RMF(Data):
@@ -472,8 +471,8 @@ class RMF(Data):
                     )
                 mat[i, : len(rmf[i])] = rmf[i]
 
-            energy_low = np.min(f[1].data["energ_lo"])  # type: ignore
-            energy_high = np.max(f[1].data["energ_hi"])  # type: ignore
+            energy_low = f[1].data["energ_lo"]  # type: ignore
+            energy_high = f[1].data["energ_hi"]  # type: ignore
 
         new = cls(mat)
 
