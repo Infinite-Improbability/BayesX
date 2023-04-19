@@ -450,13 +450,11 @@ class RMF(Data):
             mat = np.zeros((xrayNbin, xrayNch))
 
             for i in range(0, xrayNbin):
-                log.debug(
-                    f"First channel: {first_channel[i]}, last channel: {last_channel[i]}"
-                )
-                first_index = first_channel[i] - 1  # correct for zero indexing
+                # correct for zero indexing
+                first_index = first_channel[i] - 1
                 # We don't need zero indexing correction because it's cancelled out by Python's exclusive slice endpoint
                 last_index = last_channel[i]
-                log.debug(f"First index: {first_index}, last index: {last_index}")
+
                 mat[i, first_index:last_index] = rmf[i]
 
             new = cls(mat)
@@ -480,17 +478,30 @@ class RMF(Data):
         if energy_range is not None:
             if self.energy_bounds is not None:
                 # Very unoptimised
-                for i, e in enumerate(self.energy_bounds[:, 2]):
+
+                for i, e in enumerate(self.energy_bounds["E_MAX"]):
                     # if e_max for channel greater than specified minimum energy
                     if e > energy_range[0]:
-                        min_channel = self.energy_bounds[i, 0]
+                        # We are assuming Ebounds order matches channel order, ascending
+                        min_index = i
+                        log.debug(f"Min index found ({i}) with max energy of {e}")
                         break
-                for i, e in enumerate(self.energy_bounds[:, 2]):
+                else:
+                    log.warn("Unable to find minimum index using energy bounds")
+
+                for i, e in enumerate(self.energy_bounds["E_MIN"]):
                     # if e_min for channel greater than specified maximum energy
-                    if e < energy_range[1]:
-                        max_channel = self.energy_bounds[i, 0]
+                    if e > energy_range[1]:
+                        max_index = i
+                        log.debug(f"Max index found ({i}) with min energy of {e}")
                         break
-                data = self.data[min_index:max_index, :]
+                else:
+                    log.warn("Unable to find maximum index using energy bounds")
+
+                if min_index >= max_index:
+                    raise ValueError("Energy bounding got inverted bounds.")
+
+                data = self.data[:, min_index:max_index]
             else:
                 log.warn("Unable to constrain energy range on RMF")
 
@@ -624,7 +635,7 @@ class DataConfig:
                 )
 
         # Export RMF and ARF
-        rmf.export(out_path.joinpath("rmf.txt"))
+        rmf.export(out_path.joinpath("rmf.txt"), energy_range=energy_range)
         arf.export(out_path.joinpath("arf.txt"))
 
         log.info(f"ARF has {arf.data.size} energy bins.")
