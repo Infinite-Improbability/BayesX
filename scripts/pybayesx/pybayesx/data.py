@@ -2,6 +2,7 @@ from __future__ import annotations  # python 3.7 and up
 
 from dataclasses import dataclass
 from logging import getLogger
+from os import makedirs
 from pathlib import Path
 from typing import Any, Optional, Sequence, Union
 
@@ -592,6 +593,8 @@ class DataConfig:
         """
 
         out_path = Path(out_path)
+
+        makedirs(out_path)
 
         # Set energy range from source data
         if energy_range is None:
