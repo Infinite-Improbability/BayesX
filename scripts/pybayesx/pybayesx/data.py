@@ -147,7 +147,8 @@ class BinnableData(Data):
         if mask and (n_channels is None or n_channels <= 0):
             raise ValueError("If binning a mask, max_chan is a required argument.")
         elif n_channels is None:
-            n_channels = int(np.max(channel))
+            n_channels = int(np.ptp(channel)) + 1  # max - min
+        channel_offset = int(np.min(channel))
 
         # If origins are not provided default to centre of data
         if x0 is None:
@@ -194,14 +195,16 @@ class BinnableData(Data):
 
             # Increments count for bin
             if mask:
-                counts[i, j, :] = np.maximum(counts[i, j, :], channel[k])
+                counts[i, j, :] = np.maximum(
+                    counts[i, j, :], channel[k] - channel_offset
+                )
                 # This should cause the mask file to match the structure of the binned
                 # data.
                 # The file is chan_max times longer, but we avoid having to expand
                 # the mask across all channels in BayesX.
             else:
                 # Get energy channel and convert to index by subtracting 1
-                vr = int(channel[k]) - 1
+                vr = int(channel[k] - channel_offset) - 1
                 counts[i, j, vr] += 1
 
         counts_1d = counts.ravel()
