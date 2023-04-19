@@ -45,6 +45,9 @@ class Ellipse:
     def semimajor_axis(self) -> float:
         return np.max((self.radius1, self.radius2))
 
+    def __str__(self) -> str:
+        return f"ellipse: x0={self.origin_x} y0={self.origin_y}, r1={self.radius1}, r2={self.radius2}, angle={self.angle}"
+
 
 def mask(
     xMin: float,
@@ -74,10 +77,10 @@ def mask(
     for ellipse in ellipses:
         log.debug(f"Processing ellipse {ellipse}")
 
-        min_x = ellipse.origin_x - (ellipse.semimajor_axis / 2)
-        min_y = ellipse.origin_y - (ellipse.semimajor_axis / 2)
-        max_x = ellipse.origin_x + (ellipse.semimajor_axis / 2)
-        max_y = ellipse.origin_y + (ellipse.semimajor_axis / 2)
+        min_x = ellipse.origin_x - ellipse.semimajor_axis
+        min_y = ellipse.origin_y - ellipse.semimajor_axis
+        max_x = ellipse.origin_x + ellipse.semimajor_axis
+        max_y = ellipse.origin_y + ellipse.semimajor_axis
 
         if min_x < xMin:
             min_x = xMin
