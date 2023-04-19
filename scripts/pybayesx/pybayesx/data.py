@@ -8,7 +8,7 @@ from typing import Any, Optional, Sequence, Union
 import numpy as np
 from astropy.io import fits
 from astropy.io.fits.hdu import PrimaryHDU
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 
 from .mask import mask
 
@@ -320,6 +320,7 @@ class Events(BinnableData):
             energy_max = np.ceil(energy_max / 10) / 100
 
             log.info(f"Rounded energy range to {energy_min}:{energy_max} keV")
+            log.info("Events loading complete")
 
             return cls(data, exposure_time, background, (energy_min, energy_max))
 
@@ -362,6 +363,9 @@ class Mask(BinnableData):
         """
         path = Path(path)
         data = mask(xMin, xMax, yMin, yMax, [path])
+
+        log.info("Region loading complete")
+
         return cls(data)
 
     def bin(
@@ -385,9 +389,6 @@ class ARF(Data):
         assert self.data.ndim == 1  # TODO: Better verification
         self.xrayNbins = len(self.data)  # TODO: Verify correctness
 
-        self.energy_low = None
-        self.energy_high = None
-
     @classmethod
     def load_txt(cls, path: Union[Path, str], **kwargs) -> ARF:
         path = Path(path)
@@ -401,39 +402,15 @@ class ARF(Data):
         with fits.open(path) as f:
             data = f[1].data["specresp"]  # type: ignore
 
-            # Energy bounds on the bins
-            energy_low = f[1].data["energ_lo"]  # type: ignore
-            energy_high = f[1].data["energ_hi"]  # type: ignore
+        log.info("ARF loading complete")
 
-        new = cls(data)
-        new.energy_low = energy_low
-        new.energy_high = energy_high
+        return cls(data)
 
-        return new
-
-    def export(
-        self, outfile: Union[Path, str], energy_range: Optional[Sequence[float]] = None
-    ):
+    def export(self, outfile: Union[Path, str]):
         outfile = Path(outfile)
         self.path = outfile
 
-        min_index = 0
-        max_index = self.data.size
-        if energy_range is not None:
-            if self.energy_low is not None and self.energy_high is not None:
-                # Very unoptimised
-                for i, e in enumerate(self.energy_low):
-                    if e >= energy_range[0]:
-                        min_index = i
-                        break
-                for i, e in enumerate(self.energy_high):
-                    if e >= energy_range[1]:
-                        max_index = i
-                        break
-            else:
-                log.warn("Unable to constrain energy range on ARF")
-
-        np.savetxt(outfile, self.data[min_index:max_index])
+        np.savetxt(outfile, self.data)
 
 
 class RMF(Data):
@@ -441,8 +418,7 @@ class RMF(Data):
         super().__init__(data)
         assert self.data.ndim == 2  # TODO: Better verification
         self.xrayNbins, self.xrayNch = self.data.shape  # TODO: Verify correctness
-        self.energy_low = None
-        self.energy_high = None
+        self.energy_bounds: Optional[NDArray] = None
 
     @classmethod
     def load_txt(cls, path: Union[Path, str]) -> RMF:
@@ -456,28 +432,37 @@ class RMF(Data):
     @classmethod
     def load_fits(cls, path: Union[Path, str]) -> RMF:
         path = Path(path)
+
         with fits.open(path) as f:
-            rmf = f[1].data["matrix"]  # type: ignore
-            xrayNch = len(rmf[-1])
+            data = f[1].data  # type: ignore
+
+            rmf = data["MATRIX"]
+
+            first_channel = np.concatenate(data["F_CHAN"])
+            n_channels = np.concatenate(data["N_CHAN"])
+            last_channel = first_channel + n_channels - 1
+
+            xrayNch = np.max(last_channel)
             xrayNbin = len(rmf)
+
+            log.debug(f"RMF has {xrayNbin} bins and {xrayNch} channels")
+
             mat = np.zeros((xrayNbin, xrayNch))
 
             for i in range(0, xrayNbin):
-                if len(rmf[i]) > xrayNch:
-                    # If this happens then our assumption that the last entry has the most channels was flawed
-                    # We'll probably need to adjust xrayNch to check every entry, which sounds slow
-                    raise ValueError(
-                        "RMF size calculations failed, bad assumption. See source."
-                    )
-                mat[i, : len(rmf[i])] = rmf[i]
+                log.debug(
+                    f"First channel: {first_channel[i]}, last channel: {last_channel[i]}"
+                )
+                first_index = first_channel[i] - 1  # correct for zero indexing
+                # We don't need zero indexing correction because it's cancelled out by Python's exclusive slice endpoint
+                last_index = last_channel[i]
+                log.debug(f"First index: {first_index}, last index: {last_index}")
+                mat[i, first_index:last_index] = rmf[i]
 
-            energy_low = f[1].data["energ_lo"]  # type: ignore
-            energy_high = f[1].data["energ_hi"]  # type: ignore
+            new = cls(mat)
+            new.energy_bounds = f[2].data  # type: ignore
 
-        new = cls(mat)
-
-        new.energy_low = energy_low
-        new.energy_high = energy_high
+        log.info("RMF loading complete")
 
         return new
 
@@ -493,19 +478,24 @@ class RMF(Data):
         min_index = 0
         max_index = self.data.size
         if energy_range is not None:
-            if self.energy_low is not None and self.energy_high is not None:
+            if self.energy_bounds is not None:
                 # Very unoptimised
-                for i, e in enumerate(self.energy_low):
-                    min_index = i
-                    break
-                for i, e in enumerate(self.energy_high):
-                    if e >= energy_range[1]:
-                        max_index = i
+                for i, e in enumerate(self.energy_bounds[:, 2]):
+                    # if e_max for channel greater than specified minimum energy
+                    if e > energy_range[0]:
+                        min_channel = self.energy_bounds[i, 0]
+                        break
+                for i, e in enumerate(self.energy_bounds[:, 2]):
+                    # if e_min for channel greater than specified maximum energy
+                    if e < energy_range[1]:
+                        max_channel = self.energy_bounds[i, 0]
                         break
                 data = self.data[min_index:max_index, :]
             else:
                 log.warn("Unable to constrain energy range on RMF")
 
+        self.n_bins = data.shape[0]
+        self.n_channels = data.shape[1]
         np.savetxt(outfile, np.ravel(data))
 
 
@@ -589,6 +579,7 @@ class DataConfig:
 
         out_path = Path(out_path)
 
+        # Set energy range from source data
         if energy_range is None:
             if evts.energy_range is not None:
                 energy_range = evts.energy_range
@@ -601,6 +592,7 @@ class DataConfig:
             else:
                 raise ValueError("Unable to detect energy range, please specify.")
 
+        # Bin
         log.info("Binning events...")
         evts.bin(nbins, bin_size, out_path.joinpath("evts.txt"))
         log.info("Binning background...")
@@ -608,19 +600,47 @@ class DataConfig:
 
         log.info(f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})")
 
+        # Validate binning before proceeding
         if (evts.nx, evts.ny, evts.n_channels) != (bg.nx, bg.ny, bg.n_channels):
-            raise ValueError("Mismatched binned datasets.")
+            raise ValueError(
+                "Source and background datasets have different shapes after binning."
+            )
 
+        # Bin mask
         mask_path = None
         if mask is not None:
             log.info("Binning mask")
             mask_path = out_path.joinpath("mask.txt")
             mask.bin(nbins, bin_size, outfile=mask_path, n_channels=evts.n_channels)
 
-        rmf.export(out_path.joinpath("rmf.txt"), energy_range=energy_range)
-        arf.export(out_path.joinpath("arf.txt"), energy_range=energy_range)
+            # Validate binning before proceeding
+            if (evts.nx, evts.ny, evts.n_channels) != (
+                mask.nx,
+                mask.ny,
+                mask.n_channels,
+            ):
+                raise ValueError(
+                    "Source and mask datasets have different shapes after binning."
+                )
 
-        # TODO: Validate matching dimensions of rmf and arf on appropriate axes
+        # Export RMF and ARF
+        rmf.export(out_path.joinpath("rmf.txt"))
+        arf.export(out_path.joinpath("arf.txt"))
+
+        log.info(f"ARF has {arf.data.size} energy bins.")
+        log.info(
+            f"RMF has {rmf.n_bins} energy bins and {rmf.n_channels} energy channels (in export)."
+        )
+
+        # More data validation
+        if arf.data.size != rmf.n_bins:
+            raise ValueError(
+                f"ARF and RMF have different numbers of energy bins ({arf.data.size}, {rmf.n_bins})"
+            )
+        elif rmf.n_channels != evts.n_channels:
+            raise ValueError(
+                f"RMF and source data have different numbers of energy channels ({rmf.n_channels}, {evts.n_channels})"
+            )
 
         return cls(
             filBG=bg.path,
