@@ -59,7 +59,8 @@ class BinnableData(Data):
         if outfile is not None:
             outfile = Path(outfile)
             self.path = outfile
-        b = self._bin(
+
+        binned, new_edges = self._bin(
             self.data[:, 0],
             self.data[:, 1],
             self.data[:, 2],
@@ -67,8 +68,8 @@ class BinnableData(Data):
             outfile=outfile,
             **kwargs,
         )
-        self.nx, self.ny, self.n_channels = b[0].shape
-        return b
+        self.nx, self.ny, self.n_channels = binned.shape
+        return binned, new_edges
 
     def _bin(
         self,
@@ -76,6 +77,7 @@ class BinnableData(Data):
         y: ArrayLike,
         channels: ArrayLike,
         cellsize: float,
+        edges: Optional[Sequence[ArrayLike]] = None,
         n_bins: Optional[tuple[int, int]] = None,
         origin: Optional[tuple[float, float]] = None,
         n_channels: Optional[int] = None,
@@ -128,28 +130,29 @@ class BinnableData(Data):
         # TODO: Rewrite as class method
 
         # Coerce input
-        x = np.asanyarray(x)
-        y = np.asanyarray(y)
-        channels = np.asanyarray(channels)
-
-        # Do some input checking
-        if len(x) != len(y):
-            raise ValueError("Coordinate lists x and y have different lengths.")
-        if x.ndim != 1 or y.ndim != 1 or channels.ndim != 1:
-            raise ValueError("An input array is not one dimensional.")
+        x = np.asarray(x)
+        y = np.asarray(y)
+        channels = np.asarray(channels)
 
         # Set no. of channels based on largest channel number present
         if mask and (n_channels is None or n_channels < 1):
             raise ValueError("If binning a mask, max_chan is a required argument.")
         elif n_channels is None:
             n_channels = int(np.ptp(channels)) + 1  # max - min
-        channel_offset = int(np.min(channels))
 
         if mask:
-            channels = np.linspace(1, n_channels, n_channels)
+            log.debug(f"n_channels is given as {n_channels}")
+            channels = np.linspace(0, n_channels, n_channels)
             channels = np.tile(channels, x.size)
             x = x.repeat(n_channels)
             y = y.repeat(n_channels)
+
+        # Do some input checking
+        # We do this now to ensure mask modifications are included
+        if len(x) != len(y) != len(channels):
+            raise ValueError("Coordinate lists x and y have different lengths.")
+        if x.ndim != 1 or y.ndim != 1 or channels.ndim != 1:
+            raise ValueError("An input array is not one dimensional.")
 
         # If origins are not provided default to centre of data
         if origin is None:
@@ -169,9 +172,9 @@ class BinnableData(Data):
 
         # Calculate the number of bins.
         # We don't want partial bins so we use integer division.
-        n_x_bins = (x_max - x_min) // cellsize
-        n_y_bins = (y_max - y_min) // cellsize
-        n_ch_bins = n_channels
+        n_x_bins = int((x_max - x_min) // cellsize)
+        n_y_bins = int((y_max - y_min) // cellsize)
+        n_ch_bins = int(n_channels) + 1
 
         # If the user has provided bins check their input against our own
         # Then do what they ask because sometimes it is valid.
@@ -193,25 +196,32 @@ class BinnableData(Data):
 
         # It would be easier to just get scipy to do all the edge generation for us but
         # this gives us more control and repeatibility
-        x_edges = np.linspace(x_min, x_max, n_x_bins)
-        y_edges = np.linspace(y_min, y_max, n_y_bins)
+        if edges is not None:
+            x_edges, y_edges, _ = edges
+        else:
+            x_edges = np.linspace(x_min, x_max, n_x_bins)
+            y_edges = np.linspace(y_min, y_max, n_y_bins)
         ch_edges = np.linspace(ch_min, ch_max, n_ch_bins)
 
+        data = np.column_stack((x, y, channels))
+
         counts: NDArray
-        edges: list[NDArray]
-        counts, edges, bin_numbers = binned_statistic_dd(
-            [x, y, channels],
+        new_edges: list[NDArray]
+        counts, new_edges, bin_numbers = binned_statistic_dd(
+            data,
             values=None,
             statistic="count",
             bins=[x_edges, y_edges, ch_edges],  # type: ignore
         )
+
+        # log.debug(f"Binning done with edges {edges}")
 
         counts_1d = counts.ravel()
 
         if outfile:
             np.savetxt(outfile, counts_1d, "%5d")
 
-        return counts, edges
+        return counts, new_edges
 
 
 class Events(BinnableData):
@@ -372,7 +382,6 @@ class Mask(BinnableData):
 
     def bin(
         self,
-        n_bins: int,
         cellsize: float,
         n_channels: int,
         outfile: Optional[Union[Path, str]] = None,
@@ -558,7 +567,6 @@ class DataConfig:
         rmf: RMF,
         out_path: Union[str, Path],
         bin_size: int,
-        nbins: int,
         energy_range: Optional[Sequence[float]] = None,
         mask: Optional[Mask] = None,
         cell_size: float = 0.492,
@@ -592,7 +600,7 @@ class DataConfig:
 
         out_path = Path(out_path)
 
-        makedirs(out_path)
+        makedirs(out_path, exist_ok=True)
 
         # Set energy range from source data
         if energy_range is None:
@@ -608,17 +616,25 @@ class DataConfig:
                 raise ValueError("Unable to detect energy range, please specify.")
 
         # Bin
-        log.info("Binning events...")
-        evts.bin(bin_size, out_path.joinpath("evts.txt"))
-        log.info("Binning background...")
-        bg.bin(bin_size, out_path.joinpath("bg.txt"))
-
-        log.info(f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})")
+        log.info("Binning source events...")
+        _, edges = evts.bin(bin_size, out_path.joinpath("evts.txt"))
+        log.info("Binning background events...")
+        bg.bin(bin_size, out_path.joinpath("bg.txt"), edges=edges)
 
         # Validate binning before proceeding
         if (evts.nx, evts.ny, evts.n_channels) != (bg.nx, bg.ny, bg.n_channels):
+            log.info(
+                f"Source events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})"
+            )
+            log.info(
+                f"Background events have dimensions ({bg.nx}, {bg.ny}, {bg.n_channels})"
+            )
             raise ValueError(
                 "Source and background datasets have different shapes after binning."
+            )
+        else:
+            log.info(
+                f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})"
             )
 
         # Bin mask
@@ -626,7 +642,11 @@ class DataConfig:
         if mask is not None:
             log.info("Binning mask")
             mask_path = out_path.joinpath("mask.txt")
-            mask.bin(nbins, bin_size, outfile=mask_path, n_channels=evts.n_channels)
+            mask.bin(
+                bin_size, outfile=mask_path, n_channels=evts.n_channels, edges=edges
+            )
+
+            log.info(f"Mask has dimensions ({mask.nx}, {mask.ny}, {mask.n_channels})")
 
             # Validate binning before proceeding
             if (evts.nx, evts.ny, evts.n_channels) != (
@@ -635,7 +655,7 @@ class DataConfig:
                 mask.n_channels,
             ):
                 raise ValueError(
-                    "Source and mask datasets have different shapes after binning."
+                    f"Source and mask datasets have different shapes after binning."
                 )
 
         # Export RMF and ARF
