@@ -4,12 +4,13 @@ from dataclasses import dataclass
 from logging import getLogger
 from os import makedirs
 from pathlib import Path
-from typing import Any, Optional, Sequence, Union
+from typing import Optional, Sequence, Union
 
 import numpy as np
 from astropy.io import fits
 from astropy.io.fits.hdu import PrimaryHDU
 from numpy.typing import ArrayLike, NDArray
+from scipy.stats import binned_statistic_dd
 
 from .mask import mask
 
@@ -40,7 +41,6 @@ class BinnableData(Data):
 
     def bin(
         self,
-        n_bins: int,
         cellsize: float,
         outfile: Optional[Union[Path, str]] = None,
         **kwargs,
@@ -63,27 +63,25 @@ class BinnableData(Data):
             self.data[:, 0],
             self.data[:, 1],
             self.data[:, 2],
-            n_bins,
             cellsize,
             outfile=outfile,
             **kwargs,
         )
-        self.nx, self.ny, self.n_channels = b.shape
+        self.nx, self.ny, self.n_channels = b[0].shape
         return b
 
     def _bin(
         self,
         x: ArrayLike,
         y: ArrayLike,
-        channel: ArrayLike,
-        n_bins: int,
+        channels: ArrayLike,
         cellsize: float,
-        x0: Optional[float] = None,
-        y0: Optional[float] = None,
+        n_bins: Optional[tuple[int, int]] = None,
+        origin: Optional[tuple[float, float]] = None,
         n_channels: Optional[int] = None,
         outfile: Optional[Path] = None,
         mask: bool = False,
-    ) -> "np.ndarray[Any, np.dtype[np.float64]]":
+    ) -> tuple[NDArray, list[NDArray]]:
         """Bin data given spatial coordinates and channel coordinates of events.
         Bins are only spatial and do not reduce channel count.
         This will crop points if they are not within `n_bins/2` bins of the center.
@@ -92,25 +90,23 @@ class BinnableData(Data):
         The current implementation of this function leaves a cross artefact on the
         binned data.
 
-        :param x: 1D sequence of x coordinates of events. Should have an entry for every
+        :param x: 1D array of x coordinates of events. Should have an entry for every
         point.
         :type x: numpy.typing.ArrayLike
-        :param y: Sequence of y coordinates of events, assumed to use the same units and
+        :param y: 1D array of y coordinates of events, assumed to use the same units and
         order as x.
         :type y: numpy.typing.ArrayLike
-        :param channel: Sequence of channels of events, assumed to use the same order
-         as y. If `mask` is True then this value  should be 1 for all masked spatial
-         coordinates and 0 otherwise.
+        :param channel: 1D array of channels of events, assumed to use the same order
+         as x. If `mask` is True then this value is ignored.
         :type channel: numpy.typing.ArrayLike
-        :param nbins: The number of bins along each spatial axis
-        :type nbins: int
         :param cellsize: The size of a bin, in units matching x and y
         :type cellsize: float
-        :param x0: Central (origin) point along x axis in data, defaults to None. If
-         None then the midpoint of x is used.
-        :type x0: float, optional
-        :param y0: See `x0`, defaults to None
-        :type y0: float, optional
+        :param nbins: The number of bins along each spatial axis, defaults to None. If excluded
+         bin number is determined by `floor((max-min) / cellsize)` on each axis.
+        :type nbins: [int, int], optional
+        :param origin: Central (origin) point (x0, y0) along in data, defaults to None. If
+         None then the midpoint is determined from the range of the data.
+        :type origin: [float, float], optional
         :param n_channels: Number of possible channels, defaults to None. If None, then
          the maximum value of `channel` is used. If `mask` is True then a positive
          integer value is required.
@@ -129,91 +125,93 @@ class BinnableData(Data):
         x_bin_index(y_bin_index)
         :rtype: np.ndarray[Any, np.dtype[np.float64]]
         """
-
-        # TODO: Rewrite for being class method
-        # And fix the cross problem
+        # TODO: Rewrite as class method
 
         # Coerce input
         x = np.asanyarray(x)
         y = np.asanyarray(y)
-        channel = np.asanyarray(channel)
+        channels = np.asanyarray(channels)
 
         # Do some input checking
         if len(x) != len(y):
             raise ValueError("Coordinate lists x and y have different lengths.")
-        if x.ndim != 1 or y.ndim != 1:
-            raise ValueError("x or y array is not one dimensional.")
+        if x.ndim != 1 or y.ndim != 1 or channels.ndim != 1:
+            raise ValueError("An input array is not one dimensional.")
 
         # Set no. of channels based on largest channel number present
-        if mask and (n_channels is None or n_channels <= 0):
+        if mask and (n_channels is None or n_channels < 1):
             raise ValueError("If binning a mask, max_chan is a required argument.")
         elif n_channels is None:
-            n_channels = int(np.ptp(channel)) + 1  # max - min
-        channel_offset = int(np.min(channel))
+            n_channels = int(np.ptp(channels)) + 1  # max - min
+        channel_offset = int(np.min(channels))
+
+        if mask:
+            channels = np.linspace(1, n_channels, n_channels)
+            channels = np.tile(channels, x.size)
+            x = x.repeat(n_channels)
+            y = y.repeat(n_channels)
 
         # If origins are not provided default to centre of data
-        if x0 is None:
+        if origin is None:
             x0 = (np.max(x) + np.min(x)) / 2
-        if y0 is None:
             y0 = (np.max(y) + np.min(y)) / 2
+        else:
+            x0 = origin[0]
+            y0 = origin[1]
 
-        # Set relative coordinates
-        dx = x - x0
-        dy = y - y0
+        # Get edges of data
+        x_min = np.min(x)
+        y_min = np.min(y)
+        x_max = np.max(x)
+        y_max = np.max(y)
+        ch_min = np.min(channels)
+        ch_max = np.max(channels)
 
-        # Initalize output array
-        counts = np.zeros((n_bins, n_bins, n_channels))
+        # Calculate the number of bins.
+        # We don't want partial bins so we use integer division.
+        n_x_bins = (x_max - x_min) // cellsize
+        n_y_bins = (y_max - y_min) // cellsize
+        n_ch_bins = n_channels
 
-        # Set center coordinates in bin basis
-        i0 = n_bins / 2
-        j0 = n_bins / 2
-
-        # Loop over every cell
-        # The x and y arrays contain an entry for every point so we don't need a nested
-        # iteration over dy
-        for k in range(len(dx)):
-            # Get cell coordinates in original basis, relative to centre
-            u = dx[k]
-            v = dy[k]
-
-            # Get bin indices
-            signx = 1.0
-            if u < 0.0:
-                signx = -1
-            signy = 1.0
-            if v < 0.0:
-                signy = -1
-
-            # Convert coordinates to bin basis
-            i = int(np.floor(u / cellsize + signx * 0.5) + i0)
-            j = int(np.floor(v / cellsize + signy * 0.5) + j0)
-
-            # If bin indices out of range then abort
-            if (i < 0) | (i >= n_bins):
-                continue
-            if (j < 0) | (j >= n_bins):
-                continue
-
-            # Increments count for bin
-            if mask:
-                counts[i, j, :] = np.maximum(
-                    counts[i, j, :], channel[k] - channel_offset
+        # If the user has provided bins check their input against our own
+        # Then do what they ask because sometimes it is valid.
+        if n_bins:
+            if n_x_bins < n_bins[0] or n_y_bins < n_bins[1]:
+                log.warning(
+                    "Requesting more bins than the data spans. This may be due to bad input, or there may simply be no events at the edge of the observation."
                 )
-                # This should cause the mask file to match the structure of the binned
-                # data.
-                # The file is chan_max times longer, but we avoid having to expand
-                # the mask across all channels in BayesX.
-            else:
-                # Get energy channel and convert to index by subtracting 1
-                vr = int(channel[k] - channel_offset) - 1
-                counts[i, j, vr] += 1
+            n_x_bins, n_y_bins = n_bins
+
+        if (x_max - x_min) % cellsize != 0:
+            log.info("Trimmed x data to have whole number of bins")
+            x_min = x0 - (cellsize * n_x_bins / 2)
+            x_max = x0 + (cellsize * n_x_bins / 2)
+        if (y_max - y_min) % cellsize != 0:
+            log.info("Trimmed y data to have whole number of bins")
+            y_min = y0 - (cellsize * n_y_bins / 2)
+            y_max = y0 + (cellsize * n_y_bins / 2)
+
+        # It would be easier to just get scipy to do all the edge generation for us but
+        # this gives us more control and repeatibility
+        x_edges = np.linspace(x_min, x_max, n_x_bins)
+        y_edges = np.linspace(y_min, y_max, n_y_bins)
+        ch_edges = np.linspace(ch_min, ch_max, n_ch_bins)
+
+        counts: NDArray
+        edges: list[NDArray]
+        counts, edges, bin_numbers = binned_statistic_dd(
+            [x, y, channels],
+            values=None,
+            statistic="count",
+            bins=[x_edges, y_edges, ch_edges],  # type: ignore
+        )
 
         counts_1d = counts.ravel()
 
         if outfile:
             np.savetxt(outfile, counts_1d, "%5d")
 
-        return counts
+        return counts, edges
 
 
 class Events(BinnableData):
@@ -381,7 +379,7 @@ class Mask(BinnableData):
         **kwargs,
     ):
         kwargs["mask"] = True
-        super().bin(n_bins, cellsize, outfile, n_channels=n_channels, **kwargs)
+        super().bin(cellsize, outfile, n_channels=n_channels, **kwargs)
 
 
 class ARF(Data):
@@ -611,9 +609,9 @@ class DataConfig:
 
         # Bin
         log.info("Binning events...")
-        evts.bin(nbins, bin_size, out_path.joinpath("evts.txt"))
+        evts.bin(bin_size, out_path.joinpath("evts.txt"))
         log.info("Binning background...")
-        bg.bin(nbins, bin_size, out_path.joinpath("bg.txt"))
+        bg.bin(bin_size, out_path.joinpath("bg.txt"))
 
         log.info(f"Events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})")
 

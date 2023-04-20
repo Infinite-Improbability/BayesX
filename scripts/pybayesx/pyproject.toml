@@ -1,6 +1,6 @@
 [project]
 name = "PyBayesX"
-version = "0.4.1"
+version = "0.4.2"
 description = "Wrapper about BayesX to aid in data preparation and automated analysis."
 dependencies = [
     "numpy ~= 1.24",
