@@ -1,11 +1,12 @@
 [project]
 name = "PyBayesX"
-version = "0.4.0"
-description = "Wrapper about BayesX to aid in data preperation and automated analysis."
+version = "0.4.1"
+description = "Wrapper about BayesX to aid in data preparation and automated analysis."
 dependencies = [
     "numpy ~= 1.24",
     "astropy ~= 5.2",
-    "getdist ~= 1.4"
+    "getdist ~= 1.4",
+    "scipy ~= 1.10"
 ]
 license = {file = "LICENSE"}
 authors = [{name = "Ryan Cox", email = "ryan.cox@vuw.ac.nz"}]
