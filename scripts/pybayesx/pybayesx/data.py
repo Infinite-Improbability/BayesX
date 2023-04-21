@@ -68,6 +68,7 @@ class BinnableData(Data):
             outfile=outfile,
             **kwargs,
         )
+        self.binned = binned
         self.nx, self.ny, self.n_channels = binned.shape
         return binned, new_edges
 
@@ -205,6 +206,8 @@ class BinnableData(Data):
 
         data = np.column_stack((x, y, channels))
 
+        log.debug(f"Binning on range x={x_edges.min()}:{x_edges.max()}, y={y_edges.min()}:{y_edges.max()}, ch={ch_edges.min()}:{ch_edges.max()}")  # type: ignore
+
         counts: NDArray
         new_edges: list[NDArray]
         counts, new_edges, bin_numbers = binned_statistic_dd(
@@ -222,6 +225,27 @@ class BinnableData(Data):
             np.savetxt(outfile, counts_1d, "%5d")
 
         return counts, new_edges
+
+    def bin_plot(self, channel_index=None):
+        if not hasattr(self, "binned"):
+            raise ValueError("Data not binned")
+
+        try:
+            import matplotlib.pyplot as plt
+            from matplotlib.colors import LogNorm
+
+            getLogger("matplotlib").setLevel("WARNING")
+            if channel_index is None:
+                # Sum over counts
+                binned = np.sum(self.binned, 2)
+            else:
+                binned = self.binned[:, :, channel_index]
+
+            plt.imshow(binned, norm=LogNorm(), origin="lower", interpolation="none")
+            plt.colorbar()
+        except ImportError:
+            log.warn("Matplotlib not installed")
+            return
 
 
 class Events(BinnableData):
@@ -583,7 +607,7 @@ class DataConfig:
         :type rmf: RMF
         :param out_path: Folder in which to save exported data
         :type out_path: Union[str, Path]
-        :param bin_size: Size of bin (side length) in units of pixels
+        :param bin_size: Size of bin (side length) in same units as spatial coordinates
         :type bin_size: int
         :param nbins: Number of bins kept (side length)
         :type nbins: int
@@ -640,7 +664,7 @@ class DataConfig:
         # Bin mask
         mask_path = None
         if mask is not None:
-            log.info("Binning mask")
+            log.info("Binning mask...")
             mask_path = out_path.joinpath("mask.txt")
             mask.bin(
                 bin_size, outfile=mask_path, n_channels=evts.n_channels, edges=edges
