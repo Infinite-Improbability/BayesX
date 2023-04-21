@@ -147,7 +147,7 @@ class Analysis:
         if not self.model.check_priors([p.property for p in self.priors]):
             raise ValueError("Missing required priors for model.")
 
-        makedirs(self.config_path.parent)
+        makedirs(self.config_path.parent, exist_ok=True)
 
         with open(self.config_path, "w") as f:
             for key, value in (
