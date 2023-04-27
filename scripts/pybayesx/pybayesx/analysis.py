@@ -141,7 +141,7 @@ class Analysis:
             self.config_path = self.base_path.joinpath(f"infile_{self.label}.inp")
 
         # Append filenames to paths
-        self.output_path = self.base_path.joinpath("out", "out_")
+        self.output_path = self.base_path.joinpath("out")
 
         # Verify we have all required priors
         if not self.model.check_priors([p.property for p in self.priors]):
