@@ -245,3 +245,9 @@ polytropic = Model(
     ],
     name="NFW-GNFW",
 )
+
+models: dict[str, Model] = {
+    "nfw_gnfw": nfw_gnfw,
+    "nfw_einasto": nfw_einasto,
+    "polytropic": polytropic,
+}
