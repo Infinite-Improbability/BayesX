@@ -3,7 +3,7 @@ from datetime import datetime
 from itertools import zip_longest
 from logging import getLogger
 from pathlib import Path
-from subprocess import run
+from subprocess import CalledProcessError, run
 from typing import Optional, Union
 
 from .model import Model, Property, models
@@ -24,8 +24,19 @@ class Document:
     chains_path: Path
     comments = ""
 
-    def to_markdown(self):
+    def to_markdown(self, for_conversion_to=None):
         lines: list[str] = []
+
+        # Special formatting for export types
+        if for_conversion_to is not None:
+            lines.append("---")
+            lines.append(f"title: {self.title}")
+            lines.append("---")
+
+            lines.append("``` {=html}")
+            lines.append("<style>body {max-width: unset} </style>")
+            lines.append("```")
+
         # Title
         lines.append(f"# {self.title}")
         lines.append("\n")
@@ -116,14 +127,6 @@ class Document:
             [self.posteriors[k][5] for k in posterior_keys],
         )
 
-        lines.append(
-            """``` {=html}
-            <style>
-            body { max-width: unset; }
-            </style>
-            ```"""
-        )
-
         return lines
 
 
@@ -199,7 +202,6 @@ def make_report(
         posteriors=posteriors,  # type: ignore
         posterior_plot=plot_file.relative_to(report_path.parent),
     )
-    lines = doc.to_markdown()
 
     convert_to = None
     if report_path.suffix == "":
@@ -207,6 +209,8 @@ def make_report(
     if report_path.suffix != ".md":
         convert_to = report_path.suffix
         report_path = report_path.with_suffix(".tmp.md")
+
+    lines = doc.to_markdown(convert_to)
 
     with report_path.open("x") as f:
         f.writelines([line + "\n" for line in lines])
@@ -216,21 +220,44 @@ def make_report(
         old_path = report_path
         report_path = report_path.with_stem(report_path.stem[:-4])
         report_path = report_path.with_suffix(convert_to)
+
+        args = [
+            "pandoc",
+            old_path,
+            "-o",
+            report_path,
+            "-f",
+            "commonmark_x",
+            "--standalone",
+            "--table-of-contents",
+        ]
+
+        if convert_to in [".pdf", ".tex"]:
+            args += [
+                "-V",
+                "papersize:a4",
+                "-V",
+                "margin:1cm",
+                "-V",
+                "geometry:landscape",
+            ]
+        # landscape looks bad but I ran into pandoc errors trying to rotate the
+        # oversized table
+
         log.info(f"Converting from markdown to {convert_to} with Pandoc")
-        run(
-            [
-                "pandoc",
-                old_path,
-                "-o",
-                report_path,
-                "-f",
-                "commonmark_x",
-                "--standalone",
-                "--table-of-contents",
-                f"--metadata=title:{doc.title}",
-            ],
-            check=True,
-        )
+        log.debug(f"Pandoc args: {args}")
+
+        try:
+            run(
+                args,
+                check=True,
+            )
+        except CalledProcessError as e:
+            log.error("Error converting report")
+            log.info(f"Removing {old_path}")
+            old_path.unlink()
+            raise e
+
         log.info(f"Report saved to {report_path}")
         log.info(f"Removing {old_path}")
         old_path.unlink()
