@@ -1,11 +1,15 @@
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import zip_longest
+from logging import getLogger
 from pathlib import Path
+from subprocess import run
 from typing import Optional, Union
 
 from .model import Model, Property, models
 from .plot import plot
+
+log = getLogger(__name__)
 
 
 @dataclass
@@ -31,10 +35,11 @@ class Document:
         lines.append(f"Report generated at {now}")
         lines.append("\n")
 
-        # Summary
         lines.append("## Summary")
-        # TODO
-        lines.append(f"Model `{self.model.name}` used.")
+        free_priors = [
+            p for p in self.model.required_priors if self.priors[p.value][0] != "Delta"
+        ]
+        lines.append(f"Model `{self.model.name}` used with {len(free_priors)} priors.")
         lines.append(
             f"Nested sampling global log-evidence is {' ± '.join(self.log_evidence)}."
         )
@@ -111,6 +116,14 @@ class Document:
             [self.posteriors[k][5] for k in posterior_keys],
         )
 
+        lines.append(
+            """``` {=html}
+            <style>
+            body { max-width: unset; }
+            </style>
+            ```"""
+        )
+
         return lines
 
 
@@ -136,7 +149,7 @@ def make_report(
         title = str(Path(*chains_path.parts[-2:]))
 
     for m in models.values():
-        if m.num == infile["cluster_model"]:
+        if m.num == int(infile["cluster_model"]):
             model = m
             break
     else:
@@ -188,8 +201,38 @@ def make_report(
     )
     lines = doc.to_markdown()
 
+    convert_to = None
+    if report_path.suffix == "":
+        report_path = report_path.with_suffix(".md")
+    if report_path.suffix != ".md":
+        convert_to = report_path.suffix
+        report_path = report_path.with_suffix(".tmp.md")
+
     with report_path.open("x") as f:
         f.writelines([line + "\n" for line in lines])
+        log.info(f"Report saved to {report_path}")
+
+    if convert_to:
+        old_path = report_path
+        report_path = report_path.with_stem(report_path.stem[:-4])
+        report_path = report_path.with_suffix(convert_to)
+        log.info(f"Converting from markdown to {convert_to} with Pandoc")
+        run(
+            [
+                "pandoc",
+                old_path,
+                "-o",
+                report_path,
+                "-f",
+                "commonmark_x",
+                "--standalone",
+                "--table-of-contents",
+                f"--metadata=title:{doc.title}",
+            ]
+        )
+        log.info(f"Report saved to {report_path}")
+        log.info(f"Removing {old_path}")
+        old_path.unlink()
 
     return report_path
 
@@ -263,7 +306,7 @@ def _load_paramnames_file(chains_root: Path):
             value = parts[1]
             if "/" in line:
                 unit = line.split("/")[1].strip()
-                unit = unit.strip("\\mathrm")
+                unit = unit.replace("\\mathrm", "")
                 unit = unit.replace("\\odot", "sun")
                 # unit = unit.replace('{', '')
                 # unit = unit.replace('}', '')

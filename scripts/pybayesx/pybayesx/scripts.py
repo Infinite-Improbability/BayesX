@@ -152,4 +152,3 @@ def _demo(args):
 
 def _report(args):
     rp = make_report(args.infile, args.output, args.m500)
-    print(f"Report saved to {rp}")
