@@ -228,7 +228,8 @@ def make_report(
                 "--standalone",
                 "--table-of-contents",
                 f"--metadata=title:{doc.title}",
-            ]
+            ],
+            check=True,
         )
         log.info(f"Report saved to {report_path}")
         log.info(f"Removing {old_path}")
