@@ -1,5 +1,5 @@
 import logging
-from argparse import ArgumentParser, FileType, Namespace
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from sys import stderr, stdout
 
@@ -8,6 +8,7 @@ from getdist import loadMCSamples
 from .analysis import demo
 from .mask import mask
 from .plot import plot
+from .report import make_report
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ def main():
         "-o", "--output", type=Path, default=None, help="Path to save plot as"
     )
     plot_parser.add_argument(
-        "-i", "--interactive", type=bool, default=True, help="Show plot"
+        "-ni", "--no-interactive", action="store_false", help="Do not display plot"
     )
     plot_parser.add_argument(
         "-l", "--label", type=str, nargs="+", default=[], help="Labels for chains"
@@ -54,35 +55,24 @@ def main():
     mask_parser.add_argument(
         "maskFiles", nargs="+", help="List of paths to files of ellipses to mask"
     )
-    # Optional
-    mask_parser.add_argument(
-        "-d",
-        "--overdraw",
-        help="Positive values increase effective radius of ellipse, negative decrease.",
-        type=float,
-        default=0,
-    )
-    mask_parser.add_argument(
-        "-o",
-        "--outputFile",
-        help=(
-            "Path to output file. File extensions '.txt' and '.txt.gz' will export to "
-            "a text file, with compression in the latter case. This is slowest and "
-            "large. Best for human readable output. '.npy' will export to an "
-            "uncompressed numpy .npy file. This is the fastest option but large. "
-            "'.npz' (default) will export to a compressed numpy .npz file. This is "
-            "slower than .npy but much smaller. '.matxt' will export entire mask matrix"
-            " to text file.  This is intended for debugging purposes and is not "
-            "formatted for the binning script.",
-        ),  # type: ignore
-        type=FileType("wb"),
-        default="mask.npz",
-    )
     mask_parser.set_defaults(func=_mask)
 
     # Demo parser
     demo_parser = subparsers.add_parser("demo", description="Run demo analysis.")
     demo_parser.set_defaults(func=_demo)
+
+    # Report parser
+    report_parser = subparsers.add_parser(
+        "report", description="Write a report on a run."
+    )
+    report_parser.add_argument("infile", type=Path, help="Path to infile")
+    report_parser.add_argument(
+        "-o", "--output", type=Path, default=None, help="Path to save report as"
+    )
+    report_parser.add_argument(
+        "--m500", action="store_true", help="Use M500 instead of M200 on plot"
+    )
+    report_parser.set_defaults(func=_report)
 
     # Write logging to shell
     rlog = logging.getLogger()
@@ -153,10 +143,13 @@ def _mask(args):
         args.yMin,
         args.yMax,
         args.maskFiles,
-        args.overdraw,
-        args.outputFile,
     )
 
 
 def _demo(args):
     demo()
+
+
+def _report(args):
+    rp = make_report(args.infile, args.output, args.m500)
+    print(f"Report saved to {rp}")

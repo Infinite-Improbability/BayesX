@@ -216,7 +216,7 @@ nfw_gnfw = Model(
 )
 
 nfw_einasto = Model(
-    num=1,
+    num=2,
     required_priors=[
         Property.x,
         Property.y,
@@ -233,7 +233,7 @@ nfw_einasto = Model(
 )
 
 polytropic = Model(
-    num=1,
+    num=3,
     required_priors=[
         Property.x,
         Property.y,
@@ -245,3 +245,9 @@ polytropic = Model(
     ],
     name="NFW-GNFW",
 )
+
+models: dict[str, Model] = {
+    "nfw_gnfw": nfw_gnfw,
+    "nfw_einasto": nfw_einasto,
+    "polytropic": polytropic,
+}
