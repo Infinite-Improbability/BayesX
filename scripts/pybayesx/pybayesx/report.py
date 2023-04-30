@@ -110,6 +110,12 @@ class Document:
         # Full posteriors
         lines.append("## All Posteriors")
         posterior_keys = list(self.posteriors.keys())
+
+        if for_conversion_to == ".pdf" or for_conversion_to == ".tex":
+            for k, v in self.posteriors.items():
+                v = [f"${v[0]}$", v[1]] + [f"{float(n):.5e}" for n in v[2:]]
+                self.posteriors[k] = tuple(v)
+
         lines += _make_md_table(
             [
                 "Parameter",
@@ -237,9 +243,7 @@ def make_report(
                 "-V",
                 "papersize:a4",
                 "-V",
-                "margin:1cm",
-                "-V",
-                "geometry:landscape",
+                "geometry:margin=2cm",
             ]
         # landscape looks bad but I ran into pandoc errors trying to rotate the
         # oversized table
