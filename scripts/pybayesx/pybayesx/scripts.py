@@ -130,7 +130,7 @@ def interactive_plot(args: Namespace):
     plot(
         args.chain_paths,
         args.p__parameter,
-        display=args.interactive,
+        display=args.no_interactive,
         plot_file=args.output,
         chain_labels=args.label,
     )
