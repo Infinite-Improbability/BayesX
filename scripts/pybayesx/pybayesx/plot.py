@@ -199,6 +199,11 @@ def plot(
     if save:
         # TODO: Clobber protection
         plotter.export(str(plot_file))
+        log.info(f"Saving fig to {plot_file}")
 
-    if display and plotter.fig is not None:
-        plotter.fig.show()
+    if display:
+        if plotter.fig is not None:
+            log.info("Displaying fig")
+            plotter.fig.show()
+        else:
+            log.error("Plot display failed. Figure does not exist.")
