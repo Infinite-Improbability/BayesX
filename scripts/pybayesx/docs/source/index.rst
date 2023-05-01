@@ -7,6 +7,7 @@ Welcome to PyBayesX's documentation!
 ====================================
 
 .. toctree::
+   gettingstarted
    modules
    :maxdepth: 2
    :caption: Contents:
