@@ -33,13 +33,17 @@ Run this script from the BayesX root folder:
 
 from argparse import ArgumentParser
 from datetime import datetime
+from logging import basicConfig
 from os import cpu_count, mkdir
 from subprocess import run
 from typing import Optional
 
 import numpy as np
+from pybayesx.plot import plot
 
 rng = np.random.default_rng()
+
+basicConfig(level="INFO")
 
 # Parse command line arguments
 parser = ArgumentParser(description="Run internal consistency check")
@@ -174,6 +178,7 @@ params["eff"] = 0.8
 params["tol"] = 0.5
 params["seed"] = -1
 
+params["rauto"] = False
 params["rmin"] = 0.01
 params["rmax"] = 0.3
 params["rlimit"] = 0.3
@@ -292,7 +297,7 @@ model_priors[3] = [
     "z_Prior",
 ]
 plot_priors = []
-true_priors = ["--true"]  # start list with flag needed for command
+true_priors = []
 p_count = 1
 for k in model_priors[params["cluster_model"]]:
     p = priors[k]
@@ -300,14 +305,11 @@ for k in model_priors[params["cluster_model"]]:
         plot_priors.append(
             f"p{str(p_count).zfill(3)}"
         )  # plotting script expects p001, p002, etc
-        true_priors.append(str(p.value))
+        true_priors.append(p.value)
         p_count += 1
 
-run(
-    ["python3", "scripts/auto_plot_tri.py", params["root"].path]
-    + plot_priors
-    + true_priors
-)
+plot(params["root"].path, zip(plot_priors, true_priors), display=True)
+
 
 # Output any additional data
 with open(f"{chain_path}/autorun-report.txt", "x") as f:
