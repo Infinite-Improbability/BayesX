@@ -40,10 +40,11 @@ from typing import Optional
 
 import numpy as np
 from pybayesx.plot import plot
+from pybayesx.report import make_report
 
 rng = np.random.default_rng()
 
-basicConfig(level="INFO")
+basicConfig(level="DEBUG")
 
 # Parse command line arguments
 parser = ArgumentParser(description="Run internal consistency check")
@@ -81,7 +82,12 @@ class Prior:
     """
 
     def __init__(
-        self, type_: int, param1: float, param2: float, value: Optional[float] = None
+        self,
+        type_: int,
+        param1: float,
+        param2: float,
+        value: Optional[float] = None,
+        name: Optional[str] = None,
     ):
         """
         Parameters
@@ -94,6 +100,8 @@ class Prior:
             Parameter for prior
         value : float, optional
             Override random assignment of true value
+        name: str, optional
+            Name as in .paramnames file
         """
         self.type = type_
         self.param1 = param1
@@ -190,10 +198,10 @@ params["cluster_model"] = args.model
 # Note that the automatic free prior detection at the end assumes
 # this specific set of prior types
 priors = {}
-priors["x_prior"] = Prior(0, 1, 1)
-priors["y_prior"] = Prior(0, 1, 1)
-priors["m200_prior"] = Prior(2, 1e14, 6e15, 5e15)
-priors["fgas200_prior"] = Prior(3, 0.13, 0.02, 0.131)
+priors["x_prior"] = Prior(0, 1, 1, 1, "x_0")
+priors["y_prior"] = Prior(0, 1, 1, 1, "y_0")
+priors["m200_prior"] = Prior(2, 1e14, 6e15, 5e15, "M_{T,200}")
+priors["fgas200_prior"] = Prior(3, 0.13, 0.02, 0.131, "f_{\\mathrm{gas},200}")
 priors["a_GNFW_prior"] = Prior(0, 1.062, 1.062)
 priors["b_GNFW_prior"] = Prior(0, 5.4807, 5.4807)
 priors["c_GNFW_prior"] = Prior(0, 0.3292, 0.3292)
@@ -308,14 +316,31 @@ for k in model_priors[params["cluster_model"]]:
         true_priors.append(p.value)
         p_count += 1
 
-plot(params["root"].path, zip(plot_priors, true_priors), display=True)
+plot(params["root"].path, zip(plot_priors, true_priors, strict=True), display=True)
 
+# make_report(free_path.path)
 
-# Output any additional data
-with open(f"{chain_path}/autorun-report.txt", "x") as f:
-    f.write(f"Fixed runtime: {fixed_time.total_seconds()} seconds\n")
-    f.write(f"Free runtime: {free_time.total_seconds()} seconds")
-    # TODO: Include priors, posterior information, etc
+prior_dict = {k: v for k, v in zip(plot_priors, true_priors, strict=True)}
+
+values = []
+with open(f'{params["root"].path}stats.dat') as f:
+    for line in f.readlines():
+        parts = line.split()
+        if line == "":
+            break
+        if "p" not in parts[0] or "*" in parts[0]:
+            continue
+        print(f"Checking parameter {line}")
+        value, uncert = [float(p) for p in parts[1:]]
+        true_value = prior_dict[parts[0]]
+        if not ((value - uncert) < true_value < (value + uncert)):
+            raise Exception(
+                f"Consistency check failed on parameter {parts[0]}",
+                f"True value is {true_value}",
+                f"Estimated value is {value} +/- {uncert}",
+            )
+
+print("Consistency check completed successfully.")
 
 print(f"\n Completed processing of {chain_path}.\n")
 print("----------------------------------------------------------------\n\n\n")
