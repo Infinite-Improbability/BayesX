@@ -358,9 +358,10 @@ CONTAINS
          r(i) = 10.d0**logr(i)
       END DO
 
-      if (logr(n) > rlimit) then
-         write(*, *) 'Logr greater than limit, adjusting'
-         logr(n) = rlimit
+      if (maxval(logr) > rlimit) then
+         write(*, *) 'Logr', maxval(logr), 'greater than rlimit', rlimit, ', adjusting'
+         rlimit = maxval(logr)
+         rmax = rlimit
       end if
 
       !if( myID == 0 ) WRITE(*,*) '         Lhood0 =', XRAYLhood0
