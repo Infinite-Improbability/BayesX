@@ -7,10 +7,11 @@ from typing import Optional, Sequence, Union
 from getdist import MCSamples, loadMCSamples, plots
 
 log = getLogger(__name__)
+getLogger("matplotlib").setLevel("INFO")
 
 
 def plot(
-    chain_paths: Union[Path, Sequence[Path]],
+    chain_paths: Union[Path, str, Sequence[Path | str]],
     parameters: Iterable[str | tuple[str, float] | tuple[str, None]],
     display: bool = False,
     save: bool = True,
@@ -21,7 +22,7 @@ def plot(
 
     :param chain_paths: Path, or paths, to chains, including filename prefix,
      e.g. 'chains/subfolder/out' for files named 'outFILENAME'
-    :type chain_paths: Union[Path, Sequence[Path]]
+    :type chain_paths: Path or list of paths, or string(s)
     :param parameters: Parameter ids to plot, e.g. [p001]
     :type parameters: Iterable[str  |  tuple[str, float]  |  tuple[str, None]]
     :param display: Show interactive plot, defaults to False
@@ -40,21 +41,29 @@ def plot(
 
     # This allows us to accept a single path without the user having to wrap it in a
     # sequence
-    if isinstance(chain_paths, Path):
+    if isinstance(chain_paths, str):
+        chain_paths = [Path(chain_paths)]
+    elif isinstance(chain_paths, Path):
         chain_paths = [chain_paths]
+
+    chain_paths = [Path(p) for p in chain_paths]
+
+    log.debug(f"Plotting chains {chain_paths}")
 
     if isinstance(chain_labels, str):
         chain_labels = [chain_labels]
 
     # Set default output path
     if plot_file is None:
-        plot_file = Path(chain_paths[0]).joinpath(
-            f"_{datetime.now().strftime('%Y%m%d%H%M%S')}_tri.svg"
+        plot_file = Path(
+            f"{chain_paths[0]}_{datetime.now().strftime('%Y%m%d%H%M%S')}_tri.svg"
         )
 
     # Convert all parameters to tuples of the form (id_number, true_value) using None
     # if true value not provided
     parameters = [p if isinstance(p, tuple) else (p, None) for p in parameters]
+
+    log.debug(f"Parmeters and values are: {parameters}")
 
     # Load in chains
     chains: list[MCSamples] = []
@@ -72,17 +81,17 @@ def plot(
     # Select the parameters we are plotting
     plotted_pars: list[str] = []
     for p in parameters:
-        plotted_pars.append(
-            first_chain_pars.parWithName(
-                p[0], error=True
-            ).label  # pyright: ignore [reportOptionalMemberAccess]
-        )
+        plotted_pars.append(first_chain_pars.parWithName(p[0], error=True).label)
 
     # Internal names for the various parameter plots
     plotpar_names = ["plot" + str(i) for i in range(len(plotted_pars))]
 
     # Convert pairs of param id numbers and true values to dict
-    markers = {p: v for p, v in parameters if v is not None}
+    markers = {
+        p: v[1] for p, v in zip(plotted_pars, parameters, strict=True) if v is not None
+    }
+
+    log.debug(f"Markers are: {markers}")
 
     # Loop over all the chains
     for i, samps in enumerate(chains):
@@ -184,8 +193,10 @@ def plot(
 
     # Add true values, if they exist
     for ipar, p in enumerate(plotted_pars):
+        log.debug(f"Iterating over marker ({ipar}, {p})")
         if p in markers:
             # Add line for true value
+            log.debug(f"Trying to add marker for {p}")
             ax = plotter.subplots[ipar, ipar]
             ax.axvline(x=markers[p], color="k")
             # Add star for true values in corrolation plots
