@@ -127,11 +127,10 @@ class Analysis:
 
     def export_infile(self, path: Optional[Union[Path, str]] = None):
         """
-        Run BayesX with a given configuration.
+        Export configuration in BayesX infile format.
 
-        :param label: Label for the run and related output, defaults to current time in
-         format YYYYMMDDHHmmSS
-        :type label: str, optional
+        :param path: Path to save infile as.
+        :type label: Path or string, optional
         :raises ValueError: When missing priors required by model.
         """
 
@@ -154,6 +153,7 @@ class Analysis:
                 asdict(self.data_config) | asdict(self.analysis_config)
             ).items():
                 if value is None:
+                    log.debug(f"Skipping entry {key} (is None)")
                     continue
                 elif isinstance(value, float):
                     value = str(value).replace(
@@ -169,6 +169,9 @@ class Analysis:
 
                 f.write(f"#{key}\n")
                 f.write(str(value) + "\n")
+
+                log.debug(f"Written {key}: {value} to infile")
+
             for prior in self.priors:
                 prior: Prior
                 f.write(f"#{prior.property.value}\n")

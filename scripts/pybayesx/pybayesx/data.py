@@ -582,6 +582,8 @@ class DataConfig:
         float
     ] = None  # Used to calculate logr, may need to be slightly higher than rmax, Mpc
 
+    comments: Optional[str] = None  # User comments
+
     @classmethod
     def generate(
         cls,

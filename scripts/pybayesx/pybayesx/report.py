@@ -157,6 +157,8 @@ def make_report(
     else:
         title = str(Path(*chains_path.parts[-2:]))
 
+    comments = infile.get("comments", "")
+
     for m in models.values():
         if m.num == int(infile["cluster_model"]):
             model = m
@@ -207,6 +209,7 @@ def make_report(
         log_evidence=log_evidence,  # type: ignore
         posteriors=posteriors,  # type: ignore
         posterior_plot=plot_file.relative_to(report_path.parent),
+        comments=comments,
     )
 
     convert_to = None
