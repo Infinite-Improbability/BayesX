@@ -35,7 +35,7 @@ jobs:
         run: ./bin/BayesX-tests 
       
       - name: Build BayesX
-        uses: make BayesX FC=gfortran CC=gcc CXX=g++ FFLAGS="-w -O3 -ffree-line-length-none" CFLAGS="-I. -O3" CXFLAGS="-I. -O3" LIBS="-llapack -lcfitsio"
+        run: make BayesX FC=gfortran CC=gcc CXX=g++ FFLAGS="-w -O3 -ffree-line-length-none" CFLAGS="-I. -O3" CXFLAGS="-I. -O3" LIBS="-llapack -lcfitsio"
       
       - name: Setup Python
         uses: actions/setup-python@v3
