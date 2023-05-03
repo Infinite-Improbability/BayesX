@@ -68,7 +68,7 @@ multinest: | multinestDirs
 multinestDirs:
 	mkdir -p lib
 
-BayesX: | BayesXdirs
+BayesX: multinest | BayesXdirs
 	$(MAKE) -C src BayesX
 
 BayesXdirs:
