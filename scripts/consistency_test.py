@@ -206,10 +206,11 @@ priors["a_GNFW_prior"] = Prior(0, 1.062, 1.062)
 priors["b_GNFW_prior"] = Prior(0, 5.4807, 5.4807)
 priors["c_GNFW_prior"] = Prior(0, 0.3292, 0.3292)
 priors["c500_GNFW_prior"] = Prior(0, 1.156, 1.156)
-priors["alpha_model2_prior"] = Prior(0, 2.5, 2.5)
-priors["gamma0_poly_prior"] = Prior(0, 0.25, 0.25)
+priors["alpha_model2_prior"] = Prior(1, 0.5, 5)
+priors["gamma0_poly_prior"] = Prior(1, 0.1, 0.4, value=0.3)
 priors["gammaR_poly_prior"] = Prior(0, 0.3, 0.3)
 priors["t0_poly_prior"] = Prior(0, 3, 3)
+
 priors["z_Prior"] = Prior(0, 0.5, 0.5)
 
 # Start configuring for fixed priors
