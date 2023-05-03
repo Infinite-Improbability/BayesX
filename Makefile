@@ -22,24 +22,24 @@
 
 # Parallel with GNU Compilers
 
-FC = mpifort
-CC = mpicc
-CXX = mpic++
-FFLAGS = -w -O3 -ffree-line-length-none -DMPI -fallow-argument-mismatch
-CFLAGS = -I. -O3
-CXXFLAGS = -I. -O3
-LIBS = -llapack -lcfitsio
+# FC = mpifort
+# CC = mpicc
+# CXX = mpic++
+# FFLAGS = -w -O3 -ffree-line-length-none -DMPI -fallow-argument-mismatch
+# CFLAGS = -I. -O3
+# CXXFLAGS = -I. -O3
+# LIBS = -llapack -lcfitsio
 
 
 # Serial with GNU Compilers
 
-# FC = gfortran
-# CC = gcc
-# CXX = g++
-# FFLAGS = -w -O3 -ffree-line-length-none
-# CFLAGS = -I. -O3
-# CXXFLAGS = -I. -O3
-# LIBS = -llapack -lcfitsio
+FC = gfortran
+CC = gcc
+CXX = g++
+FFLAGS = -w -O3 -ffree-line-length-none
+CFLAGS = -I. -O3
+CXXFLAGS = -I. -O3
+LIBS = -llapack -lcfitsio
 
 
 # Serial with GNU Compilers debug flags
@@ -52,11 +52,9 @@ LIBS = -llapack -lcfitsio
 # CXXFLAGS = -I. -Og
 # LIBS = -llapack -lcfitsio
 
-
-
 export FC FFLAGS CC CFLAGS CXX CXXFLAGS LIBS
 
-.PHONY: multinest BayesX
+.PHONY: multinest BayesX test
 
 BINDIR = bin
 
@@ -73,6 +71,10 @@ BayesX: multinest | BayesXdirs
 
 BayesXdirs:
 	mkdir -p $(BINDIR) chains
+
+test: multinest | BayesXdirs
+	$(MAKE) -C src libbayesx.a
+	$(MAKE) -C tests tests
 
 clean:
 	$(MAKE) -C src clean
