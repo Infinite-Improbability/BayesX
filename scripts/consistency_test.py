@@ -39,7 +39,8 @@ from subprocess import run
 from typing import Optional
 
 import numpy as np
-from pybayesx.plot import plot
+
+# from pybayesx.plot import plot
 
 rng = np.random.default_rng()
 
@@ -316,7 +317,7 @@ for k in model_priors[params["cluster_model"]]:
         true_priors.append(p.value)
         p_count += 1
 
-plot(params["root"].path, zip(plot_priors, true_priors, strict=True), display=True)
+# plot(params["root"].path, zip(plot_priors, true_priors, strict=True), display=True)
 
 prior_dict = {k: v for k, v in zip(plot_priors, true_priors, strict=True)}
 
