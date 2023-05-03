@@ -40,11 +40,10 @@ from typing import Optional
 
 import numpy as np
 from pybayesx.plot import plot
-from pybayesx.report import make_report
 
 rng = np.random.default_rng()
 
-basicConfig(level="DEBUG")
+basicConfig(level="INFO")
 
 # Parse command line arguments
 parser = ArgumentParser(description="Run internal consistency check")
@@ -247,7 +246,8 @@ run(
         "--oversubscribe",
         "bin/BayesX",
         fixed_path.path,
-    ]
+    ],
+    check=True,
 )
 fixed_time = datetime.now() - time
 print(f"\nFixed run complete in {fixed_time.total_seconds()} seconds\n\n")
@@ -276,7 +276,15 @@ with open(free_path.path, "w") as f:
 # Run with free priors
 time = datetime.now()
 run(
-    ["mpiexec", "-n", str(cpu_count()), "--oversubscribe", "bin/BayesX", free_path.path]
+    [
+        "mpiexec",
+        "-n",
+        str(cpu_count()),
+        "--oversubscribe",
+        "bin/BayesX",
+        free_path.path,
+    ],
+    check=True,
 )
 free_time = datetime.now() - time
 print(f"\nFree run complete in {free_time.total_seconds()} seconds\n\n")
@@ -318,16 +326,14 @@ for k in model_priors[params["cluster_model"]]:
 
 plot(params["root"].path, zip(plot_priors, true_priors, strict=True), display=True)
 
-# make_report(free_path.path)
-
 prior_dict = {k: v for k, v in zip(plot_priors, true_priors, strict=True)}
 
 values = []
 with open(f'{params["root"].path}stats.dat') as f:
     for line in f.readlines():
         parts = line.split()
-        if line == "":
-            break
+        if not line or len(parts) < 3:
+            continue
         if "p" not in parts[0] or "*" in parts[0]:
             continue
         print(f"Checking parameter {line}")
