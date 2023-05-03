@@ -207,7 +207,9 @@ cython_debug/
 
 # Project specific
 __pycache__
+bin/*
 bin/BayesX
+bin/BayesX-tests
 chains/*
 ComaData/*
 mask.txt

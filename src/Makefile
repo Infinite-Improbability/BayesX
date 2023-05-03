@@ -2,7 +2,7 @@ PROGS = BayesX
 
 INCLUDEDIRS = -I../multinest
  
-FFLAGS += $(INCLUDEDIRS)
+override FFLAGS += $(INCLUDEDIRS)
  
 AR = ar r  
 LINKLIB = ld -shared  
@@ -29,7 +29,15 @@ BayesX: $(MOBJECTS)
 	$(FC) $(FFLAGS) -o BayesX $(MOBJECTS) $(MCLIBS)
 	-mv $@ $(BINDIR)
 	-rm *.o
+
+libbayesx.a: $(MOBJECTS) 
+	$(AR) $@ $^ 
+	-mv $@ $(LIBDIR)
+	-rm *.o
  
 clean: 
 	-rm *.o *.mod
 	-rm $(BINDIR)/BayesX
+
+ 
+
