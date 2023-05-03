@@ -34,7 +34,7 @@ Run this script from the BayesX root folder:
 from argparse import ArgumentParser
 from datetime import datetime
 from logging import basicConfig
-from os import cpu_count, mkdir
+from os import mkdir
 from subprocess import run
 from typing import Optional
 
@@ -240,10 +240,6 @@ with open(fixed_path.path, "w") as f:
 time = datetime.now()
 run(
     [
-        "mpiexec",
-        "-n",
-        str(cpu_count()),
-        "--oversubscribe",
         "bin/BayesX",
         fixed_path.path,
     ],
@@ -277,10 +273,6 @@ with open(free_path.path, "w") as f:
 time = datetime.now()
 run(
     [
-        "mpiexec",
-        "-n",
-        str(cpu_count()),
-        "--oversubscribe",
         "bin/BayesX",
         free_path.path,
     ],
