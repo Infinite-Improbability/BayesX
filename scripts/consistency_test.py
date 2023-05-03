@@ -167,9 +167,9 @@ params["filRMF"] = Path(
 )  # Root for RMF telescope file in .txt format.
 
 # Misc params
-params["n"] = 64  # Number of steps for discretising r
-params["nx"] = 64  # Number of pixels in x direction
-params["ny"] = 64  # Number of pixels in y direction
+params["n"] = 32  # Number of steps for discretising r
+params["nx"] = 32  # Number of pixels in x direction
+params["ny"] = 32  # Number of pixels in y direction
 params["xrayNbin"] = 32  # Number of energy bins
 params["xrayNch"] = 32  # Number of energy bins
 params["Aeffave"] = 250  # Average effective area of the telescope in cm^{2}
@@ -180,7 +180,7 @@ params["sexpotime"] = "120d3"
 params["bexpotime"] = "120d3"
 params["NHcol"] = "2.2d20"
 params["xrayBG_model"] = "8.4d-6"
-params["nlive"] = 100
+params["nlive"] = 50
 params["eff"] = 0.8
 params["tol"] = 0.5
 params["seed"] = -1
@@ -197,18 +197,18 @@ params["cluster_model"] = args.model
 # Note that the automatic free prior detection at the end assumes
 # this specific set of prior types
 priors = {}
-priors["x_prior"] = Prior(0, 1, 1, 1, "x_0")
-priors["y_prior"] = Prior(0, 1, 1, 1, "y_0")
-priors["m200_prior"] = Prior(2, 1e14, 6e15, 5e15, "M_{T,200}")
-priors["fgas200_prior"] = Prior(3, 0.13, 0.02, 0.131, "f_{\\mathrm{gas},200}")
+priors["x_prior"] = Prior(0, 1, 1, name="x_0")
+priors["y_prior"] = Prior(0, 1, 1, name="y_0")
+priors["m200_prior"] = Prior(1, 1e14, 1e15, name="M_{T,200}")
+priors["fgas200_prior"] = Prior(1, 0.08, 0.24, name="f_{\\mathrm{gas},200}")
 priors["a_GNFW_prior"] = Prior(0, 1.062, 1.062)
 priors["b_GNFW_prior"] = Prior(0, 5.4807, 5.4807)
 priors["c_GNFW_prior"] = Prior(0, 0.3292, 0.3292)
 priors["c500_GNFW_prior"] = Prior(0, 1.156, 1.156)
-priors["alpha_model2_prior"] = Prior(1, 0.05, 5)
-priors["gamma0_poly_prior"] = Prior(1, 0.1, 0.4)
-priors["gammaR_poly_prior"] = Prior(1, 0.1, 0.4)
-priors["t0_poly_prior"] = Prior(1, 1, 5)
+priors["alpha_model2_prior"] = Prior(0, 2.5, 2.5)
+priors["gamma0_poly_prior"] = Prior(0, 0.25, 0.25)
+priors["gammaR_poly_prior"] = Prior(0, 0.3, 0.3)
+priors["t0_poly_prior"] = Prior(0, 3, 3)
 priors["z_Prior"] = Prior(0, 0.5, 0.5)
 
 # Start configuring for fixed priors
