@@ -3,10 +3,7 @@ name: Run tests
 
 # Eventually we'll want to run on any push
 # But for now we just want the branch that actually has the tests
-# on: push
-on:
-  push:
-    branches: ["tests"]
+on: push
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -34,9 +31,65 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Build
+      - name: Build tests
         run: make test FC=gfortran CC=gcc CXX=g++ FFLAGS="-w -O3 -ffree-line-length-none" CFLAGS="-I. -O3" CXFLAGS="-I. -O3" LIBS="-llapack -lcfitsio"
 
-      - name: Run tests
+      - name: Run unit tests
         run: ./bin/BayesX-tests 
+  
+  consistency:
+    name: Consistency tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: liblapack-dev libcfitsio-dev
+          version: 1.0
+    
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build tests
+        run: make test FC=gfortran CC=gcc CXX=g++ FFLAGS="-w -O3 -ffree-line-length-none" CFLAGS="-I. -O3" CXFLAGS="-I. -O3" LIBS="-llapack -lcfitsio"
+
+      - name: Run unit tests
+        run: ./bin/BayesX-tests 
+      
+      - name: Build BayesX
+        uses: make BayesX FC=gfortran CC=gcc CXX=g++ FFLAGS="-w -O3 -ffree-line-length-none" CFLAGS="-I. -O3" CXFLAGS="-I. -O3" LIBS="-llapack -lcfitsio"
+      
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Upgrade pip
+        run: |
+          # install pip=>20.1 to use "pip cache dir"
+          python3 -m pip install --upgrade pip
+
+      - name: Get pip cache dir
+        id: pip-cache
+        run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install numpy
+        run: python3 -m pip install numpy
+      
+      - name: Run consistency test on model 1
+        run: ./scripts/consistency_test.py 1
+      
+      - name: Run consistency test on model 2
+        run: ./scripts/consistency_test.py 2
+      
+      - name: Run consistency test on model 3
+        run: ./scripts/consistency_test.py 3
 
