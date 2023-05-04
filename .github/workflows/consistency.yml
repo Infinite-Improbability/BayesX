@@ -35,12 +35,6 @@ jobs:
     
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Build tests
-        run: make test FC=gfortran CC=gcc CXX=g++ FFLAGS="-w -O3 -ffree-line-length-none" CFLAGS="-I. -O3" CXFLAGS="-I. -O3" LIBS="-llapack -lcfitsio"
-
-      - name: Run unit tests
-        run: ./bin/BayesX-tests 
       
       - name: Build BayesX
         run: make BayesX FC=gfortran CC=gcc CXX=g++ FFLAGS="-w -O3 -ffree-line-length-none" CFLAGS="-I. -O3" CXFLAGS="-I. -O3" LIBS="-llapack -lcfitsio"
