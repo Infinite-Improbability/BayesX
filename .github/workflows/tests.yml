@@ -1,9 +1,17 @@
 # Workflow to build and run tests
 name: Unit tests
 
-# Eventually we'll want to run on any push
-# But for now we just want the branch that actually has the tests
-on: push
+on:
+  # Runs on pushes targeting any branch if they modify any specified path
+  push:
+    paths:
+      - "src/**"
+      - "multinest/**"
+      - "**.f90"
+      - "tests/**"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 env:
   FC: gfortran
