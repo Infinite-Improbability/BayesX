@@ -339,6 +339,8 @@ with open(f'{params["root"].path}stats.dat') as f:
                 f"True value is {true_value}",
                 f"Estimated value is {value} +/- {uncert}",
             )
+        else:
+            raise Exception("Deliberate failure")
 
 print("Consistency check completed successfully.")
 
