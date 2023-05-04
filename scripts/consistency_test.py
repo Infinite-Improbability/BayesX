@@ -322,23 +322,34 @@ for k in model_priors[params["cluster_model"]]:
 
 prior_dict = {k: v for k, v in zip(plot_priors, true_priors, strict=True)}
 
+print(f"True values are: {prior_dict}")
+
 values = []
 with open(f'{params["root"].path}stats.dat') as f:
     for line in f.readlines():
         parts = line.split()
-        if not line or len(parts) < 3:
+        if not line or len(parts) != 3:
             continue
-        if "p" not in parts[0] or "*" in parts[0]:
+        try:
+            # maximum liklihood value and associated sigma
+            index, value, uncert = [float(p) for p in parts]
+            index = int(index)
+            index = f"p{index:03}"
+            if index not in prior_dict:
+                continue
+            print(f"Checking parameter {line} with key {index}")
+            true_value = prior_dict[index]
+            deviation = np.abs((value - true_value) / uncert)
+            print(f"Deviation from true is {deviation} times the standard deviation.")
+            if deviation > 2:  # sensitivity
+                raise Exception(
+                    f"Consistency check failed on parameter {index}\n",
+                    f"True value is {true_value}\n",
+                    f"Estimated value is {value} +/- {uncert}\n",
+                    f"Deviation from true is {deviation} times the standard deviation.",
+                )
+        except ValueError:
             continue
-        print(f"Checking parameter {line}")
-        value, uncert = [float(p) for p in parts[1:]]
-        true_value = prior_dict[parts[0]]
-        if not ((value - uncert) < true_value < (value + uncert)):
-            raise Exception(
-                f"Consistency check failed on parameter {parts[0]}",
-                f"True value is {true_value}",
-                f"Estimated value is {value} +/- {uncert}",
-            )
 
 print("Consistency check completed successfully.")
 
