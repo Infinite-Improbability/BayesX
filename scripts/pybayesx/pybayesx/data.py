@@ -8,7 +8,7 @@ from typing import Optional, Sequence, Union
 
 import numpy as np
 from astropy.io import fits
-from astropy.io.fits.hdu import PrimaryHDU
+from astropy.io.fits.hdu import BinTableHDU
 from numpy.typing import ArrayLike, NDArray
 from scipy.stats import binned_statistic_dd
 
@@ -104,11 +104,12 @@ class BinnableData(Data):
         :type channel: numpy.typing.ArrayLike
         :param cellsize: The size of a bin, in units matching x and y
         :type cellsize: float
-        :param nbins: The number of bins along each spatial axis, defaults to None. If excluded
-         bin number is determined by `floor((max-min) / cellsize)` on each axis.
+        :param nbins: The number of bins along each spatial axis, defaults to None. If
+         excluded bin number is determined by `floor((max-min) / cellsize)`
+         on each axis.
         :type nbins: [int, int], optional
-        :param origin: Central (origin) point (x0, y0) along in data, defaults to None. If
-         None then the midpoint is determined from the range of the data.
+        :param origin: Central (origin) point (x0, y0) along in data, defaults to None.
+         If None then the midpoint is determined from the range of the data.
         :type origin: [float, float], optional
         :param n_channels: Number of possible channels, defaults to None. If None, then
          the maximum value of `channel` is used. If `mask` is True then a positive
@@ -182,7 +183,9 @@ class BinnableData(Data):
         if n_bins:
             if n_x_bins < n_bins[0] or n_y_bins < n_bins[1]:
                 log.warning(
-                    "Requesting more bins than the data spans. This may be due to bad input, or there may simply be no events at the edge of the observation."
+                    "Requesting more bins than the data spans. "
+                    "This may be due to bad input, "
+                    "or no events at the edge of the observation."
                 )
             n_x_bins, n_y_bins = n_bins
 
@@ -206,7 +209,11 @@ class BinnableData(Data):
 
         data = np.column_stack((x, y, channels))
 
-        log.debug(f"Binning on range x={x_edges.min()}:{x_edges.max()}, y={y_edges.min()}:{y_edges.max()}, ch={ch_edges.min()}:{ch_edges.max()}")  # type: ignore
+        log.debug(
+            f"Binning on range x={x_edges.min()}:{x_edges.max()}, "
+            f"y={y_edges.min()}:{y_edges.max()}, "
+            f"ch={ch_edges.min()}:{ch_edges.max()}"
+        )
 
         counts: NDArray
         new_edges: list[NDArray]
@@ -258,13 +265,15 @@ class Events(BinnableData):
     ) -> None:
         """X-ray event data
 
-        :param data: Source data array. Three columns, with each row containing (x, y, channel).
+        :param data: Source data array. Three columns, with each row containing
+         (x, y, channel).
         :type data: ArrayLike
         :param exposure_time: Observation exposure time (live).
         :type exposure_time: float
         :param background: True if data is for the X-ray background
         :type background: bool
-        :param energy_range: Range of input energies, lower limit followed by upper limit in keV, defaults to None
+        :param energy_range: Range of input energies, lower limit followed by upper
+         limit in keV, defaults to None
         :type energy_range: Sequence[float], optional
         """
         # TODO: Figure out consistent format for input data in docstring
@@ -321,7 +330,8 @@ class Events(BinnableData):
         :type y_key: str, optional
         :param channel_key: Key of channel column in fits file, defaults to "PI"
         :type channel_key: str, optional
-        :param energy_key: Key of energy column (assumes eV) in fits file, defaults to "energy"
+        :param energy_key: Key of energy column (assumes eV) in fits file,
+          defaults to "energy"
         :type energy_key: str, optional
         :param du_index: List index of data unit in HDUList with events (0-indexed)
         :type du_index: int
@@ -333,17 +343,20 @@ class Events(BinnableData):
         with fits.open(path) as fi:
             assert du_index < len(fi)
 
-            f: PrimaryHDU = fi[du_index]  # type: ignore
+            f: BinTableHDU = fi[du_index]  # type: ignore
 
             if f.header["extname"] != "EVENTS":
                 log.warn(
                     "Trying to load events from a data unit that lacks events extension"
                 )
 
-            data = np.column_stack((f.data[x_key], f.data[y_key], f.data[channel_key]))  # type: ignore
+            data = np.column_stack(
+                (f.data[x_key], f.data[y_key], f.data[channel_key])  # type: ignore
+            )
             exposure_time: float = f.header["livetime"]  # type: ignore
 
             # Assuming eV
+            # TODO: Get units from fits
             energy_min = np.min(f.data[energy_key])  # type: ignore
             energy_max = np.max(f.data[energy_key])  # type: ignore
 
@@ -487,7 +500,8 @@ class RMF(Data):
             for i in range(0, xrayNbin):
                 # correct for zero indexing
                 first_index = first_channel[i] - 1
-                # We don't need zero indexing correction because it's cancelled out by Python's exclusive slice endpoint
+                # We don't need zero indexing correction because it's cancelled out by
+                # Python's exclusive slice endpoint
                 last_index = last_channel[i]
 
                 mat[i, first_index:last_index] = rmf[i]
@@ -613,13 +627,16 @@ class DataConfig:
         :type bin_size: int
         :param nbins: Number of bins kept (side length)
         :type nbins: int
-        :param energy_range: Range of input energies, lower limit followed by upper limit in keV, defaults to None
+        :param energy_range: Range of input energies, lower limit followed by upper
+          limit in keV, defaults to None
         :type energy_range: Sequence[float], optional
         :param mask: Mask file of regions, defaults to None
         :type mask: Mask, optional
-        :param cell_size: Size (side length) of pixel in arcseconds before binning, defaults to 0.492 (as for Chandra ACIS)
+        :param cell_size: Size (side length) of pixel in arcseconds before binning,
+          defaults to 0.492 (as for Chandra ACIS)
         :type cell_size: float, optional
-        :raises ValueError: Raised if events and background have different shapes after binning.
+        :raises ValueError: Raised if events and background have different shapes after
+          binning.
         :return: A new DataConfig object
         :rtype: DataConfig
         """
@@ -634,7 +651,8 @@ class DataConfig:
                 energy_range = evts.energy_range
                 if evts.energy_range != bg.energy_range:
                     log.warn(
-                        "Background and source energy ranges don't match, using source range."
+                        "Background and source energy ranges don't match,"
+                        " using source range.",
                     )
             elif bg.energy_range is not None:
                 energy_range = bg.energy_range
@@ -650,7 +668,8 @@ class DataConfig:
         # Validate binning before proceeding
         if (evts.nx, evts.ny, evts.n_channels) != (bg.nx, bg.ny, bg.n_channels):
             log.info(
-                f"Source events have dimensions ({evts.nx}, {evts.ny}, {evts.n_channels})"
+                "Source events have dimensions "
+                f"({evts.nx}, {evts.ny}, {evts.n_channels})"
             )
             log.info(
                 f"Background events have dimensions ({bg.nx}, {bg.ny}, {bg.n_channels})"
@@ -681,7 +700,7 @@ class DataConfig:
                 mask.n_channels,
             ):
                 raise ValueError(
-                    f"Source and mask datasets have different shapes after binning."
+                    "Source and mask datasets have different shapes after binning."
                 )
 
         # Export RMF and ARF
@@ -690,17 +709,20 @@ class DataConfig:
 
         log.info(f"ARF has {arf.data.size} energy bins.")
         log.info(
-            f"RMF has {rmf.n_bins} energy bins and {rmf.n_channels} energy channels (in export)."
+            f"RMF has {rmf.n_bins} energy bins and "
+            f"{rmf.n_channels} energy channels (in export)."
         )
 
         # More data validation
         if arf.data.size != rmf.n_bins:
             raise ValueError(
-                f"ARF and RMF have different numbers of energy bins ({arf.data.size}, {rmf.n_bins})"
+                "ARF and RMF have different numbers of energy bins "
+                f"({arf.data.size}, {rmf.n_bins})"
             )
         elif rmf.n_channels != evts.n_channels:
             raise ValueError(
-                f"RMF and source data have different numbers of energy channels ({rmf.n_channels}, {evts.n_channels})"
+                "RMF and source data have different numbers of energy channels "
+                f"({rmf.n_channels}, {evts.n_channels})"
             )
 
         return cls(
