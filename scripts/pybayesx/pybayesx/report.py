@@ -236,7 +236,7 @@ def make_report(
             "-o",
             report_path,
             "-f",
-            "commonmark_x",
+            "commonmark_x+rebase_relative_paths",
             "--standalone",
             "--table-of-contents",
         ]
