@@ -81,14 +81,21 @@ def plot(
     # Select the parameters we are plotting
     plotted_pars: list[str] = []
     for p in parameters:
-        plotted_pars.append(first_chain_pars.parWithName(p[0], error=True).label)
+        param = first_chain_pars.parWithName(p[0], error=False)
+        if param is not None:
+            plotted_pars.append(param.label)
+        else:
+            log.warn(f"Unable to find parameter with name {p[0]}")
+            parameters.remove(p)
 
     # Internal names for the various parameter plots
     plotpar_names = ["plot" + str(i) for i in range(len(plotted_pars))]
 
     # Convert pairs of param id numbers and true values to dict
     markers = {
-        p: v[1] for p, v in zip(plotted_pars, parameters, strict=True) if v is not None
+        p: v[1]
+        for p, v in zip(plotted_pars, parameters, strict=True)
+        if v[1] is not None
     }
 
     log.debug(f"Markers are: {markers}")
@@ -135,6 +142,7 @@ def plot(
                         else:
                             M2 *= 1e-14
                         samps.setRanges({p_name: [M1, M2]})
+                        # Update true value
                         if p_label in markers and i == 0:
                             markers[p_label] *= 1e-14
                     elif p_label[0] == "S" and "Jy" in p_label:

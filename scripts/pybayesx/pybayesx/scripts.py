@@ -121,7 +121,7 @@ def interactive_plot(args: Namespace):
         args.p__parameter = plotpars
 
     if not args.output:
-        default_output = Path("plot_tri.svg")
+        default_output = Path(f"{args.chain_paths[0]}plot_tri.svg")
         ouput = input(f"Path to output file ({default_output}): ")
         args.output = Path(ouput) if ouput != "" else default_output
 
@@ -151,4 +151,4 @@ def _demo(args):
 
 
 def _report(args):
-    rp = make_report(args.infile, args.output, args.m500)
+    make_report(args.infile, args.output, args.m500)

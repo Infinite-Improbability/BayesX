@@ -22,7 +22,7 @@ class Document:
     posterior_plot: Path
     parameters: dict[str, str]
     chains_path: Path
-    comments = ""
+    comments: Optional[list[str]] = None
 
     def to_markdown(self, for_conversion_to=None):
         lines: list[str] = []
@@ -209,7 +209,7 @@ def make_report(
         log_evidence=log_evidence,  # type: ignore
         posteriors=posteriors,  # type: ignore
         posterior_plot=plot_file.relative_to(report_path.parent),
-        comments=comments,
+        comments=[comments],
     )
 
     convert_to = None
