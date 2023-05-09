@@ -185,8 +185,9 @@ CONTAINS
 
       IMPLICIT NONE
       INTEGER                         ::  i, j, k, m, index, iend, idx(1), iostatus
-      REAL*8                           :: Lhood, XRAYLhood, log_Cobs_factorial, log_BGobs_factorial, nullev, angfactor
-      REAL*8                           :: Mmin, Mmax, d1, d2
+      REAL*8                          :: Lhood, XRAYLhood, log_Cobs_factorial, log_BGobs_factorial, nullev, angfactor
+      REAL*8                          :: Mmin, Mmax, d1, d2
+      real*8                          :: M200_max
       CHARACTER(LEN=100)    :: string
 
       Initialise = 0
@@ -343,14 +344,34 @@ CONTAINS
 
 !-----------------------------------------
 ! Initialise working arrays:
+
+      ! Dynamic radius calculation
       if (rauto .eqv. .TRUE. .and. Dn == 1) then
-         ! Init logr for fixed redshift
+         ! By requiring Dn = 1 we required a fixed redshift
+         ! and avoid having to deal with redshift induced variation
+         ! in diameter
+
+         ! Init rmin, rlimit for fixed redshift
          angfactor = sec2rad * lookD(1,2) ! Physical Mpc per arcsec
          rlimit = dble(min(xraynx, xrayny)) / 2 * xraycell * angfactor ! radius in Mpc
-         rmax = rlimit ! TODO: Really figure out the difference between rmax and rlimit
-         rmin = 0.001 * rlimit ! TODO: Log values for debug, configurable scale, configure only one value?
+         rmin = 0.001 * rlimit
+
+         ! rmax needs some additional information
+         ! M200 = Gas_Prior(1, 1, 2), maximum prior value
+         M200_max = Gas_Prior(1, 1, 2)
+
+         IF (znow) THEN
+            rhocritz = rhocrit
+         ELSE
+            rhocritz = rhocritofz(zdmin)
+         END IF
+
+         ! Setting rmax to 5x R500 which is calculated as R200/1.5
+         ! Estimate R200 with NFW model
+         rmax = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0) / 1.5d0 * 5.d0
+
          write(*, *) 'Using dynamic radius limits'
-         write(*, *) 'rmin: ', rmin, ' rlimit = rmax = ', rlimit
+         write(*, *) 'rmin: ', rmin, ' rlimit = ', rlimit, 'rmax = ', rmax
       end if
 
       DO i = 1, n
@@ -361,8 +382,8 @@ CONTAINS
       if (maxval(logr) > rlimit) then
          write(*, *) 'Logr', maxval(logr), 'greater than rlimit', rlimit, ', adjusting'
          rlimit = maxval(logr)
-         rmax = rlimit
       end if
+
 
       !if( myID == 0 ) WRITE(*,*) '         Lhood0 =', XRAYLhood0
 

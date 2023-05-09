@@ -71,8 +71,8 @@ Parameter values corresponding to a given tag are specified in the following lin
 Limits on the radius considered:  
 #rauto:     Do dynamic limit calculation [T/F]. Overrides following options, default value T  
 #rmin:      real, Minimum radius, Mpc  
-#rmax:      real, Maximum radius for xray emission and GNFW model, Mpc  
-#rlimit:    real, Used to calculate logr, may need to be slightly higher than rmax, Mpc  
+#rmax:      real, Maximum radius for integrals, Mpc  
+#rlimit:    real, Maximum radius of the cluster/observation in the plane of the sky, Mpc  
 
 The root for MEKAL data files:  
 #filion:		mekal1.dat   
