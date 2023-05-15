@@ -210,8 +210,8 @@ class BinnableData(Data):
         data = np.column_stack((x, y, channels))
 
         log.debug(
-            f"Binning on range x={x_edges.min()}:{x_edges.max()}, "
-            f"y={y_edges.min()}:{y_edges.max()}, "
+            f"Binning on range x={x_edges.min()}:{x_edges.max()}, "  # type: ignore
+            f"y={y_edges.min()}:{y_edges.max()}, "  # type: ignore
             f"ch={ch_edges.min()}:{ch_edges.max()}"
         )
 
