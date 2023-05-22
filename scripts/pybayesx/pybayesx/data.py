@@ -54,7 +54,8 @@ class BinnableData(Data):
         :type cellsize: float
         :param outfile: Path to write binned data to, defaults to None
         :type outfile: Path | str, optional
-        :param energy_range: Limits on energies included in binned data, in order (min, max)
+        :param energy_range: Limits on energies included in binned data, in order
+         (min, max)
         :type energy_range: Sequence of floats, optional
         :return: 1D array of binned data
         :rtype: np.ndarray[Any, np.dtype[np.float64]]
@@ -335,6 +336,7 @@ class Events(BinnableData):
         channel_key: str = "PI",
         energy_key: str = "energy",
         du_index=1,  # TODO: Confirm correct
+        exposure_time: Optional[float] = None,
     ) -> Events:
         """Load events from a fits file.
         The file will be converted to the text format used by BayesX.
@@ -354,8 +356,9 @@ class Events(BinnableData):
         :type energy_key: str, optional
         :param du_index: List index of data unit in HDUList with events (0-indexed)
         :type du_index: int
-        :param mode: `'evts'` for events, `bg` for background.
-        :type mode: str
+        :param exposure_time: Exposure time of observation in seconds. If None,
+         detected from infile.
+        :type exposure_time: float, optional
         """
         path = Path(path)
 
@@ -372,7 +375,11 @@ class Events(BinnableData):
             data = np.column_stack(
                 (f.data[x_key], f.data[y_key], f.data[channel_key])  # type: ignore
             )
-            exposure_time: float = f.header["livetime"]  # type: ignore
+
+            if not exposure_time:
+                exposure_time = f.header["livetime"]  # type: ignore
+                if exposure_time is None:
+                    raise Exception("Failed to detect exposure time from fits.")
 
             # Assuming eV
             # TODO: Get units from fits
