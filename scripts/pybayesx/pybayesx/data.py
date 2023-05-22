@@ -687,9 +687,16 @@ class DataConfig:
 
         # Bin
         log.info("Binning source events...")
-        _, edges = evts.bin(bin_size, out_path.joinpath("evts.txt"))
+        _, edges = evts.bin(
+            bin_size, out_path.joinpath("evts.txt"), energy_range=energy_range
+        )
         log.info("Binning background events...")
-        bg.bin(bin_size, out_path.joinpath("bg.txt"), edges=edges)
+        bg.bin(
+            bin_size,
+            out_path.joinpath("bg.txt"),
+            edges=edges,
+            energy_range=energy_range,
+        )
 
         # Validate binning before proceeding
         if (evts.nx, evts.ny, evts.n_channels) != (bg.nx, bg.ny, bg.n_channels):
