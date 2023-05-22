@@ -43,6 +43,7 @@ class BinnableData(Data):
         self,
         cellsize: float,
         outfile: Optional[Union[Path, str]] = None,
+        energy_range: Optional[Sequence[float]] = None,
         **kwargs,
     ):
         """Bin arbitary data with three dimensions in first two dimensions.
@@ -53,6 +54,8 @@ class BinnableData(Data):
         :type cellsize: float
         :param outfile: Path to write binned data to, defaults to None
         :type outfile: Path | str, optional
+        :param energy_range: Limits on energies included in binned data, in order (min, max)
+        :type energy_range: Sequence of floats, optional
         :return: 1D array of binned data
         :rtype: np.ndarray[Any, np.dtype[np.float64]]
         """
@@ -60,10 +63,26 @@ class BinnableData(Data):
             outfile = Path(outfile)
             self.path = outfile
 
+        # Trim events by energy
+        # PI = [(energy/14.6 eV) + 1] with decimal part discarded
+        if energy_range is not None:
+            assert len(energy_range) == 2
+            min_channel = energy_range[0] * 1000 // 14.6 + 1
+            # min_channel = 1
+            max_channel = (
+                energy_range[1] * 1000 // 14.6 + 1
+            )  # drop +1 for exclusive range
+
+            data = self.data[
+                (min_channel <= self.data[:, 2]) & (self.data[:, 2] <= max_channel)
+            ]
+        else:
+            data = self.data
+
         binned, new_edges = self._bin(
-            self.data[:, 0],
-            self.data[:, 1],
-            self.data[:, 2],
+            data[:, 0],
+            data[:, 1],
+            data[:, 2],
             cellsize,
             outfile=outfile,
             **kwargs,
