@@ -73,7 +73,7 @@ class AnalysisConfig:
     n: int = 64  # Number of steps for discretising r
 
     # MutliNest parameters
-    nlive: int = 1000  # Number of live points.
+    nlive: int = 200  # Number of live points.
     IS: bool = False  # Do Importance Nested Sampling?
     multimodal: bool = False  # Do mode seperation
     eff: float = 0.8  # Target efficiency
