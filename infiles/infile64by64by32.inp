@@ -113,7 +113,7 @@
 0.5
 
 #seed
--1
+5654
 
 #root
 'chains/out64by64by32'
