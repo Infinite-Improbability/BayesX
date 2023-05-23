@@ -22,9 +22,9 @@
 
 # Parallel with GNU Compilers
 
-FC = mpifort
-CC = mpicc
-CXX = mpic++
+FC = $(PREP) mpifort
+CC = $(PREP) mpicc
+CXX = $(PREP) mpic++
 FFLAGS = -w -O3 -ffree-line-length-none -DMPI -fallow-argument-mismatch
 CFLAGS = -I. -O3
 CXXFLAGS = -I. -O3
