@@ -25,7 +25,7 @@
 FC = $(PREP) mpifort
 CC = $(PREP) mpicc
 CXX = $(PREP) mpic++
-FFLAGS = -w -O3 -ffree-line-length-none -DMPI -fallow-argument-mismatch
+FFLAGS = -w -O3 -ffree-line-length-none -DMPI -fallow-argument-mismatch -fopenmp
 CFLAGS = -I. -O3
 CXXFLAGS = -I. -O3
 LIBS = -llapack -lcfitsio
