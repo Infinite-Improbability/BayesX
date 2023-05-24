@@ -70,7 +70,7 @@ PROGRAM BayesX
       LENx = xraynx*xrayny*xrayNch
       xrayDeltaE = (xrayEmax - xrayEmin)/xrayNbin
 
-      allocate (photar(xrayNbin), xrayE1(xrayNbin), xrayE2(xrayNbin), xrayFluxCoeff(xrayNbin), xrayFlux(xrayNbin), &
+      allocate (photar(xrayNbin), xrayBinMin(xrayNbin), xrayBinMax(xrayNbin), xrayFluxCoeff(xrayNbin), xrayFlux(xrayNbin), &
                 xraypredFlux(xrayNch), Arf(xrayNbin), Rmf(xrayNbin, xrayNch), TRM(xrayNbin, xrayNch), xrayBG(LENx), &
                 xrayCobs(LENx), xrayBG_obs(LENX), xrayMask(LENx), xrayCmap(xrayNch, xraynx, xrayny), xrayCpred(LENx), r(n), T(n), Rhogas(n), logr(n))
 

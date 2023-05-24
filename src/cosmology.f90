@@ -8,6 +8,7 @@ CONTAINS
 !=======================================================================
 
    FUNCTION Hubble(zloc)
+      ! Return the Hubble parameter at some redshift zloc
 
       IMPLICIT NONE
 
@@ -27,9 +28,9 @@ CONTAINS
    END FUNCTION Hubble
 
 !=======================================================================
-! Function returns rhocrit(zz)
 
    FUNCTION rhocritofz(zz)
+      ! Return the critical density of the universe at some redshift zz
 
       IMPLICIT NONE
 

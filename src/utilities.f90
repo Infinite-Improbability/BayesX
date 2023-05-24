@@ -682,8 +682,9 @@ CONTAINS
                         END SUBROUTINE lookUp2D
 
 !=======================================================================
-!        lookup a 2D table, output 2 values
+
                         SUBROUTINE lookUp1D(num1, val1, tab1, tab3, v)
+                           ! lookup a 2D table, output 2 values
 
                            IMPLICIT NONE
 

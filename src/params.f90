@@ -158,14 +158,14 @@ MODULE params
    INTEGER         ::  indexy, init, lun, ierr, nl, nlx
    CHARACTER(LEN=256)   ::  filion = '', filrec = '', filkar = '', filcon = '', fillin = ''
    CHARACTER(LEN=256)   :: filcaf = ''
-   CHARACTER(LEN=256)   ::  filARF = '', filRMF = '', filevent = '', filBG = '', filmask=''
+   CHARACTER(LEN=256)   ::  filARF = '', filRMF = '', filevent = '', filBG = '', filmask = ''
    CHARACTER(LEN=72)    ::  comment
    INTEGER, PARAMETER  ::  NOEL = 15
    INTEGER, PARAMETER  ::  NL_MAX = 5500
 
    CHARACTER(LEN=3), PARAMETER   ::  Elements(1:15) = &
-      (/'H  ', 'He ', 'C  ', 'N  ', 'O  ', 'Ne ', 'Na ', 'Mg ', 'Al ', &
-      'Si ', 'S  ', 'Ar ', 'Ca ', 'Fe ', 'Ni '/)
+                                    (/'H  ', 'He ', 'C  ', 'N  ', 'O  ', 'Ne ', 'Na ', 'Mg ', 'Al ', &
+                                      'Si ', 'S  ', 'Ar ', 'Ca ', 'Fe ', 'Ni '/)
    REAL*8              ::  abund, nuc_tot, Z_tot, xe, xzin, elx, flx
    DIMENSION abund(NOEL), nuc_tot(NOEL), Z_tot(NOEL), xe(NOEL), xzin(NUMION), elx(NL_MAX)
    DIMENSION flx(NL_MAX)
@@ -201,7 +201,7 @@ MODULE params
    REAL*8, DIMENSION(:), ALLOCATABLE     ::n_H, ne_nH, n_e, T, Rhogas
    REAL*8, DIMENSION(:, :), ALLOCATABLE     :: X_emiss2D, X_S2D, predX_S2D
    REAL*8, DIMENSION(:), ALLOCATABLE              :: logX_emiss1D, X_S1D
-   REAL*8, DIMENSION(:), ALLOCATABLE     :: xrayE1, xrayE2
+   REAL*8, DIMENSION(:), ALLOCATABLE     :: xrayBinMin, xrayBinMax
    REAL*8, DIMENSION(:), ALLOCATABLE     :: xrayFluxCoeff, xrayFlux, xraypredFlux
    REAL*8, DIMENSION(:), ALLOCATABLE      :: Arf
    REAL*8, DIMENSION(:, :), ALLOCATABLE     :: Rmf, TRM

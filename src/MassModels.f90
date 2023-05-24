@@ -44,6 +44,10 @@ CONTAINS
 
 !-----------------------------------------------------------------------
    SUBROUTINE makeDlookup(zdmin, zdmax)
+      ! Populate the lookD array.
+      ! The array has Dn rows and 2 columns
+      ! Column 1 contains redshifts, distributed betweeb zdmin and zdmax
+      ! Column 2 contains the angular diameter distance at that redshift.
 
       IMPLICIT NONE
 
