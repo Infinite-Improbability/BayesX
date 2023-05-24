@@ -253,3 +253,12 @@ https://github.com/JohannesBuchner/PyMultiNest
 ## Python Interface
 
 There is an experimental Python wrapper, `pybayesx` to simplify data processing. Documentation can be found [here](https://infinite-improbability.github.io/BayesX/index.html).
+
+## Development Notes
+
+### Profiling
+I've used [Score-P](https://www.vi-hps.org/projects/score-p/) and [Cube](https://www.scalasca.org/scalasca/software/cube-4.x/download.html) for profiling. If you have these utilities installed then Bayes-X can be compiled with profiling support using
+```
+make PREP="scorep"
+```
+Profiling will then be performed automatically when run and the output can be viewed with Cube.

@@ -43,6 +43,7 @@ class BinnableData(Data):
         self,
         cellsize: float,
         outfile: Optional[Union[Path, str]] = None,
+        energy_range: Optional[Sequence[float]] = None,
         **kwargs,
     ):
         """Bin arbitary data with three dimensions in first two dimensions.
@@ -53,6 +54,9 @@ class BinnableData(Data):
         :type cellsize: float
         :param outfile: Path to write binned data to, defaults to None
         :type outfile: Path | str, optional
+        :param energy_range: Limits on energies included in binned data, in order
+         (min, max)
+        :type energy_range: Sequence of floats, optional
         :return: 1D array of binned data
         :rtype: np.ndarray[Any, np.dtype[np.float64]]
         """
@@ -60,10 +64,26 @@ class BinnableData(Data):
             outfile = Path(outfile)
             self.path = outfile
 
+        # Trim events by energy
+        # PI = [(energy/14.6 eV) + 1] with decimal part discarded
+        if energy_range is not None:
+            assert len(energy_range) == 2
+            min_channel = energy_range[0] * 1000 // 14.6 + 1
+            # min_channel = 1
+            max_channel = (
+                energy_range[1] * 1000 // 14.6 + 1
+            )  # drop +1 for exclusive range
+
+            data = self.data[
+                (min_channel <= self.data[:, 2]) & (self.data[:, 2] <= max_channel)
+            ]
+        else:
+            data = self.data
+
         binned, new_edges = self._bin(
-            self.data[:, 0],
-            self.data[:, 1],
-            self.data[:, 2],
+            data[:, 0],
+            data[:, 1],
+            data[:, 2],
             cellsize,
             outfile=outfile,
             **kwargs,
@@ -316,6 +336,7 @@ class Events(BinnableData):
         channel_key: str = "PI",
         energy_key: str = "energy",
         du_index=1,  # TODO: Confirm correct
+        exposure_time: Optional[float] = None,
     ) -> Events:
         """Load events from a fits file.
         The file will be converted to the text format used by BayesX.
@@ -335,8 +356,9 @@ class Events(BinnableData):
         :type energy_key: str, optional
         :param du_index: List index of data unit in HDUList with events (0-indexed)
         :type du_index: int
-        :param mode: `'evts'` for events, `bg` for background.
-        :type mode: str
+        :param exposure_time: Exposure time of observation in seconds. If None,
+         detected from infile.
+        :type exposure_time: float, optional
         """
         path = Path(path)
 
@@ -353,7 +375,11 @@ class Events(BinnableData):
             data = np.column_stack(
                 (f.data[x_key], f.data[y_key], f.data[channel_key])  # type: ignore
             )
-            exposure_time: float = f.header["livetime"]  # type: ignore
+
+            if not exposure_time:
+                exposure_time = f.header["livetime"]  # type: ignore
+                if exposure_time is None:
+                    raise Exception("Failed to detect exposure time from fits.")
 
             # Assuming eV
             # TODO: Get units from fits
@@ -661,9 +687,16 @@ class DataConfig:
 
         # Bin
         log.info("Binning source events...")
-        _, edges = evts.bin(bin_size, out_path.joinpath("evts.txt"))
+        _, edges = evts.bin(
+            bin_size, out_path.joinpath("evts.txt"), energy_range=energy_range
+        )
         log.info("Binning background events...")
-        bg.bin(bin_size, out_path.joinpath("bg.txt"), edges=edges)
+        bg.bin(
+            bin_size,
+            out_path.joinpath("bg.txt"),
+            edges=edges,
+            energy_range=energy_range,
+        )
 
         # Validate binning before proceeding
         if (evts.nx, evts.ny, evts.n_channels) != (bg.nx, bg.ny, bg.n_channels):
