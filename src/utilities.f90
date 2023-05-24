@@ -103,7 +103,9 @@ CONTAINS
       else
          write (*, *) 'x = ', x0, '  is out of table range xmin: ', xmin, ' xmax: ', xmax
          write (*, *) '10**x:', 10**x0, 10**xmin, 10**xmax
-         stop
+         write (*, *) 'x/xmax', x0/xmax
+         write (*, *) 'x/xmin', x0/xmin
+         error stop
       end if
       return
 
@@ -205,6 +207,8 @@ CONTAINS
       a1 = lim1
       b1 = lim2
 
+      ! write(*, *) 'Started qtrap with a1:', a1, 'b1:', b1
+
       ! First catch some stupidities:
 
       IF (a1 == b1) THEN
@@ -222,17 +226,21 @@ CONTAINS
       olds = -1.d30
       s = 0.d0
 
+      ! write(*,*) 'Qtrap loop start'
+
       DO j = 1, jmax
          CALL trapzd(func, a1, b1, S, j)
          IF (j == 1) THEN
+            ! write(*, *) 'Qtrap j==1 case start'
             t1 = func(a1)
             t2 = func(b1)
+            ! write(*, *) 'Qtrap j==1 case end'
          END IF
 
-         IF (abs(s - olds) < eps*abs(olds) .OR. abs(s - olds) == 0.d0) GOTO 20
+         IF (abs(S - olds) < eps*abs(olds) .OR. abs(S - olds) == 0.d0) GOTO 20
          IF (j == jmax) GOTO 10
 
-         olds = s
+         olds = S
       END DO
 
 10    if (myID == 0) then
@@ -248,6 +256,9 @@ CONTAINS
       GOTO 30
 
 20    S = S*sign
+
+      ! write(*, *) 'Finished qtrap'
+
 30    RETURN
    END SUBROUTINE qtrap
 
@@ -257,10 +268,10 @@ CONTAINS
 
       IMPLICIT NONE
 
-      REAL*8                                     :: a1, b1, S
+      REAL*8                                     :: a1, b1, S, S2
       INTEGER                                     :: n
       INTEGER                                      ::it, j
-      REAL*8                                     :: tnm, del, x, sum
+      REAL*8                                     :: tnm, del, x, sum, sum2
       REAL*8, allocatable :: x_vals(:)
 
       INTERFACE
@@ -269,30 +280,58 @@ CONTAINS
          END FUNCTION func
       END INTERFACE
 
+      ! write(*, *) 'trapzd start with n=', n
+
       IF (n .EQ. 1) THEN
+         ! write(*, *) 'trapzd n==1 case started with a1:', a1, 'b1:', b1
          S = 0.5*(b1 - a1)*(func(a1) + func(b1))
          it = 1
+         ! write(*, *) 'trapzd n==1 case finished'
       ELSE
          it = 2**(n - 2)
          tnm = it*1.0
          del = (b1 - a1)/tnm
          x = a1 + 0.5*del
          sum = 0.
+         sum2 = 0.
 
          allocate(x_vals(it))
          x_vals(1) = x
-         DO j = 2, it
+         do j = 2, it
             x_vals(j) = x_vals(j-1) + del
-            write(*, *) phlog10(x_vals(j))
-         END DO
+         end do
 
-         !$OMP PARALLEL
+         ! write(*, *) 'Starting parallel loop'
+
+         !$OMP PARALLEL DO REDUCTION(+: sum)
          DO j = 1, it
-            sum = sum + func(x + x_vals(j))
+            sum = sum + func(x_vals(j))
          END DO
-         !$OMP END PARALLEL
+         !$OMP END PARALLEL DO
 
-         s = 0.5*(s + (b1 - a1)*sum/tnm)
+         ! write(*, *) 'Finished parallel loop. Starting serial loop'
+
+         ! DO j = 1, it
+         !    if (x .ne. x_vals(j)) then
+         !       write(*, *) 'j: ', j, 'x:', x, 'x_val', x_vals(j)
+         !    end if
+         !    sum2 = sum2 + func(x)
+         !    x = x + del
+
+         ! END DO
+
+         ! if (abs(sum - sum2) / sum2 > 1.d-10) THEN
+         !    write(*, *) 'SUM :: Parallel: ', sum, ' serial:', sum2, 'diff (%):', (sum - sum2) / sum2 * 100.0
+         ! end if
+
+         ! S2 = S
+
+         ! S = 0.5*(S + (b1 - a1)*sum/tnm)
+         ! S2 = 0.5*(S2 + (b1 - a1)*sum2/tnm)
+
+         ! if (abs(S - S2) / S2 > 1.d-10) THEN
+         !    write(*, *) 'S :: Parallel: ', S, ' serial:', S2, 'diff (%):', (S - S2) / S2 * 100.0
+         ! end if
       END IF
 
       RETURN

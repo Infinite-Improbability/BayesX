@@ -296,6 +296,7 @@ CONTAINS
                uu = r(m)
                rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
                IF (rlimit1 > 0d0) THEN
+                  ! write(*, *) 'Qtrap called from label A'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
@@ -659,6 +660,7 @@ CONTAINS
                rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
                !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
+                  write(*, *) 'Qtrap called from label B'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
@@ -710,6 +712,7 @@ CONTAINS
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     write(*, *) 'Calling interpolate from label 4'
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
@@ -966,6 +969,7 @@ CONTAINS
                rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
                !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
+                  write(*, *) 'Qtrap called from label C'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm) ! per Mpc^2?
@@ -3242,6 +3246,7 @@ CONTAINS
       ELSEIF (rr >= r_integration_max) THEN
          XraySintegrand = 0.d0
       ELSE
+         ! write(*, *) 'Calling Xrayemission func in rmin case with rr = ', rr
          XraySintegrand = Xrayemissfunc1(rr)
       END IF
 
