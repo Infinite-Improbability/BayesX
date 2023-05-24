@@ -129,10 +129,11 @@ CONTAINS
          ! according to eq 8 of Olamaie2015.
          xfluxsec1 = 1.0/((4.0*pi)*((1.0 + z(k))**4))
 
-         ! TODO: What is this?
+         ! Coefficent of cooling function Lambda_c
          xfluxsec2 = (3.031d-15)
 
-         ! TODO: WHat is this?
+         ! This shows up in eq 22 of Olamaie 2014
+         ! Appears to be a coefficent of another form of the surface brightness
          xfluxsec5 = (pi*pi)/(60.0*60.0*180.0*180.0)
 
          ! Initialise arrays
@@ -155,6 +156,8 @@ CONTAINS
          ! photar is the fractional transmission
          CALL xsphab(xrayBinMin, xrayNbin, N_H_col, photar)
 
+         ! Calculate more parmeters
+         ! TODO: Verify correctness
          Rhogas500 = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
                      calcneDM(r500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          Tg500_DM = (4.d0*pi*0.6*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
@@ -162,7 +165,11 @@ CONTAINS
                     (1.0 + ((r500_DM/rp_GNFW)**(a_GNFW)))* &
                     (((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
                     *(m_sun*Mpc2m*Mpc2m)*(J2keV)
+
+         ! TODO: What does this do exactly?
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+
+         ! Calculate some cluster properties
          n_e500 = n_e500*1.d+6
          Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
          Pe500 = n_e500*Tg500_DM
@@ -171,6 +178,7 @@ CONTAINS
          MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
          fg500_DM = Mg500_DM/MT500_DM
 
+         ! R2500
          r2500_DM = r200_DM/3.5d0
          c2500_DM = r2500_DM/rs_DM
          Rhogas2500 = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
@@ -189,6 +197,7 @@ CONTAINS
          MT2500_DM = (4.d0*pi/3.d0)*(2500.d0*rhocritz)*(r2500_DM*r2500_DM*r2500_DM)
          fg2500_DM = Mg2500_DM/MT2500_DM
 
+         ! R200
          Rhogas200 = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
                      calcneDM(r200_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          Tg200_DM = (4.d0*pi*0.6*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
@@ -201,12 +210,16 @@ CONTAINS
          Ke200 = Tg200_DM/(n_e200**(2.0/3.0))
          Pe200 = n_e200*Tg200_DM
 
+         ! Allocate some more memory
          ALLOCATE (rgx(13))
          ALLOCATE (rhogasx(13), n_Hx(13))
          ALLOCATE (ne_nHx(13), n_ex(13))
          ALLOCATE (Tgx(13), Kex(13), Pex(13))
          ALLOCATE (M_DMx(13), Mg_DMx(13), fg_DMx(13))
+
+         ! Starting radius, as fraction of R500
          rx_incre = 0.03
+
          DO m = 1, 7
             rx_incre = rx_incre + 0.01
             rgx(m) = rx_incre*r500_DM
@@ -226,6 +239,7 @@ CONTAINS
                         DM_GNFWgasVol(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)         !M_sun
             fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
          END DO
+
          rx_incre = 0.1
          DO m = 8, 13
             rx_incre = rx_incre + 0.05
@@ -1263,11 +1277,13 @@ CONTAINS
       REAL*8 xe, xzin, elx, flx
       DIMENSION xe(NOEL), xzin(NUMION), elx(NL_MAX), flx(NL_MAX)
 
+      ! Initialise variables
       xrayde = 0.0
       DO i = 1, xrayNbin
          xrayFluxCoeff(i) = 0.
       END DO
 
+      ! Convert gas density to SI units
       Rhogas0_SI = Rhogas0*m_sun/(Mpc2m*Mpc2m*Mpc2m)      !this is central gas density in kgm^-3
 
       sum_xenuctot = 0.
@@ -2174,7 +2190,7 @@ CONTAINS
       param(1) = N_H_col*1.e-22 ! 10^22 cm^-2
       vparam(1) = param(1)
       DO i = 2, NPARM - 1
-         vparam(i) = 1.
+         vparam(i) = 1. ! relative values?
       END DO
       vparam(NPARM) = 0.
 
@@ -2186,7 +2202,7 @@ CONTAINS
    SUBROUTINE xszvph(ear, ne, param, photar)
 
       INTEGER ne
-!      REAL ear(0:ne), param(19), photar(ne), photer(ne)
+      ! REAL ear(0:ne), param(19), photar(ne), photer(ne)
       REAL param(19), photar(ne), photer(ne)
       REAL*8 ear(0:ne)
 
@@ -2214,10 +2230,9 @@ CONTAINS
 
       INTEGER i
 
-      ! TODO: This following code seems overly complex. Verify if it is necessary.
       pparam(1) = param(1)
       DO i = 2, NPARM - 1
-         pparam(i) = param(i)*param(1) ! Why not skip the multiplication? I think we're multiplying by 1 eveywhere
+         pparam(i) = param(i)*param(1)
       END DO
       pparam(NPARM) = param(NPARM)
 
@@ -2233,36 +2248,36 @@ CONTAINS
       REAL param(19), photar(ne)
       REAL*8 ear(0:ne)
 
-!  works out the redshifted transmission for material whose abundances
-!  are specified for the following 18 elements :
-!    1   hydrogen    (1)
-!    2   helium      (2)
-!    3   carbon      (6)
-!    4   nitrogen    (7)
-!    5   oxygen      (8)
-!    6   neon        (10)
-!    7   sodium      (11)
-!    8   magnesium   (12)
-!    9   aluminium   (13)
-!   10   silicon     (14)
-!   11   sulphur     (16)
-!   12   chlorine    (17)
-!   13   argon       (18)
-!   14   calcium     (20)
-!   15   chromium    (24)
-!   16   iron        (26)
-!   17   cobalt      (27)
-!   18   nickel      (28)
-!  The parameters are the column densities of the 18 elements in units of
-!  the column of each element in a solar abundance column of equivalent
-!  hydrogen column density of 1e22 /cm/cm. Parameter 19 is the redshift.
+      !  works out the redshifted transmission for material whose abundances
+      !  are specified for the following 18 elements :
+      !    1   hydrogen    (1)
+      !    2   helium      (2)
+      !    3   carbon      (6)
+      !    4   nitrogen    (7)
+      !    5   oxygen      (8)
+      !    6   neon        (10)
+      !    7   sodium      (11)
+      !    8   magnesium   (12)
+      !    9   aluminium   (13)
+      !   10   silicon     (14)
+      !   11   sulphur     (16)
+      !   12   chlorine    (17)
+      !   13   argon       (18)
+      !   14   calcium     (20)
+      !   15   chromium    (24)
+      !   16   iron        (26)
+      !   17   cobalt      (27)
+      !   18   nickel      (28)
+      !  The parameters are the column densities of the 18 elements in units of
+      !  the column of each element in a solar abundance column of equivalent
+      !  hydrogen column density of 1e22 /cm/cm. Parameter 19 is the redshift.
 
-! Arguments :
-!      ear     r        i: energy ranges
-!      ne      i        i: number of energies
-!      param   r        i: model parameters
-!      ifl     i        i: file number
-!      photar  r        o: transmitted fraction
+      ! Arguments :
+      !      ear     r        i: energy ranges
+      !      ne      i        i: number of energies
+      !      param   r        i: model parameters
+      !      ifl     i        i: file number
+      !      photar  r        o: transmitted fraction
 
       INTEGER NELTS
       PARAMETER(NELTS=18)
@@ -2295,7 +2310,7 @@ CONTAINS
          column(i) = param(i)*1.e22*fgabnd(celts(i))
       END DO
 
-      zfac = 1.0 + param(19)
+      zfac = 1.0 + param(19) ! TODO: This isn't factoring in redshift correctlyS I think as param(19) is always 0
       elow = ear(0)*zfac
 
       DO ie = 1, ne
