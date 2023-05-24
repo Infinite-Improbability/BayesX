@@ -660,7 +660,7 @@ CONTAINS
                rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
                !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
-                  write(*, *) 'Qtrap called from label B'
+                  ! write(*, *) 'Qtrap called from label B'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
@@ -969,7 +969,7 @@ CONTAINS
                rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
                !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
-                  write(*, *) 'Qtrap called from label C'
+                  ! write(*, *) 'Qtrap called from label C'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm) ! per Mpc^2?
