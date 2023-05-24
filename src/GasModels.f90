@@ -30,12 +30,14 @@ CONTAINS
       real*8 :: ne500_poly, ne2500_poly, ne200_poly, ne_rx
 !-----------------------------------------------------------------------
 
+      ! Load redshift and set appropriate critical density
       IF (znow) THEN
          rhocritz = rhocrit
       ELSE
          rhocritz = rhocritofz(z(k))
       END IF
 
+      ! Get angular distance from redshift
       CALL lookUp1D(Dn, z(k), lookD(:, 1), lookD(:, 2), D)
 
       if (GasModel == 1) THEN
@@ -593,7 +595,7 @@ CONTAINS
                rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
 !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
-                  write(*, *) 'Qtrap called from label B'
+                  ! write(*, *) 'Qtrap called from label B'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
@@ -905,7 +907,7 @@ CONTAINS
                rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
                !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
-                  write(*, *) 'Qtrap called from label C'
+                  ! write(*, *) 'Qtrap called from label C'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm) ! per Mpc^2?
