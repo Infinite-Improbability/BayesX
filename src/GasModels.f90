@@ -282,7 +282,7 @@ CONTAINS
             END DO
             DO m = 1, n
                uu = r(m)
-               rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
+               rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0)) ! That should be rmax I think. We're taking the radius and the radius on the sky plane to get LOS radius
 
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
