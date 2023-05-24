@@ -235,6 +235,7 @@ CONTAINS
                rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
 
                IF (rlimit1 > 0d0) THEN
+                  ! write(*, *) 'Qtrap called from label A'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
@@ -281,6 +282,7 @@ CONTAINS
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     ! write(*, *) 'Calling interpolate from label 1'
                      call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr >= rlimit) then
@@ -289,6 +291,7 @@ CONTAINS
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     ! write(*, *) 'Calling interpolate from label 2'
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
@@ -590,6 +593,7 @@ CONTAINS
                rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
 !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
+                  write(*, *) 'Qtrap called from label B'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
@@ -634,6 +638,7 @@ CONTAINS
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     write(*, *) 'Calling interpolate from label 3'
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr >= rlimit) then
@@ -642,6 +647,7 @@ CONTAINS
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     write(*, *) 'Calling interpolate from label 4'
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
@@ -899,6 +905,7 @@ CONTAINS
                rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
                !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
+                  write(*, *) 'Qtrap called from label C'
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm) ! per Mpc^2?
@@ -943,6 +950,7 @@ CONTAINS
                DO i = 1, xrayNch
                   IF (xrayr < rmin) THEN
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
+                     write(*, *) 'Calling interpolate from label 5'
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr >= rlimit) THEN
@@ -951,6 +959,7 @@ CONTAINS
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
+                     write(*, *) 'Calling interpolate from label 6'
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
@@ -3153,14 +3162,18 @@ CONTAINS
       REAL*8               :: zz, rr
       REAL*8               ::  XraySintegrand
 
+      ! write(*, *) 'XraySintegrand called for uu =', uu, 'zz = ', zz
+
       rr = SQRT(uu*uu + zz*zz)
 
       IF (rr < rmin) THEN
          rr = rmin
+         ! write(*, *) 'Calling Xrayemission func in rmin case with rr = ', rr, 'rmin =', rmin
          XraySintegrand = Xrayemissfunc1(rr)
-      ELSEIF (rr >= rmax) THEN
+      ELSEIF (rr >= rlimit) THEN
          XraySintegrand = 0.d0
       ELSE
+         ! write(*, *) 'Calling Xrayemission func in rmin case with rr = ', rr
          XraySintegrand = Xrayemissfunc1(rr)
       END IF
       !WRITE(*,*)'XraySintegrand= ', XraySintegrand
@@ -3178,6 +3191,7 @@ CONTAINS
 
       IF (rr < rmin) THEN
          !CALL interp1d(logX_emiss1D, logr, n, phlog10(rmin), result)
+         ! write(*, *) 'Calling interpolate from label 7'
          CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rmin), result)
 
       ELSEIF (rr >= rmax) THEN
@@ -3185,6 +3199,13 @@ CONTAINS
          RETURN
       ELSE
          !CALL interp1d(logX_emiss1D, logr, n, phlog10(rr), result)
+         ! write(*, *) 'Calling interpolate from label 8 with rr', rr
+         ! write(*, *) 'phlog10(rr)', phlog10(rr)
+
+         ! if (rr > rlimit) then
+         !    write(*, *) 'rr > rlimit with rr=', rr, 'rlimit', rlimit
+         ! end if
+
          CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rr), result)
       END IF
 

@@ -380,9 +380,11 @@ CONTAINS
          r(i) = 10.d0**logr(i)
       END DO
 
-      if (maxval(logr) > rlimit) then
-         write(*, *) 'Logr', maxval(logr), 'greater than rlimit', rlimit, ', adjusting'
-         rlimit = maxval(logr)
+      if (maxval(r) > rlimit) then
+         write(*, *) 'r', maxval(r), 'greater than rlimit', rlimit, 'raising rlimit to match'
+         rlimit = maxval(r)
+      else
+         write(*, *) 'maxval(r) / rlimit', maxval(r) / rlimit
       end if
 
 
