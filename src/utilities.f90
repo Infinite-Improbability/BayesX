@@ -272,7 +272,7 @@ CONTAINS
       INTEGER                                     :: n
       INTEGER                                      ::it, j
       REAL*8                                     :: tnm, del, x, sum, sum2
-      REAL*8, allocatable :: x_vals(:)
+      ! REAL*8, allocatable :: x_vals(:)
 
       INTERFACE
          FUNCTION func(zz)
@@ -293,19 +293,19 @@ CONTAINS
          del = (b1 - a1)/tnm
          x = a1 + 0.5*del
          sum = 0.
-         sum2 = 0.
+         ! sum2 = 0.
 
-         allocate(x_vals(it))
-         x_vals(1) = x
-         do j = 2, it
-            x_vals(j) = x_vals(j-1) + del
-         end do
+         ! allocate(x_vals(it))
+         ! x_vals(1) = x
+         ! do j = 2, it
+         !    x_vals(j) = x_vals(j-1) + del
+         ! end do
 
          ! write(*, *) 'Starting parallel loop'
 
          !$OMP PARALLEL DO REDUCTION(+: sum)
          DO j = 1, it
-            sum = sum + func(x_vals(j))
+            sum = sum + func(x + del*(j-1))
          END DO
          !$OMP END PARALLEL DO
 
