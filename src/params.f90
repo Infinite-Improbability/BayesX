@@ -66,7 +66,12 @@ MODULE params
    REAL*8                                          :: aux(NAtoms, aux_dim)
    REAL*8, DIMENSION(:), ALLOCATABLE               :: r, logr
    REAL*8                                          :: uu, loguu
-   REAL*8                                          :: rmin = 0.01, rmax = 10.0, rlimit = 10.0
+   ! Radius limits in the sky plane and along the line of sight
+   ! The sky plane limits should be chosen to keep analysis within the limits of the data
+   ! The LOS limits should be chosen with respect to their role as limits for integration along the line of sight
+   ! TODO: Rename LOS to explicitly acknowledge use in integrals?
+   ! The r_mins current share a value. Remove one?
+   REAL*8                                          :: r_sky_min = 0.01, r_sky_max = 10.0, r_los_min = 0.01, r_los_max = 10.0 ! Mpc
    LOGICAL                                         :: rauto = .TRUE.
 
    REAL*8                                          ::  rhocritz

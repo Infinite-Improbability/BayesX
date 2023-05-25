@@ -282,7 +282,7 @@ CONTAINS
             END DO
             DO m = 1, n
                uu = r(m)
-               rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0)) ! That should be rmax I think. We're taking the radius and the radius on the sky plane to get LOS radius
+               rlimit1 = sqrt(max(r_los_max*r_los_max - uu*uu, 0.d0)) !  FIXED: That should be rmax I think. We're taking the radius and the radius on the sky plane to get LOS radius
 
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
@@ -329,16 +329,14 @@ CONTAINS
                xraydx(2) = xrayyy - xrayy0
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
-                  IF (xrayr < rmin) THEN
-                     !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
-                     call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
+                  IF (xrayr < r_sky_min) THEN
+                     call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_sky_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr >= rlimit) then
+                  ELSEIF (xrayr >= r_sky_max) then ! TODO: Is just > safe?
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
-                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN
+                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN ! TODO: this was added to deal with an error but maybe it'll be ok once we fix radius limits?
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
-                     !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
@@ -637,7 +635,7 @@ CONTAINS
 
             DO m = 1, n
                uu = r(m)
-               rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
+               rlimit1 = sqrt(max(r_los_max*r_los_max - uu*uu, 0.d0))
 !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
@@ -682,11 +680,10 @@ CONTAINS
                xraydx(2) = xrayyy - xrayy0
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
-                  IF (xrayr < rmin) THEN
-                     !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
-                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
+                  IF (xrayr < r_sky_min) THEN
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_sky_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr >= rlimit) then
+                  ELSEIF (xrayr >= r_sky_max) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSEIF (phlog10(xrayr) >= logr(n)) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
@@ -945,7 +942,7 @@ CONTAINS
 
             DO m = 1, n
                uu = r(m)
-               rlimit1 = sqrt(max(rlimit*rlimit - uu*uu, 0.d0))
+               rlimit1 = sqrt(max(r_los_max*r_los_max - uu*uu, 0.d0))
                !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
@@ -990,16 +987,15 @@ CONTAINS
                xraydx(2) = xrayyy - xrayy0
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
-                  IF (xrayr < rmin) THEN
+                  IF (xrayr < r_sky_min) THEN
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
-                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(rmin), result)
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_sky_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr >= rlimit) THEN
+                  ELSEIF (xrayr >= r_sky_max) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSEIF (phlog10(xrayr) >= logr(n)) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
-                     !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
@@ -1094,17 +1090,27 @@ CONTAINS
 
    FUNCTION DM_GNFWsphVolInt(r)
 
+      ! This is proportional to the density of the gas at radius r
+      ! There is a constant coefficient not included here that makes
+      ! it equal to pressure.
+      !
+      ! The function seems mostly used to calculate mass in a radius,
+      ! by integrating over density
+      !
+      ! See Olamaie 2012, eq 6
+
       IMPLICIT NONE
       REAL*8               :: r
       REAL*8               ::DM_GNFWsphVolInt
 
-      IF (r < rmin) THEN
-         DM_GNFWsphVolInt = ((rmin*rmin*rmin)/((DLOG(1.0 + (rmin/rs_DM))) - (1.0/(1.0 + (rs_DM/rmin)))))* &
-                            ((rmin/rp_GNFW)**(-1.0*c_GNFW))* &
-                            ((1.0 + (rmin/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-                            ((b_GNFW*((rmin/rp_GNFW)**(a_GNFW))) + c_GNFW)
+      ! There's a singularity towards the center
+      IF (r < r_los_min) THEN
+         DM_GNFWsphVolInt = ((r_los_min*r_los_min*r_los_min)/((DLOG(1.0 + (r_los_min/rs_DM))) - (1.0/(1.0 + (rs_DM/r_los_min)))))* &
+                            ((r_los_min/rp_GNFW)**(-1.0*c_GNFW))* &
+                            ((1.0 + (r_los_min/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+                            ((b_GNFW*((r_los_min/rp_GNFW)**(a_GNFW))) + c_GNFW)
 
-      ELSEIF (r > rmax) THEN
+      ELSEIF (r > r_los_max) THEN
 
          DM_GNFWsphVolInt = 0.d0
 
@@ -1240,14 +1246,14 @@ CONTAINS
       REAL*8               :: r
       REAL*8               ::EinastoDM_GNFWsphVolInt
 
-      IF (r < rmin) THEN
-         EinastoDM_GNFWsphVolInt = ((rmin*rmin*rmin)* &
-                                    ((b_GNFW*((rmin/rp_GNFW)**(a_GNFW))) + c_GNFW)* &
-                                    ((rmin/rp_GNFW)**(-1.0*c_GNFW))* &
-                                    (1.0d0 + (rmin/rp_GNFW)**(a_GNFW))** &
+      IF (r < r_los_min) THEN
+         EinastoDM_GNFWsphVolInt = ((r_los_min*r_los_min*r_los_min)* &
+                                    ((b_GNFW*((r_los_min/rp_GNFW)**(a_GNFW))) + c_GNFW)* &
+                                    ((r_los_min/rp_GNFW)**(-1.0*c_GNFW))* &
+                                    (1.0d0 + (r_los_min/rp_GNFW)**(a_GNFW))** &
                                     (-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))/ &
-                                   INCOG(Gamma_coeff1, ((2.d0/alpha_Einasto)*((rmin/r_2_DM)**alpha_Einasto)))
-      ELSEIF (r > rmax) THEN
+                                   INCOG(Gamma_coeff1, ((2.d0/alpha_Einasto)*((r_los_min/r_2_DM)**alpha_Einasto)))
+      ELSEIF (r > r_los_max) THEN
          EinastoDM_GNFWsphVolInt = 0.d0
       ELSE
          EinastoDM_GNFWsphVolInt = ((r*r*r)* &
@@ -3203,17 +3209,20 @@ CONTAINS
                   REAL*8               :: zz, rr
                   REAL*8               ::  XraySintegrand
 
+                  ! uu is the projected distance from the cluster center on the sky
+                  ! zz is the distance along the line of sight.
                   rr = SQRT(uu*uu + zz*zz)
 
-                  IF (rr < rmin) THEN
-                     rr = rmin
+                  ! We compare to rr because we want to match the spherical shape of the cluster
+
+                  IF (rr < r_los_min) THEN
+                     rr = r_los_min
                      XraySintegrand = Xrayemissfunc1(rr)
-                  ELSEIF (rr >= rmax) THEN
+                  ELSEIF (rr >= r_los_max) THEN
                      XraySintegrand = 0.d0
                   ELSE
                      XraySintegrand = Xrayemissfunc1(rr)
                   END IF
-                  !WRITE(*,*)'XraySintegrand= ', XraySintegrand
 
                END FUNCTION XraySintegrand
 !=================================================================================================
@@ -3226,15 +3235,15 @@ CONTAINS
                   REAL*8               :: Xrayemissfunc1
                   REAL*8               :: result
 
-                  IF (rr < rmin) THEN
-                     !CALL interp1d(logX_emiss1D, logr, n, phlog10(rmin), result)
-                     CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rmin), result)
+                  ! TODO: We're nesting checks in a way that may be unnecessary
 
-                  ELSEIF (rr >= rmax) THEN
+                  IF (rr < r_los_min) THEN
+                     CALL interp1d_even(logX_emiss1D, logr, n, phlog10(r_los_min), result)
+
+                  ELSEIF (rr >= r_los_max) THEN
                      Xrayemissfunc1 = 0.d0
                      RETURN
                   ELSE
-                     !CALL interp1d(logX_emiss1D, logr, n, phlog10(rr), result)
                      CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rr), result)
                   END IF
 

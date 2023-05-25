@@ -232,7 +232,7 @@ CONTAINS
          ! uniform sampling in triangle check
 
          IF ((Geo_PriorType(i, 1) == 9 .and. Geo_PriorType(i, 2) /= 9) .or. &
-            (Geo_PriorType(i, 1) /= 9 .and. Geo_PriorType(i, 2) == 9)) THEN
+             (Geo_PriorType(i, 1) /= 9 .and. Geo_PriorType(i, 2) == 9)) THEN
             if (myID == 0) then
                WRITE (*, *) "ERROR: Geo_PriorType should be set to 9 for both x and y positions if &
                &                                                uniform sampling in a triangle is desired"
@@ -309,7 +309,7 @@ CONTAINS
       xrayCpred = 0.d0
 
       xrayBG(1:LENx) = (xrayBG_predmax/xrayNch)* &
-         (sexpotime)*(Aeffave)*(xraycell*xraycell*sec2min*sec2min)
+                       (sexpotime)*(Aeffave)*(xraycell*xraycell*sec2min*sec2min)
 
       ! Calculating XRAYLhood0= sum[(c_obs)_i !]
 
@@ -352,9 +352,10 @@ CONTAINS
          ! in diameter
 
          ! Init rmin, rlimit for fixed redshift
-         angfactor = sec2rad * lookD(1,2) ! Physical Mpc per arcsec
-         rlimit = dble(min(xraynx, xrayny)) / 2 * xraycell * angfactor ! radius in Mpc
-         rmin = 0.001 * rlimit
+         angfactor = sec2rad*lookD(1, 2) ! Physical Mpc per arcsec
+         r_sky_max = dble(min(xraynx, xrayny))/2*xraycell*angfactor ! radius in Mpc
+         r_sky_min = 0.001*r_sky_max
+         r_los_min = r_sky_min
 
          ! rmax needs some additional information
          ! M200 = Gas_Prior(1, 1, 2), maximum prior value
@@ -368,23 +369,23 @@ CONTAINS
 
          ! Setting rmax to 5x R500 which is calculated as R200/1.5
          ! Estimate R200 with NFW model
-         rmax = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0) / 1.5d0 * 5.d0
+         rmax = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/1.5d0*5.d0
          !rmax = rlimit
 
-         write(*, *) 'Using dynamic radius limits'
-         write(*, *) 'rmin: ', rmin, ' rlimit = ', rlimit, 'rmax = ', rmax
+         write (*, *) 'Using dynamic radius limits'
+         write (*, *) 'r_sky_min: ', r_sky_min, ' r_sky_max = ', r_sky_max
+         write (*, *) 'r_los_min: ', r_los_min, ' r_los_max = ', r_los_max
       end if
 
       DO i = 1, n
-         logr(i) = log10(rmin) + (log10(rlimit) - log10(rmin))*(i - 1)/dble(n - 1)
+         logr(i) = log10(r_los_min) + (log10(r_los_max) - log10(r_los_min))*(i - 1)/dble(n - 1)
          r(i) = 10.d0**logr(i)
       END DO
 
-      if (maxval(logr) > rlimit) then
-         write(*, *) 'Logr', maxval(logr), 'greater than rlimit', rlimit, ', adjusting'
-         rlimit = maxval(logr)
+      if (maxval(r) > r_los_max) then
+         write (*, *) 'r', maxval(r), 'greater than r_los_max', r_los_max, ', adjusting'
+         r_los_max = maxval(r)
       end if
-
 
       !if( myID == 0 ) WRITE(*,*) '         Lhood0 =', XRAYLhood0
 

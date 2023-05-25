@@ -147,11 +147,17 @@ contains
          elseif (tag == '#rauto') then
             read (funit, *) rauto
          elseif (tag == '#rmin') then
-            read (funit, *) rmin
+            ! read (funit, *) rmin
+            write (*, *) 'user specified radius is currently disabled'
+            stop
          elseif (tag == '#rmax') then
-            read (funit, *) rmax
+            ! read (funit, *) rmax
+            write (*, *) 'user specified radius is currently disabled'
+            stop
          elseif (tag == '#rlimit') then
-            read (funit, *) rlimit
+            ! read (funit, *) rlimit
+            write (*, *) 'user specified radius is currently disabled'
+            stop
          end if
       end do
 
