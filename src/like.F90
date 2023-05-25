@@ -411,13 +411,16 @@ CONTAINS
 
       WRITE (*, '(a)') '****************************************************************'
       WRITE (*, '(a)')
-      WRITE (*, '(a)') '  BAYES-X v 1.2'
+      WRITE (*, '(a)') '  BAYES-X v 1.3'
       WRITE (*, '(a)')
       WRITE (*, '(a)') '  Bayesian inference tool for the analysis of X-ray'
       WRITE (*, '(a)') '  observations of galaxy clusters'
       WRITE (*, '(a)')
       WRITE (*, '(a)') '  M. Olamaie et al. '
       WRITE (*, '(a)') '  September 2014 '
+      WRITE (*, '(a)')
+      WRITE (*, '(a)') '  Updated by R. Cox'
+      WRITE (*, '(a)') '  2022-2023'
       WRITE (*, '(a)')
       WRITE (*, '(a)') '****************************************************************'
       WRITE (*, '(a)')
