@@ -369,7 +369,7 @@ CONTAINS
 
          ! Setting rmax to 5x R500 which is calculated as R200/1.5
          ! Estimate R200 with NFW model
-         rmax = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/1.5d0*5.d0
+         r_los_max = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/1.5d0*5.d0
          !rmax = rlimit
 
          write (*, *) 'Using dynamic radius limits'
