@@ -383,7 +383,7 @@ CONTAINS
       END DO
 
       if (maxval(r) > r_los_max) then
-         write (*, *) 'r', maxval(r), 'greater than r_los_max', r_los_max, ', adjusting'
+         write (*, *) 'r', maxval(r), 'greater than r_los_max', r_los_max, ', adjusting r_los_max to match'
          r_los_max = maxval(r)
       end if
 
