@@ -228,7 +228,7 @@ testbed/*
 *.h5
 data/
 scripts/sim_test.py
-!data/A262datafiles
+!data/A262datafiles.*
 !data/MEKAL
 !data/simtestdatafiles
 scripts/pybayesx/docs/source/modules.rst
