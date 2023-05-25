@@ -160,7 +160,7 @@ contains
          elseif (tag == '#rlimit') then
             ! read (funit, *) rlimit
             write (*, *) 'user specified radius is currently disabled'
-            stop
+            ! stop
          end if
       end do
 
