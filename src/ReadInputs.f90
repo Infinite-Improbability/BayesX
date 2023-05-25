@@ -146,14 +146,17 @@ contains
             read (funit, *) mass_function
          elseif (tag == '#rauto') then
             read (funit, *) rauto
+            if (rauto == .FALSE.) then
+               write (*, *) 'user specified radius is currently disabled, ignoring rauto flag'
+            end if
          elseif (tag == '#rmin') then
             ! read (funit, *) rmin
             write (*, *) 'user specified radius is currently disabled'
-            stop
+            ! stop
          elseif (tag == '#rmax') then
             ! read (funit, *) rmax
             write (*, *) 'user specified radius is currently disabled'
-            stop
+            ! stop
          elseif (tag == '#rlimit') then
             ! read (funit, *) rlimit
             write (*, *) 'user specified radius is currently disabled'
