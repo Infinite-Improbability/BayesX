@@ -187,7 +187,7 @@ CONTAINS
       INTEGER                         ::  i, j, k, m, index, iend, idx(1), iostatus
       REAL*8                          :: Lhood, XRAYLhood, log_Cobs_factorial, log_BGobs_factorial, nullev, angfactor
       REAL*8                          :: Mmin, Mmax, d1, d2
-      real*8                          :: M200_max
+      real*8                          :: M200_max, M200_min
       CHARACTER(LEN=100)    :: string
 
       Initialise = 0
@@ -357,9 +357,9 @@ CONTAINS
          r_sky_min = 0.001*r_sky_max
          r_los_min = r_sky_min
 
-         ! rmax needs some additional information
-         ! M200 = Gas_Prior(1, 1, 2), maximum prior value
+         ! Needs some additional information
          M200_max = Gas_Prior(1, 1, 2)
+         M200_min = Gas_Prior(1, 1, 1)
 
          IF (znow) THEN
             rhocritz = rhocrit
@@ -370,7 +370,8 @@ CONTAINS
          ! Setting rmax to 5x R500 which is calculated as R200/1.5
          ! Estimate R200 with NFW model
          r_los_max = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/1.5d0*5.d0
-         !rmax = rlimit
+         r_los_min = ((3.d0*M200_min)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/100.d0
+         r_sky_min = r_los_min
 
          write (*, *) 'Using dynamic radius limits'
       end if
