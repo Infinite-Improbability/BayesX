@@ -226,7 +226,7 @@ testbed/*
 *.fits
 *.hdf5
 *.h5
-data/
+data/*
 scripts/sim_test.py
 !data/A262datafiles.tar.xz
 !data/MEKAL
