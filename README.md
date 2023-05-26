@@ -74,9 +74,9 @@ Details of these tags are as follows.
 
 ### Radius limits
 #rauto:     Do dynamic limit calculation [T/F]. Overrides following options, default value T  
-#rmin:      real, Minimum radius, Mpc  
-#rmax:      real, Maximum radius for integrals, Mpc  
-#rlimit:    real, Maximum radius of the cluster/observation in the plane of the sky, Mpc  
+#rmin:      real, Minimum radius for integration and in sky plane, Mpc  
+#rmax:      real, Maximum radius in sky plane, Mpc  
+#rlimit:    real, Maximum radius for integrals, Mpc  
 
 ### MEKAL
 The root for MEKAL data files:  

@@ -71,7 +71,7 @@ MODULE params
    ! The LOS limits should be chosen with respect to their role as limits for integration along the line of sight
    ! TODO: Rename LOS to explicitly acknowledge use in integrals?
    ! The r_mins current share a value. Remove one?
-   REAL*8                                          :: r_sky_min = 0.01, r_sky_max = 10.0, r_los_min = 0.01, r_los_max = 10.0 ! Mpc
+   REAL*8                                          :: r_sky_max = 10.0, r_min = 0.01, r_integration_max = 10.0 ! Mpc
    LOGICAL                                         :: rauto = .TRUE.
 
    REAL*8                                          ::  rhocritz

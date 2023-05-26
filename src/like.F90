@@ -194,20 +194,14 @@ CONTAINS
       tot_dim = NDim
       tot_atoms = NAtoms
 
-      Gas_PriorType(1, 11) = 1
-      Gas_Prior(1, 11, 1) = 0.001d0
-      Gas_Prior(1, 11, 2) = 0.5d0
-
-!        reduce the dimensionality if there are parameters with delta priors
+      ! reduce the dimensionality if there are parameters with delta priors
       edim = 0
       DO i = 1, tot_dim
          CALL PClass(i, j)
          IF (j > 0) edim = edim + 1
       END DO
 
-!       set the total number of parameters
-
-      !n_totPar = tot_dim + aux_dim*NAtoms
+      ! set the total number of parameters
       n_totPar = edim + aux_dim*NAtoms
       ALLOCATE (n_pWrap(edim))
       n_pWrap = 0
@@ -358,8 +352,6 @@ CONTAINS
          ! Init rmin, rlimit for fixed redshift
          angfactor = sec2rad*lookD(1, 2) ! Physical Mpc per arcsec
          r_sky_max = dble(min(xraynx, xrayny))/2*xraycell*angfactor ! radius in Mpc
-         r_sky_min = 0.001*r_sky_max
-         r_los_min = r_sky_min
 
          ! Needs some additional information
          M200_max = Gas_Prior(1, 1, 2)
@@ -373,26 +365,26 @@ CONTAINS
 
          ! Setting rmax to 5x R500 which is calculated as R200/1.5
          ! Estimate R200 with NFW model
-         r_los_max = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/1.5d0*5.d0
-         r_los_min = ((3.d0*M200_min)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/100d0
-         r_sky_min = r_los_min
+         r_integration_max = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/1.5d0*5.d0
+         r_min = ((3.d0*M200_min)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/100d0
 
          write (*, *) 'Using dynamic radius limits'
       end if
 
       DO i = 1, n
-         logr(i) = log10(r_los_min) + (log10(r_los_max) - log10(r_los_min))*(i - 1)/dble(n - 1)
+         logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
          r(i) = 10.d0**logr(i)
       END DO
 
-      if (maxval(r) > r_los_max) then
-         write (*, *) 'r', maxval(r), 'greater than r_los_max', r_los_max, ', adjusting r_los_max to match'
-         r_los_max = maxval(r)
+      if (maxval(r) > r_integration_max) then
+         write (*, *) 'r', maxval(r), 'greater than r_los_max', r_integration_max, ', adjusting r_los_max to match'
+         r_integration_max = maxval(r)
       end if
 
-      write (*, *)
-      write (*, *) 'r_sky_min: ', r_sky_min, ' r_sky_max = ', r_sky_max
-      write (*, *) 'r_los_min: ', r_los_min, ' r_los_max = ', r_los_max
+      write (*, *) 'r_min =', r_min
+      write (*, *) 'r_sky_max = ', r_sky_max
+      write (*, *) 'r_los_max = ', r_integration_max
+      write (*, *) 'r_min will be set based on rmin_fraction and r_s'
       write (*, *)
 
       XRAYLhood = 0.d0

@@ -230,7 +230,7 @@ CONTAINS
             elseif (ii == 11) then
                parname = 'r_{min}'
                if (NAtoms .gt. 1) parname = 'r_min,'//trim(js)//'}'
-               parunit = '=R_{200, M_{200, \mathrm{min}}}'
+               parunit = 'r_{s}'
             end if
          end if
          ival1 = ival1 + 1

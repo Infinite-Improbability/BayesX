@@ -140,6 +140,8 @@ contains
             read (funit, *) Gas_PriorType(1, 9), Gas_Prior(1, 9, 1), Gas_Prior(1, 9, 2)
          elseif ((tag == '#t0_poly_prior') .and. (GasModel == 3)) then
             read (funit, *) Gas_PriorType(1, 10), Gas_Prior(1, 10, 1), Gas_Prior(1, 10, 2)
+         elseif ((tag == '#rmin_fraction') .and. (GasModel == 1)) then
+            read (funit, *) Gas_PriorType(1, 11), Gas_Prior(1, 11, 1), Gas_Prior(1, 11, 2)
          elseif (tag == '#z_Prior') then
             read (funit, *) z_PriorType(1), z_Prior(1, 1), z_Prior(1, 2)
          elseif (tag == '#mass_function') then
@@ -147,18 +149,11 @@ contains
          elseif (tag == '#rauto') then
             read (funit, *) rauto
          elseif (tag == '#rmin') then
-            read (funit, *) r_sky_min
-            r_los_min = r_sky_min
-            ! write (*, *) 'user specified radius is currently disabled'
-            ! stop
+            read (funit, *) r_min
          elseif (tag == '#rmax') then
             read (funit, *) r_sky_max
-            ! write (*, *) 'user specified radius is currently disabled'
-            ! stop
          elseif (tag == '#rlimit') then
-            read (funit, *) r_los_max
-            ! write (*, *) 'user specified radius is currently disabled'
-            ! stop
+            read (funit, *) r_integration_max
          end if
       end do
 

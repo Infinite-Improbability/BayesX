@@ -20,7 +20,7 @@ CONTAINS
       INTEGER                       ::  i, j, k, m, flag
 
       REAL*8                       ::  yc, index, index_g
-      REAL*8                       ::  rs, ps, cc, T0, logT0, rlimit1
+      REAL*8                       ::  rs, ps, cc, T0, logT0, rlimit1, rmin_fraction
       REAL*8                       ::  prefactor, prefactor2
       REAL*8                       ::  thetaE
       REAL*8, PARAMETER           ::  eps = 1d-4
@@ -42,7 +42,7 @@ CONTAINS
 
       ! Select gass model
       ! Model 1 is the NFW-GNFW model
-      if (GasModel == 1) THEN
+      IF (GasModel == 1) THEN
          ! Load in current values from the priors
          MT200_DM = GasPars(k, 1)   !M_sun
          fg200_DM = GasPars(k, 2)
@@ -50,6 +50,7 @@ CONTAINS
          b_GNFW = GasPars(k, 4)
          c_GNFW = GasPars(k, 5)
          c500_GNFW = GasPars(k, 6)
+         rmin_fraction = GasPars(k, 11)
 
 
          ! Sanity check on priors
@@ -77,10 +78,12 @@ CONTAINS
          ! TODO: I think this is obtained from the NFW equation. Verify
          r200_DM = ((3.d0*MT200_DM)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)   !Mpc
 
-         r_los_min = r200_DM * GasPars(k, 11)
-
          ! Calculate the NFW scale radius
-         rs_DM = r200_DM/c200_DM                   !Mpc
+         rs_DM = r200_DM/c200_DM !Mpc
+
+         ! Adjust integration limits
+         ! This should, I hope, mask r_min in subsequent equations.
+         r_min = rs_DM * rmin_fraction
 
          ! Calculate the dark matter density at R200
          ! TODO: Where's this equation from exactly?
@@ -285,8 +288,7 @@ CONTAINS
             END DO
             DO m = 1, n
                uu = r(m)
-               rlimit1 = sqrt(max(r_los_max*r_los_max - uu*uu, 0.d0)) !  FIXED: That should be rmax I think. We're taking the radius and the radius on the sky plane to get LOS radius
-
+               rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
@@ -302,8 +304,8 @@ CONTAINS
 
          DEALLOCATE (X_emiss2D, logX_emiss1D, X_S1D)
 
-!=======================================================================
-! Calculating the telescope predicted output counts for each pixel in each channel
+         !=======================================================================
+         ! Calculating the telescope predicted output counts for each pixel in each channel
 
          ALLOCATE (predX_S2D(n, xrayNch))
 
@@ -341,8 +343,8 @@ CONTAINS
                xraydx(2) = xrayyy - xrayy0
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
-                  IF (xrayr < r_sky_min) THEN
-                     call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_sky_min), result)
+                  IF (xrayr < r_min) THEN
+                     call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr >= r_sky_max) then ! TODO: Is just > safe?
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
@@ -417,7 +419,7 @@ CONTAINS
          DEALLOCATE (rgx, Tgx, n_ex, Kex, Pex)
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
-!-------------------------------------------------------------------
+         !-------------------------------------------------------------------
       ELSEIF (GasModel == 2) THEN
          MT200_DM = GasPars(k, 1)   !M_sun
          fg200_DM = GasPars(k, 2)
@@ -426,9 +428,10 @@ CONTAINS
          c_GNFW = GasPars(k, 5)
          c500_GNFW = GasPars(k, 6)
          alpha_Einasto = GasPars(k, 7)
+
          c200_DM = 5.26d0*(((MT200_DM*h)/1.d14)**(-0.1d0))*(1.d0/(1.d0 + z(k)))
          Mg200_DM = MT200_DM*fg200_DM     !M_sun
-!          null run
+         !          null run
          IF (Mg200_DM == 0.d0) THEN
             flag = 2
             RETURN
@@ -642,28 +645,28 @@ CONTAINS
             DO m = 1, n
                logX_emiss1D(m) = phlog10(X_emiss2D(m, i)* &
                   xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m)
-!      write(*,*)logX_emiss1D(m)
+               !      write(*,*)logX_emiss1D(m)
             END DO
 
             DO m = 1, n
                uu = r(m)
-               rlimit1 = sqrt(max(r_los_max*r_los_max - uu*uu, 0.d0))
-!      write(*,*)rlimit1
+               rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
+               !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
             END DO
          END DO
-!     write(*,*)'test'
+         !     write(*,*)'test'
          DO i = 1, xrayNbin
             DO m = 1, n
                X_S2D(m, i) = X_S2D(m, i)*xfluxsec1*xfluxsec5*photar(i)
             END DO
          END DO
          DEALLOCATE (X_emiss2D, logX_emiss1D, X_S1D)
-!=======================================================================
-! Calculating the telescope predicted output counts for each pixel in each channel
+         !=======================================================================
+         ! Calculating the telescope predicted output counts for each pixel in each channel
 
          ALLOCATE (predX_S2D(n, xrayNch))
 
@@ -675,7 +678,7 @@ CONTAINS
                END DO
             END DO
          END DO
-!  write(*,*) predX_S2D(1 ,1)
+         !  write(*,*) predX_S2D(1 ,1)
          DEALLOCATE (X_S2D)
 
          angfactor = sec2rad*D
@@ -692,8 +695,8 @@ CONTAINS
                xraydx(2) = xrayyy - xrayy0
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
-                  IF (xrayr < r_sky_min) THEN
-                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_sky_min), result)
+                  IF (xrayr < r_min) THEN
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr >= r_sky_max) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
@@ -954,7 +957,7 @@ CONTAINS
 
             DO m = 1, n
                uu = r(m)
-               rlimit1 = sqrt(max(r_los_max*r_los_max - uu*uu, 0.d0))
+               rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
                !      write(*,*)rlimit1
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
@@ -999,9 +1002,9 @@ CONTAINS
                xraydx(2) = xrayyy - xrayy0
                xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
                DO i = 1, xrayNch
-                  IF (xrayr < r_sky_min) THEN
+                  IF (xrayr < r_min) THEN
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
-                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_sky_min), result)
+                     CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr >= r_sky_max) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
@@ -1116,13 +1119,13 @@ CONTAINS
       REAL*8               ::DM_GNFWsphVolInt
 
       ! There's a singularity towards the center
-      IF (r < r_los_min) THEN
-         DM_GNFWsphVolInt = ((r_los_min*r_los_min*r_los_min)/((DLOG(1.0 + (r_los_min/rs_DM))) - (1.0/(1.0 + (rs_DM/r_los_min)))))* &
-            ((r_los_min/rp_GNFW)**(-1.0*c_GNFW))* &
-            ((1.0 + (r_los_min/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-            ((b_GNFW*((r_los_min/rp_GNFW)**(a_GNFW))) + c_GNFW)
+      IF (r < r_min) THEN
+         DM_GNFWsphVolInt = ((r_min*r_min*r_min)/((DLOG(1.0 + (r_min/rs_DM))) - (1.0/(1.0 + (rs_DM/r_min)))))* &
+            ((r_min/rp_GNFW)**(-1.0*c_GNFW))* &
+            ((1.0 + (r_min/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+            ((b_GNFW*((r_min/rp_GNFW)**(a_GNFW))) + c_GNFW)
 
-      ELSEIF (r > r_los_max) THEN
+      ELSEIF (r > r_integration_max) THEN
 
          DM_GNFWsphVolInt = 0.d0
 
@@ -1258,14 +1261,14 @@ CONTAINS
       REAL*8               :: r
       REAL*8               ::EinastoDM_GNFWsphVolInt
 
-      IF (r < r_los_min) THEN
-         EinastoDM_GNFWsphVolInt = ((r_los_min*r_los_min*r_los_min)* &
-            ((b_GNFW*((r_los_min/rp_GNFW)**(a_GNFW))) + c_GNFW)* &
-            ((r_los_min/rp_GNFW)**(-1.0*c_GNFW))* &
-            (1.0d0 + (r_los_min/rp_GNFW)**(a_GNFW))** &
+      IF (r < r_min) THEN
+         EinastoDM_GNFWsphVolInt = ((r_min*r_min*r_min)* &
+            ((b_GNFW*((r_min/rp_GNFW)**(a_GNFW))) + c_GNFW)* &
+            ((r_min/rp_GNFW)**(-1.0*c_GNFW))* &
+            (1.0d0 + (r_min/rp_GNFW)**(a_GNFW))** &
             (-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))/ &
-            INCOG(Gamma_coeff1, ((2.d0/alpha_Einasto)*((r_los_min/r_2_DM)**alpha_Einasto)))
-      ELSEIF (r > r_los_max) THEN
+            INCOG(Gamma_coeff1, ((2.d0/alpha_Einasto)*((r_min/r_2_DM)**alpha_Einasto)))
+      ELSEIF (r > r_integration_max) THEN
          EinastoDM_GNFWsphVolInt = 0.d0
       ELSE
          EinastoDM_GNFWsphVolInt = ((r*r*r)* &
@@ -3227,10 +3230,10 @@ CONTAINS
 
       ! We compare to rr because we want to match the spherical shape of the cluster
 
-      IF (rr < r_los_min) THEN
-         rr = r_los_min
+      IF (rr < r_min) THEN
+         rr = r_min
          XraySintegrand = Xrayemissfunc1(rr)
-      ELSEIF (rr >= r_los_max) THEN
+      ELSEIF (rr >= r_integration_max) THEN
          XraySintegrand = 0.d0
       ELSE
          XraySintegrand = Xrayemissfunc1(rr)
@@ -3249,10 +3252,10 @@ CONTAINS
 
       ! TODO: We're nesting checks in a way that may be unnecessary
 
-      IF (rr < r_los_min) THEN
-         CALL interp1d_even(logX_emiss1D, logr, n, phlog10(r_los_min), result)
+      IF (rr < r_min) THEN
+         CALL interp1d_even(logX_emiss1D, logr, n, phlog10(r_min), result)
 
-      ELSEIF (rr >= r_los_max) THEN
+      ELSEIF (rr >= r_integration_max) THEN
          Xrayemissfunc1 = 0.d0
          RETURN
       ELSE
