@@ -10,10 +10,7 @@ CONTAINS
 
       IMPLICIT NONE
 
-      INTEGER                         ::  i, j, m, iend
-      INTEGER                         ::  ii, jj, mm
-      REAL*8                          ::  ra, dec, ra2, dec2, rao, deco
-      CHARACTER(LEN=100)    :: string
+      INTEGER :: i, j
 
       ! Reading X ray data
 
@@ -157,7 +154,7 @@ CONTAINS
       implicit none
 
       integer ival, i, j, ii, ival1
-      character(len=3) :: js, iis
+      character(len=3) :: js
       character(len=4) :: ext
       character(len=50) :: parname, fmt, parunit
       integer, parameter :: params_unit = 21
