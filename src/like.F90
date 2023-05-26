@@ -384,7 +384,7 @@ CONTAINS
       write (*, *) 'r_min =', r_min
       write (*, *) 'r_sky_max = ', r_sky_max
       write (*, *) 'r_los_max = ', r_integration_max
-      write (*, *) 'r_min will be set based on rmin_fraction and r_s'
+      write (*, *) 'r_min will be overriden for Model I based on rmin_fraction and r_s'
       write (*, *)
 
       XRAYLhood = 0.d0

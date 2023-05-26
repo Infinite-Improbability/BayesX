@@ -210,6 +210,7 @@ priors["alpha_model2_prior"] = Prior(1, 0.5, 5)
 priors["gamma0_poly_prior"] = Prior(1, 0.1, 0.4, value=0.3)
 priors["gammaR_poly_prior"] = Prior(0, 0.3, 0.3)
 priors["t0_poly_prior"] = Prior(0, 3, 3)
+priors["rmin_fraction"] = Prior(1, 0.001, 1.0, name="r_{min}")
 
 priors["z_Prior"] = Prior(0, 0.5, 0.5)
 
@@ -295,6 +296,7 @@ model_priors[1] = [
     "b_GNFW_prior",
     "c_GNFW_prior",
     "z_Prior",
+    "rmin_fraction",
 ]
 model_priors[2] = model_priors[1] + ["alpha_model2_prior"]
 model_priors[3] = [
@@ -320,7 +322,9 @@ for k in model_priors[params["cluster_model"]]:
 
 # plot(params["root"].path, zip(plot_priors, true_priors, strict=True), display=True)
 
-prior_dict = {k: v for k, v in zip(plot_priors, true_priors, strict=True)}
+prior_dict = {
+    k: v for k, v in zip(plot_priors, true_priors, strict=True)  # type: ignore
+}
 
 print(f"True values are: {prior_dict}")
 
