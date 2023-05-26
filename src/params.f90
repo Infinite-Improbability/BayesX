@@ -31,7 +31,7 @@ MODULE params
 !     5= DM_GNFW model (6 pars: Mtot(r200), fgas(r200), a, b, c, c500
 ! ??? Which gas density profile model?
    INTEGER                                              :: GasModel
-   INTEGER, PARAMETER                                   :: NGasPars = 10
+   INTEGER, PARAMETER                                   :: NGasPars = 11
    REAL*8                                              :: GasPars(NAtoms, NGasPars)
 ! redshift and angular diameter variables and lookup tables
    INTEGER                                              :: Dn, SCZdn
@@ -169,8 +169,8 @@ MODULE params
    INTEGER, PARAMETER  ::  NL_MAX = 5500
 
    CHARACTER(LEN=3), PARAMETER   ::  Elements(1:15) = &
-                                    (/'H  ', 'He ', 'C  ', 'N  ', 'O  ', 'Ne ', 'Na ', 'Mg ', 'Al ', &
-                                      'Si ', 'S  ', 'Ar ', 'Ca ', 'Fe ', 'Ni '/)
+      (/'H  ', 'He ', 'C  ', 'N  ', 'O  ', 'Ne ', 'Na ', 'Mg ', 'Al ', &
+      'Si ', 'S  ', 'Ar ', 'Ca ', 'Fe ', 'Ni '/)
    REAL*8              ::  abund, nuc_tot, Z_tot, xe, xzin, elx, flx
    DIMENSION abund(NOEL), nuc_tot(NOEL), Z_tot(NOEL), xe(NOEL), xzin(NUMION), elx(NL_MAX)
    DIMENSION flx(NL_MAX)

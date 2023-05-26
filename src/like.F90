@@ -194,6 +194,10 @@ CONTAINS
       tot_dim = NDim
       tot_atoms = NAtoms
 
+      Gas_PriorType(1, 11) = 1
+      Gas_Prior(1, 11, 1) = 0.001d0
+      Gas_Prior(1, 11, 2) = 0.5d0
+
 !        reduce the dimensionality if there are parameters with delta priors
       edim = 0
       DO i = 1, tot_dim
@@ -370,7 +374,7 @@ CONTAINS
          ! Setting rmax to 5x R500 which is calculated as R200/1.5
          ! Estimate R200 with NFW model
          r_los_max = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/1.5d0*5.d0
-         r_los_min = ((3.d0*M200_min)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/100.d0
+         r_los_min = ((3.d0*M200_min)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/100d0
          r_sky_min = r_los_min
 
          write (*, *) 'Using dynamic radius limits'
@@ -390,8 +394,6 @@ CONTAINS
       write (*, *) 'r_sky_min: ', r_sky_min, ' r_sky_max = ', r_sky_max
       write (*, *) 'r_los_min: ', r_los_min, ' r_los_max = ', r_los_max
       write (*, *)
-
-      !if( myID == 0 ) WRITE(*,*) '         Lhood0 =', XRAYLhood0
 
       XRAYLhood = 0.d0
 

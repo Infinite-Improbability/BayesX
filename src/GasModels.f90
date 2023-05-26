@@ -51,6 +51,7 @@ CONTAINS
          c_GNFW = GasPars(k, 5)
          c500_GNFW = GasPars(k, 6)
 
+
          ! Sanity check on priors
          IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0) THEN
             flag = 1
@@ -75,6 +76,8 @@ CONTAINS
          ! Calculate radius from M200
          ! TODO: I think this is obtained from the NFW equation. Verify
          r200_DM = ((3.d0*MT200_DM)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)   !Mpc
+
+         r_los_min = r200_DM * GasPars(k, 11)
 
          ! Calculate the NFW scale radius
          rs_DM = r200_DM/c200_DM                   !Mpc
