@@ -232,7 +232,7 @@ CONTAINS
          ! uniform sampling in triangle check
 
          IF ((Geo_PriorType(i, 1) == 9 .and. Geo_PriorType(i, 2) /= 9) .or. &
-             (Geo_PriorType(i, 1) /= 9 .and. Geo_PriorType(i, 2) == 9)) THEN
+            (Geo_PriorType(i, 1) /= 9 .and. Geo_PriorType(i, 2) == 9)) THEN
             if (myID == 0) then
                WRITE (*, *) "ERROR: Geo_PriorType should be set to 9 for both x and y positions if &
                &                                                uniform sampling in a triangle is desired"
@@ -309,7 +309,7 @@ CONTAINS
       xrayCpred = 0.d0
 
       xrayBG(1:LENx) = (xrayBG_predmax/xrayNch)* &
-                       (sexpotime)*(Aeffave)*(xraycell*xraycell*sec2min*sec2min)
+         (sexpotime)*(Aeffave)*(xraycell*xraycell*sec2min*sec2min)
 
       ! Calculating XRAYLhood0= sum[(c_obs)_i !]
 
@@ -373,8 +373,6 @@ CONTAINS
          !rmax = rlimit
 
          write (*, *) 'Using dynamic radius limits'
-         write (*, *) 'r_sky_min: ', r_sky_min, ' r_sky_max = ', r_sky_max
-         write (*, *) 'r_los_min: ', r_los_min, ' r_los_max = ', r_los_max
       end if
 
       DO i = 1, n
@@ -386,6 +384,11 @@ CONTAINS
          write (*, *) 'r', maxval(r), 'greater than r_los_max', r_los_max, ', adjusting r_los_max to match'
          r_los_max = maxval(r)
       end if
+
+      write (*, *)
+      write (*, *) 'r_sky_min: ', r_sky_min, ' r_sky_max = ', r_sky_max
+      write (*, *) 'r_los_min: ', r_los_min, ' r_los_max = ', r_los_max
+      write (*, *)
 
       !if( myID == 0 ) WRITE(*,*) '         Lhood0 =', XRAYLhood0
 
