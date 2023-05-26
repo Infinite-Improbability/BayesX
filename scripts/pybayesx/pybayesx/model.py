@@ -30,6 +30,7 @@ class Property(Enum):
     )
     t0_poly = "t0_poly_prior"  # prior T0, free parameter in polytropic model
     z = "z_Prior"  # prior on cluster redshift
+    rmin_frac = "rmin_fraction"  # rmin is set as a fraction of r_s
 
 
 class Prior(ABC):
@@ -210,6 +211,7 @@ nfw_gnfw = Model(
         Property.b_GNFW,
         Property.c_GNFW,
         Property.c500_GNFW,
+        Property.rmin_frac,
         Property.z,
     ],
     name="NFW-GNFW",

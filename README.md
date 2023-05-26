@@ -72,7 +72,7 @@ Details of these tags are as follows.
 #NHcol:			Hydrogen column density in cm^2, e.g. NHcol = 2.2d20  
 #xrayBG_model           Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1, e.g. xrayBG_model=8.4d-6
 
-### Radius limits
+### Radius limits_fraction
 #rauto:     Do dynamic limit calculation [T/F]. Overrides following options, default value T  
 #rmin:      real, Minimum radius for integration and in sky plane, Mpc  
 #rmax:      real, Maximum radius in sky plane, Mpc  
@@ -113,7 +113,8 @@ The root for telescope ARF and RMF files:
 #alpha_model2_prior:    prior on Einasto shape parameter, alpha  
 #gamma0_poly_prior:     prior gamma0, free parameter in polytropic model  
 #gammaR_poly_prior:     prior gammaR, free parameter in polytropic model  
-#t0_poly_prior:     prior T0, free parameter in polytropic model  
+#t0_poly_prior:     prior T0, free parameter in polytropic model
+#rmin_fraction: prior on minimum integration radius, in units of NFW scale radius r_s. Currently used by model 1 only.
 #z_Prior:		prior on cluster redshift  
 
 In the line following the prior tag, users should list 3 values as follows:  
