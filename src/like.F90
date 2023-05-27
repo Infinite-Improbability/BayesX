@@ -366,7 +366,7 @@ CONTAINS
          ! Setting rmax to 5x R500 which is calculated as R200/1.5
          ! Estimate R200 with NFW model
          r_integration_max = ((3.d0*M200_max)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/1.5d0*5.d0
-         r_min = ((3.d0*M200_min)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/200d0
+         r_min = ((3.d0*M200_min)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)/500d0
 
          write (*, *) 'Using dynamic radius limits'
       end if
@@ -376,8 +376,8 @@ CONTAINS
          r(i) = 10.d0**logr(i)
       END DO
 
-      if (maxval(r) > r_integration_max) then
-         write (*, *) 'Maximum discretised r is', maxval(r), 'greater than r_los_max', r_integration_max, ', adjusting r_los_max to match'
+      if (maxval(r) < r_integration_max) then
+         write (*, *) 'Maximum discretised r is', maxval(r), 'less than r_los_max', r_integration_max, ', adjusting r_los_max to match'
          r_integration_max = maxval(r)
       end if
 

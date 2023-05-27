@@ -85,6 +85,12 @@ CONTAINS
          ! This should, I hope, mask r_min in subsequent equations.
          r_min = rs_DM * rmin_fraction
 
+         ! Sanity check
+         if (r_min < minval(r)) then
+            flag = 3
+            return
+         end if
+
          ! Calculate the dark matter density at R200
          ! TODO: Where's this equation from exactly?
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &

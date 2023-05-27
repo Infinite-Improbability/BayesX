@@ -189,7 +189,9 @@ params["seed"] = -1
 # Set cluster model
 params["cluster_model"] = args.model
 
-if args.model != 1:
+if args.model == 1:
+    params["rauto"] = True
+else:
     params["rauto"] = False
     params["rmin"] = 0.01
     params["rmax"] = 0.3
