@@ -186,13 +186,14 @@ params["eff"] = 0.8
 params["tol"] = 0.5
 params["seed"] = -1
 
-params["rauto"] = True
-# params["rmin"] = 0.01
-# params["rmax"] = 0.3
-# params["rlimit"] = 0.3
-
 # Set cluster model
 params["cluster_model"] = args.model
+
+if args.model != 1:
+    params["rauto"] = False
+    params["rmin"] = 0.01
+    params["rmax"] = 0.3
+    params["rlimit"] = 0.3
 
 # Priors
 # Note that the automatic free prior detection at the end assumes
