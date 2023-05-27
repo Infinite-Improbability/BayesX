@@ -85,11 +85,6 @@ CONTAINS
          ! This should, I hope, mask r_min in subsequent equations.
          r_min = rs_DM * rmin_fraction
 
-         DO i = 1, n
-            logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
-            r(i) = 10.d0**logr(i)
-         END DO
-
          ! Calculate the dark matter density at R200
          ! TODO: Where's this equation from exactly?
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &
