@@ -54,7 +54,7 @@ CONTAINS
 
 
          ! Sanity check on priors
-         IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0) THEN
+         IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0 .OR. rmin_fraction .LE. 0) THEN
             flag = 1
             RETURN
          END IF
@@ -84,6 +84,11 @@ CONTAINS
          ! Adjust integration limits
          ! This should, I hope, mask r_min in subsequent equations.
          r_min = rs_DM * rmin_fraction
+
+         DO i = 1, n
+            logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
+            r(i) = 10.d0**logr(i)
+         END DO
 
          ! Calculate the dark matter density at R200
          ! TODO: Where's this equation from exactly?
