@@ -214,6 +214,8 @@ def plot(
                     ax = plotter.subplots[jplot, ipar]
                     ax.plot(markers[p], markers[p2], "*k")
 
+    plotter.finish_plot()
+
     # Save as image
     if save:
         # TODO: Clobber protection
@@ -223,6 +225,6 @@ def plot(
     if display:
         if plotter.fig is not None:
             log.info("Displaying fig")
-            plotter.fig.show()
+            plotter.fig.show(warn=True)
         else:
             log.error("Plot display failed. Figure does not exist.")
