@@ -326,7 +326,7 @@ CONTAINS
 
          ! S2 = S
 
-         ! S = 0.5*(S + (b1 - a1)*sum/tnm)
+         S = 0.5*(S + (b1 - a1)*sum/tnm)
          ! S2 = 0.5*(S2 + (b1 - a1)*sum2/tnm)
 
          ! if (abs(S - S2) / S2 > 1.d-10) THEN
