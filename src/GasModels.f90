@@ -1124,7 +1124,7 @@ CONTAINS
       REAL*8               :: r
       REAL*8               ::DM_GNFWsphVolInt
 
-      ! There's a singularity towards the center
+      ! Undefined at zero?
       IF (r < r_min) THEN
          DM_GNFWsphVolInt = ((r_min*r_min*r_min)/((DLOG(1.0 + (r_min/rs_DM))) - (1.0/(1.0 + (rs_DM/r_min)))))* &
             ((r_min/rp_GNFW)**(-1.0*c_GNFW))* &
