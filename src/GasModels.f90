@@ -228,9 +228,10 @@ CONTAINS
          ALLOCATE (Tgx(13), Kex(13), Pex(13))
          ALLOCATE (M_DMx(13), Mg_DMx(13), fg_DMx(13))
 
-         ! Starting radius, as fraction of R500
+         ! Starting radius, in units of R500
          rx_incre = 0.03
 
+         ! Calculate properties at points from 0.04 R500 to 1.0 R500
          DO m = 1, 7
             rx_incre = rx_incre + 0.01
             rgx(m) = rx_incre*r500_DM
@@ -1312,6 +1313,7 @@ CONTAINS
       ! Convert gas density to SI units
       Rhogas0_SI = Rhogas0*m_sun/(Mpc2m*Mpc2m*Mpc2m)      !this is central gas density in kgm^-3
 
+      ! Set abundances
       sum_xenuctot = 0.
       DO i = 1, NOEL
          xe(i) = 10.**(abund(i) - 12.)
@@ -2094,7 +2096,7 @@ CONTAINS
       RETURN
    END SUBROUTINE MEKAL9
 
-!==============================================================
+
    FUNCTION FMEKAL10(Y, A, B, C, D, E)
       IMPLICIT NONE
 
@@ -2129,7 +2131,7 @@ CONTAINS
       FMEKAL10 = A + B*f2 + C*f3 + D*f4 + E*f5
       RETURN
    END FUNCTION FMEKAL10
-!=============================================================
+
 
    FUNCTION FMEKAL11(X)
       IMPLICIT NONE
@@ -2146,7 +2148,8 @@ CONTAINS
       END IF
       RETURN
    END FUNCTION FMEKAL11
-!========================================================
+
+
    SUBROUTINE MEKAL12(Y, Fb)
       IMPLICIT NONE
 
@@ -2172,7 +2175,7 @@ CONTAINS
       Fb = sb
       RETURN
    END SUBROUTINE MEKAL12
-!========================================================
+
    FUNCTION FMEKAL13(U)
       IMPLICIT NONE
 
@@ -2187,11 +2190,10 @@ CONTAINS
       RETURN
    END FUNCTION FMEKAL13
 
-!========================================================
    SUBROUTINE xsphab(ear, ne, N_H_col, photar)
 
       INTEGER ne
-!      REAL ear(0:ne), param(1), photar(ne)
+      ! REAL ear(0:ne), param(1), photar(ne)
       REAL param(1), photar(ne)
       REAL N_H_col
       REAL*8 ear(0:ne)
@@ -2224,7 +2226,7 @@ CONTAINS
 
       RETURN
    END SUBROUTINE xsphab
-!========================================================
+
    SUBROUTINE xszvph(ear, ne, param, photar)
 
       INTEGER ne
@@ -2266,11 +2268,11 @@ CONTAINS
 
       RETURN
    END SUBROUTINE xszvph
-!==========================================================
+
    SUBROUTINE xszvab(ear, ne, param, photar)
 
       INTEGER ne
-!      REAL ear(0:ne), param(19), photar(ne)
+      ! REAL ear(0:ne), param(19), photar(ne)
       REAL param(19), photar(ne)
       REAL*8 ear(0:ne)
 
@@ -2318,7 +2320,7 @@ CONTAINS
 
       CHARACTER*2 celts(NELTS)
 
-! External references to cross section function
+      ! External references to cross section function
 
       DATA atomic/1, 2, 6, 7, 8, 10, 11, 12, &
          13, 14, 16, 17, 18, 20, 24, 26, &
@@ -2330,7 +2332,7 @@ CONTAINS
 
       status = 0
 
-! Set the element columns
+      ! Set the element columns
 
       DO i = 1, NELTS
          column(i) = param(i)*1.e22*fgabnd(celts(i))
@@ -2344,13 +2346,13 @@ CONTAINS
          ehi = ear(ie)*zfac
          xsect = 0.
 
-! Set transmission to unity above 100 keV and below the Lyman limit
+         ! Set transmission to unity above 100 keV and below the Lyman limit
 
          IF (elow .GT. 100. .OR. elow .LT. LYLIMIT) THEN
 
             photar(ie) = 1.0
 
-! else calculate the cross-section
+            ! else calculate the cross-section
 
          ELSE
 
@@ -2381,7 +2383,7 @@ CONTAINS
 
       RETURN
    END SUBROUTINE xszvab
-!===========================================================
+
    FUNCTION fgabnd(el)
       REAL fgabnd
       CHARACTER*2 el
@@ -2448,43 +2450,42 @@ CONTAINS
       END IF
       RETURN
    END FUNCTION fgabnd
-!=================================
+
    FUNCTION fgxsct()
       CHARACTER fgxsct*4
       fgxsct = 'bcmc'
       RETURN
    END FUNCTION fgxsct
-!==================================
-!  Routine to return the photoelectric absorption cross section in cm**2
-!  at energy keV for element Z.
 
    FUNCTION photo(keV1, keV2, Z, versn, status)
+      !  Routine to return the photoelectric absorption cross section in cm**2
+      !  at energy keV for element Z.
 
       REAL photo, keV1, keV2
       INTEGER Z, versn, status
 
-!  Cross-section data from Henke etal, Atomic Data and Nuclear Data Tables
-!  vol 27, no 1, 1982. Fits mainly by Monika Balucinska-Church and Dan McCammon
-!  "Photoelectric Absorption Cross Sections with Variable Abunances"
-!  Ap.J. 400, 699 (1992)
+      !  Cross-section data from Henke etal, Atomic Data and Nuclear Data Tables
+      !  vol 27, no 1, 1982. Fits mainly by Monika Balucinska-Church and Dan McCammon
+      !  "Photoelectric Absorption Cross Sections with Variable Abunances"
+      !  Ap.J. 400, 699 (1992)
 
-!  kaa   4/16/92
-!       11/26/99     added version number so that new and old versions of
-!                    the He cross-section can be accomodated.
+      !  kaa   4/16/92
+      !       11/26/99     added version number so that new and old versions of
+      !                    the He cross-section can be accomodated.
 
-!  Arguments :
-! keV1 r i: Lower energy of bin in keV.
-! keV2 r i: Upper energy of bin in keV.
-!       Z       i i: Atomic number of element
-!       versn   i       i: 2 == old Marr & West He x-section
-!                          3 == new Yan et al. x-section
-! status i r: 0 = OK
-!      1 = No data for this element
-! photo r r: Cross-section in cm**2
+      !  Arguments :
+      ! keV1 r i: Lower energy of bin in keV.
+      ! keV2 r i: Upper energy of bin in keV.
+      !       Z       i i: Atomic number of element
+      !       versn   i       i: 2 == old Marr & West He x-section
+      !                          3 == new Yan et al. x-section
+      ! status i r: 0 = OK
+      !      1 = No data for this element
+      ! photo r r: Cross-section in cm**2
 
-! Tabulated fit coefficients - coeff(i,j,k) is the ith coefficient for the
-! jth energy range for the kth element. i goes from 1 to 9 and j from 1 to
-! 4.
+      ! Tabulated fit coefficients - coeff(i,j,k) is the ith coefficient for the
+      ! jth energy range for the kth element. i goes from 1 to 9 and j from 1 to
+      ! 4.
 
       INTEGER MAXEDG, MAXCOF, MAXZ
       PARAMETER(MAXEDG=3, MAXCOF=9, MAXZ=79)
@@ -2499,65 +2500,65 @@ CONTAINS
       INTEGER nedges(MAXZ)
       INTEGER i, j, i1, i2, k
 
-! ***** Coefficients for polynomial fits to cross-sections *****
+      ! ***** Coefficients for polynomial fits to cross-sections *****
 
-! Hydrogen
+      ! Hydrogen
 
       DATA((coeff(i, j, 1), i=1, 9), j=1, 4)/ &
          21.46941, 0.9398479, -0.1492932, 5.4634294d-3, &
          32*0./
 
-! Helium
+      ! Helium
 
       DATA((coeff(i, j, 2), i=1, 9), j=1, 4)/ &
          14.61546, 4.682793, -0.7323856, 4.6526663d-2, -1.1172282d-3, &
          31*0./
 
-! Lithium
+      ! Lithium
 
       DATA((coeff(i, j, 3), i=1, 9), j=1, 4)/36*0./
 
-! Beryllium
+      ! Beryllium
 
       DATA((coeff(i, j, 4), i=1, 9), j=1, 4)/36*0./
 
-! Boron
+      ! Boron
 
       DATA((coeff(i, j, 5), i=1, 9), j=1, 4)/36*0./
 
-! Carbon
+      ! Carbon
 
       DATA((coeff(i, j, 6), i=1, 9), j=1, 4)/ &
          8.74161, 7.13348, -1.14604, 0.0677044, 5*0., &
          3.81334, 8.93626, -1.06905, 0.0422195, &
          23*0./
 
-! Nitrogen
+      ! Nitrogen
 
       DATA((coeff(i, j, 7), i=1, 9), j=1, 4)/ &
          9.24058, 7.02985, -1.08849, 0.0611007, 5*0., &
          -13.0353, 15.4851, -1.89502, 0.0769412, &
          23*0./
 
-! Oxygen
+      ! Oxygen
 
       DATA((coeff(i, j, 8), i=1, 9), j=1, 4)/ &
          2.57264, 10.9321, -1.79383, 0.102619, 5*0., &
          16.53869, 3.6428144, -0.3177744, 7.9471897d-3, &
          23*0./
 
-! Fluorine
+      ! Fluorine
 
       DATA((coeff(i, j, 9), i=1, 9), j=1, 4)/36*0./
 
-! Neon
+      ! Neon
 
       DATA((coeff(i, j, 10), i=1, 9), j=1, 4)/ &
          -3.04041, 13.0071, -1.93205, 0.0977639, 5*0., &
          17.6007, 3.29278, -0.263065, 5.68290d-3, &
          23*0./
 
-! Sodium
+      ! Sodium
 
       DATA((coeff(i, j, 11), i=1, 9), j=1, 4)/ &
          -2737.598, 2801.704, -1009.892, 87.16455, 43.20644, &
@@ -2565,7 +2566,7 @@ CONTAINS
          1.534019, 9.261744, -0.9914126, 3.5278253d-2, &
          23*0./
 
-! Magnesium
+      ! Magnesium
 
       DATA((coeff(i, j, 12), i=1, 9), j=1, 4)/ &
          7.107172, 3.7359418, 7*0., &
@@ -2573,7 +2574,7 @@ CONTAINS
          -9.161526, 13.07448, -1.435878, 5.2728362d-2, &
          14*0./
 
-! Aluminium
+      ! Aluminium
 
       DATA((coeff(i, j, 13), i=1, 9), j=1, 4)/ &
          26.90487, -6.135221, 1.175546, 6*0., &
@@ -2581,7 +2582,7 @@ CONTAINS
          14.6897, 4.22743, -0.344185, 8.18542d-3, &
          14*0./
 
-! Silicon
+      ! Silicon
 
       DATA((coeff(i, j, 14), i=1, 9), j=1, 4)/ &
          -3.066295, 10.006248, -0.9627411, 6*0., &
@@ -2589,11 +2590,11 @@ CONTAINS
          -33.39074, 21.42992, -2.385117, 8.887583d-2, &
          14*0./
 
-! Phosphorus
+      ! Phosphorus
 
       DATA((coeff(i, j, 15), i=1, 9), j=1, 4)/36*0./
 
-! Sulphur
+      ! Sulphur
 
       DATA((coeff(i, j, 16), i=1, 9), j=1, 4)/ &
          598.2911, -675.2265, 308.1133, -68.99324, 7.62458, &
@@ -2603,7 +2604,7 @@ CONTAINS
          -22.49628, 17.24599, -1.848444, 6.6506132d-2, &
          14*0./
 
-! Chlorine
+      ! Chlorine
 
       DATA((coeff(i, j, 17), i=1, 9), j=1, 4)/ &
          6253.247, -8222.248, 4491.675, -1302.145, 211.4881, &
@@ -2613,7 +2614,7 @@ CONTAINS
          -23.74675, 17.50997, -1.857953, 6.6208832d-2, &
          14*0./
 
-! Argon
+      ! Argon
 
       DATA((coeff(i, j, 18), i=1, 9), j=1, 4)/ &
          -330.3509, 270.7433, -78.90498, 10.35983, -0.5140201, &
@@ -2623,11 +2624,11 @@ CONTAINS
          19.1905, 2.74276, -0.164603, 0.00165895, &
          14*0./
 
-! Potassium
+      ! Potassium
 
       DATA((coeff(i, j, 19), i=1, 9), j=1, 4)/36*0./
 
-! Calcium
+      ! Calcium
 
       DATA((coeff(i, j, 20), i=1, 9), j=1, 4)/ &
          -873.972, 868.5231, -339.678, 66.83369, -6.590398, &
@@ -2637,19 +2638,19 @@ CONTAINS
          18.89376, 2.709646, -0.1377201, &
          15*0./
 
-! Scandium
+      ! Scandium
 
       DATA((coeff(i, j, 21), i=1, 9), j=1, 4)/36*0./
 
-! Titanium
+      ! Titanium
 
       DATA((coeff(i, j, 22), i=1, 9), j=1, 4)/36*0./
 
-! Vanadium
+      ! Vanadium
 
       DATA((coeff(i, j, 23), i=1, 9), j=1, 4)/36*0./
 
-! Chromium
+      ! Chromium
 
       DATA((coeff(i, j, 24), i=1, 9), j=1, 4)/ &
          -0.4919405, 15.66939, -5.199775, 1.086566, -0.1196001, &
@@ -2658,11 +2659,11 @@ CONTAINS
          -15.2525, 16.23729, -1.966778, 8.062207d-2, 5*0., &
          8.307041, 5.008987, -0.2580816, 6*0./
 
-! Manganese
+      ! Manganese
 
       DATA((coeff(i, j, 25), i=1, 9), j=1, 4)/36*0./
 
-! Iron
+      ! Iron
 
       DATA((coeff(i, j, 26), i=1, 9), j=1, 4)/ &
          -15.07332, 21.94335, -4.862457, 0.5573765, -3.0065542d-2, &
@@ -2672,7 +2673,7 @@ CONTAINS
          -1.037655, 7.022304, -0.3638919, &
          15*0./
 
-! Cobalt
+      ! Cobalt
 
       DATA((coeff(i, j, 27), i=1, 9), j=1, 4)/ &
          9.171919, 3.5721176, 7*0., &
@@ -2681,7 +2682,7 @@ CONTAINS
          8.3086651d-04, 3*0., &
          28.72910, 0.4456830, 7*0./
 
-! Nickel
+      ! Nickel
 
       DATA((coeff(i, j, 28), i=1, 9), j=1, 4)/ &
          -7.919931, 14.06475, -1.935318, 9.3929626d-2, 5*0., &
@@ -2689,7 +2690,7 @@ CONTAINS
          28.4989, 0.485797, &
          16*0./
 
-! Gold   !! Important : this is only valid above 220 eV !!
+      ! Gold   !! Important : this is only valid above 220 eV !!
 
       DATA((coeff(i, j, 79), i=1, 9), j=1, 4)/ &
          -27.40668, 18.11780, -1.869548, 6.2878355D-02, 5*0., &
@@ -2697,8 +2698,8 @@ CONTAINS
          -33.83069, 19.80218, -1.989242, 6.7341216D-02, &
          14*0./
 
-! Number of coefficients (-1 => range does not exist)
-! H - Ne
+      ! Number of coefficients (-1 => range does not exist)
+      ! H - Ne
 
       DATA((ncoefs(i, j), i=1, 4), j=1, 10)/ &
          4, -1, -1, -1, &
@@ -2712,7 +2713,7 @@ CONTAINS
          -1, -1, -1, -1, &
          4, 4, -1, -1/
 
-! Na-Ar
+      ! Na-Ar
 
       DATA((ncoefs(i, j), i=1, 4), j=11, 18)/ &
          9, 4, -1, -1, &
@@ -2724,7 +2725,7 @@ CONTAINS
          7, 5, 5, -1, &
          5, 6, 4, -1/
 
-! K-Ni
+      ! K-Ni
 
       DATA((ncoefs(i, j), i=1, 4), j=19, 28)/ &
          -1, -1, -1, -1, &
@@ -2738,17 +2739,17 @@ CONTAINS
          2, 4, 6, 2, &
          4, 4, 2, -1/
 
-! Cu-Pt
+      ! Cu-Pt
 
       DATA((ncoefs(i, j), i=1, 4), j=29, 78)/200*-1/
 
-! Au
+      ! Au
 
       DATA(ncoefs(i, 79), i=1, 4)/4, 2, 4, -1/
 
-! *****  Edge energies (in eV)  *****
+      ! *****  Edge energies (in eV)  *****
 
-! H-Ne
+      ! H-Ne
 
       DATA((edge(i, j), i=1, 3), j=1, 10)/ &
          3*1.d32, &
@@ -2762,7 +2763,7 @@ CONTAINS
          3*1.d32, &
          867.0, 2*1.d32/
 
-! Na-Ar
+      ! Na-Ar
 
       DATA((edge(i, j), i=1, 3), j=11, 18)/ &
          1071.7, 2*1.d32, &
@@ -2774,7 +2775,7 @@ CONTAINS
          202.0, 2819.6, 1.d32, &
          245.0, 3202.9, 1.d32/
 
-! K-Ni
+      ! K-Ni
 
       DATA((edge(i, j), i=1, 3), j=19, 28)/ &
          3*1.d32, &
@@ -2788,15 +2789,15 @@ CONTAINS
          61., 793.8, 7709.5, &
          853.6, 8331.6, 1.d32/
 
-! Cu-Pt
+      ! Cu-Pt
 
       DATA((edge(i, j), i=1, 3), j=29, 78)/150*1.d32/
 
-! Au
+      ! Au
 
       DATA(edge(i, 79), i=1, 3)/2220., 2743.9, 1.d32/
 
-! Number of edges (-1 => no tabulated data)
+      ! Number of edges (-1 => no tabulated data)
 
       DATA nedges/ &
          0, 0, -1, -1, -1, 1, 1, 1, -1, 1, &
@@ -2804,7 +2805,7 @@ CONTAINS
          -1, 2, -1, -1, -1, 3, -1, 2, 3, 2, &
          50*-1, 2/
 
-! cm*cm/g to barns conversion factor
+      ! cm*cm/g to barns conversion factor
 
       DATA f/ &
          1.674, 6.646, 0, 0, 0, 19.94, 23.26, 26.56, 0, 33.50, &
@@ -2813,7 +2814,7 @@ CONTAINS
 
       photo = 0.
 
-! Special case for Helium
+      ! Special case for Helium
 
       IF (Z .EQ. 2) THEN
          IF (versn .EQ. 2) THEN
@@ -2824,7 +2825,7 @@ CONTAINS
          RETURN
       END IF
 
-! Other elements
+      ! Other elements
 
       IF (nedges(Z) .EQ. -1) THEN
          status = 1
@@ -2838,22 +2839,22 @@ CONTAINS
 
       E2 = 1000*keV2
 
-! Find the appropriate range to contain the lower energy.
+      ! Find the appropriate range to contain the lower energy.
 
       i1 = 1
       DO WHILE ((E1 .GE. edge(i1, Z)) .AND. (i1 .LE. nedges(Z)))
          i1 = i1 + 1
       END DO
 
-! Find the appropriate range to contain the upper energy.
+      ! Find the appropriate range to contain the upper energy.
 
       i2 = i1
       DO WHILE ((E2 .GE. edge(i2, Z)) .AND. (i2 .LE. nedges(Z)))
          i2 = i2 + 1
       END DO
 
-! If these are the same then just sum up the cross-section
-! for the midpoint of the bin.
+      ! If these are the same then just sum up the cross-section
+      ! for the midpoint of the bin.
 
       IF (i1 .EQ. i2) THEN
 
@@ -2866,7 +2867,7 @@ CONTAINS
 
       ELSE
 
-! First do the lower energy up to the first edge in the bin
+         ! First do the lower energy up to the first edge in the bin
 
          Elog = log((E1 + edge(i1, Z))/2)
 
@@ -2876,7 +2877,7 @@ CONTAINS
          END DO
          X = Xt*(edge(i1, Z) - E1)/(E2 - E1)
 
-! Now calculate the last edge in the bin up to the upper energy
+         ! Now calculate the last edge in the bin up to the upper energy
 
          Elog = log((E2 + edge(i2 - 1, Z))/2)
 
@@ -2886,7 +2887,7 @@ CONTAINS
          END DO
          X = X + Xt*(E2 - edge(i2 - 1, Z))/(E2 - E1)
 
-! Now add in any bits between edges in the bin
+         ! Now add in any bits between edges in the bin
 
          DO k = i1 + 1, i2 - 1
 
@@ -2901,7 +2902,7 @@ CONTAINS
 
       END IF
 
-! Do the exponential, put in the E**3 factor, and convert to cm**2.
+      ! Do the exponential, put in the E**3 factor, and convert to cm**2.
 
       Elog = log((E1 + E2)/2)
       photo = EXP(X - 3*Elog - 55.26204)*f(Z)
@@ -2909,76 +2910,75 @@ CONTAINS
       RETURN
    END FUNCTION photo
 
-!---------------------------------------------------------------------
    FUNCTION HELXSC(E)
 
       REAL HELXSC, E
 
-!
-!     Real Funcion : HELIUM
-!     Source : Marr, G. V., and West, J. B., Atomic and Nuclear Data Tables,
-!                (1976) 18, 497.
-!             Oza, D. H., (1986), Phys. Rev. A, 33,  824.
-!             Fernley, J. A., Taylor, K. T., and Seaton, M. J., (1987),
-!                J. Phys. B., 20, 6457.
-!
-!     Description :
-!     calculates mass absorption coefficient (mu/rho) in cm2/g for neutral
-!     helium for the given energy in eV.
-!     Cross sections come from experimental data compiled by Marr and
-!     West (Atomic Data and Nuclear Data Tables (1976) 18, 497).
-!     The four strongest autoionization resonances are taken into account;
-!     numbers come from Oza (Phys Rev A (1986), 33, 824), and Fernley et al.
-!     (J. Phys B (1987) 20, 6457).
-!
-!     Deficiencies :
-!     works in the energy range from 30 eV to 10,000 eV
+      !
+      !     Real Funcion : HELIUM
+      !     Source : Marr, G. V., and West, J. B., Atomic and Nuclear Data Tables,
+      !                (1976) 18, 497.
+      !             Oza, D. H., (1986), Phys. Rev. A, 33,  824.
+      !             Fernley, J. A., Taylor, K. T., and Seaton, M. J., (1987),
+      !                J. Phys. B., 20, 6457.
+      !
+      !     Description :
+      !     calculates mass absorption coefficient (mu/rho) in cm2/g for neutral
+      !     helium for the given energy in eV.
+      !     Cross sections come from experimental data compiled by Marr and
+      !     West (Atomic Data and Nuclear Data Tables (1976) 18, 497).
+      !     The four strongest autoionization resonances are taken into account;
+      !     numbers come from Oza (Phys Rev A (1986), 33, 824), and Fernley et al.
+      !     (J. Phys B (1987) 20, 6457).
+      !
+      !     Deficiencies :
+      !     works in the energy range from 30 eV to 10,000 eV
 
-!     Bugs :
-!     if any are found please report to the authors
-!
-!     History :
-!     this subroutine replaces the previous version of HELIUM which
-!     calculated mass absoprtion coefficients based on Henke's data
-!     (Henke, B. L., et al., (1982), Atomic and Nuclear Data Tables, 27, 1).
-!     This version of HELIUM returns mass  absorption coefficients which
-!     are in better agreement with the best experiments as well as
-!     theoretical models (see Chen, W. F., Cooper, G., and Brion, C. E.,
-!     (1991), Phys. Rev. A, 44, 186).  This fortran-77 version of the
-!     subroutine is based on Pat Jelinsky's program written in C
-!     (obtained from EUVE Archive)
-!
-!     History :
-!     04 jan 93 : original (19775::MBC)
-!
-!     23 feb 93 : comments added and modified to remove VAX
-!                    fortran 77 extensions
-!
-!     21 sep 93 : further remnants of VAX fortran 77 extensions
-!                    have been removed (19775::MBC)
-!
-!     23 sep 93 : bug in the FANO routine has been removed (19775::MBC)
-!
-!     Usage : FUNCTION HELIUM(E)
-!            E = Energy in eV
-!
-!     Common Blocks :
-!           none
-!
-!     Implicit :
-!           none
-!
-!     Functions called by HELIUM
-!           FANO
-!
-!------------------------------------------------------------------------------
+      !     Bugs :
+      !     if any are found please report to the authors
+      !
+      !     History :
+      !     this subroutine replaces the previous version of HELIUM which
+      !     calculated mass absoprtion coefficients based on Henke's data
+      !     (Henke, B. L., et al., (1982), Atomic and Nuclear Data Tables, 27, 1).
+      !     This version of HELIUM returns mass  absorption coefficients which
+      !     are in better agreement with the best experiments as well as
+      !     theoretical models (see Chen, W. F., Cooper, G., and Brion, C. E.,
+      !     (1991), Phys. Rev. A, 44, 186).  This fortran-77 version of the
+      !     subroutine is based on Pat Jelinsky's program written in C
+      !     (obtained from EUVE Archive)
+      !
+      !     History :
+      !     04 jan 93 : original (19775::MBC)
+      !
+      !     23 feb 93 : comments added and modified to remove VAX
+      !                    fortran 77 extensions
+      !
+      !     21 sep 93 : further remnants of VAX fortran 77 extensions
+      !                    have been removed (19775::MBC)
+      !
+      !     23 sep 93 : bug in the FANO routine has been removed (19775::MBC)
+      !
+      !     Usage : FUNCTION HELIUM(E)
+      !            E = Energy in eV
+      !
+      !     Common Blocks :
+      !           none
+      !
+      !     Implicit :
+      !           none
+      !
+      !     Functions called by HELIUM
+      !           FANO
+      !
+      !------------------------------------------------------------------------------
 
-!  Avogadro's number
+      !  Avogadro's number
 
       REAL AV
       PARAMETER(AV=6.022045E23)
 
-!  atomic weight of hydrogen
+      !  atomic weight of hydrogen
 
       REAL AW
       PARAMETER(AW=4.0026E0)
@@ -2991,36 +2991,36 @@ CONTAINS
 
       INTEGER I
 
-! polynomial coefficients for Marr and West data
+      ! polynomial coefficients for Marr and West data
       DATA C1/-2.953607E1, 7.083061E0, 8.678646E-1, -1.221932E0, &
          4.052997E-2, 1.317109E-1, -3.265795E-2, 2.500933E-3/
 
-! polynomial coefficients for Marr and West data )
+      ! polynomial coefficients for Marr and West data )
       DATA C2/-2.465188E1, 4.354679E0, -3.553024E0, 5.573040E0, &
          -5.872938E0, 3.720797E0, -1.226919E0, 1.576657E-1/
 
-! parameters Q for resonances (Fernley et al. 1987)
+      ! parameters Q for resonances (Fernley et al. 1987)
       DATA Q/2.81E0, 2.51E0, 2.45E0, 2.44E0/
 
-! parameters NU for resonances (Oza 1986)
+      ! parameters NU for resonances (Oza 1986)
       DATA NU/1.610E0, 2.795E0, 3.817E0, 4.824E0/
 
-! parameters GAMMA for resonances (Oza 1986)
+      ! parameters GAMMA for resonances (Oza 1986)
       DATA GAMMA/2.64061E-3, 6.20116E-4, 2.56061E-4, &
          1.320159E-4/
 
-! Calculate wavelength
+      ! Calculate wavelength
 
       LAMBDA = 12398.54E0/E
       X = ALOG10(LAMBDA)
 
-! If > 503.97 then no absorption
+      ! If > 503.97 then no absorption
 
       IF (LAMBDA .GT. 503.97E0) THEN
          HELXSC = 0.E0
          RETURN
 
-! If < 46 then use first polynomial fit
+         ! If < 46 then use first polynomial fit
 
       ELSEIF (LAMBDA .LT. 46.E0) THEN
          Y = 0.E0
@@ -3028,8 +3028,8 @@ CONTAINS
             Y = Y + C2(I)*(X**(I - 1))
          END DO
 
-! Otherwise use second polynomial fit and include autoionization
-! resonances
+         ! Otherwise use second polynomial fit and include autoionization
+         ! resonances
 
       ELSE
 
@@ -3050,116 +3050,116 @@ CONTAINS
       HELXSC = SIGMA*AV/AW
    END FUNCTION HELXSC
 
-!-----------------------------------------------------------------------------
-!
-!     Real Funcion : HELYAN
-!     Source : Yan et al 1998, ApJ 496, 1044.
-!             Oza, D. H., (1986), Phys. Rev. A, 33,  824.
-!             Fernley, J. A., Taylor, K. T., and Seaton, M. J., (1987),
-!                J. Phys. B., 20, 6457.
-!
-!     Description :
-!     calculates mass absorption coefficient (mu/rho) in cm2/g for neutral
-!     helium for the given energy in eV.
-!     Cross sections come from a theoretical adjustment of experimental data
-!     (from Samson et al 1994a and others) by Yan et al. (ApJ 1997).
-!
-!     The four strongest autoionization resonances are taken into account;
-!     numbers come from Oza (Phys Rev A (1986), 33, 824), and Fernley et al.
-!     (J. Phys B (1987) 20, 6457).
-!
-!     Deficiencies :
-!     works in the energy range from 30 eV to 10,000 eV
-
-!     Bugs :
-!     if any are found please report to the authors
-!
-!     History :
-!     1991: calculated mass absoprtion coefficients based on Henke's data
-!     (Henke, B. L., et al., (1982), Atomic and Nuclear Data Tables, 27, 1).
-!     1993: modified to include autoionization resonances.  The fortran-77
-!     version of the subroutine was based on Pat Jelinsky's C program.
-!     (obtained from EUVE Archive)
-!     1997: realized Marr and West (1976:
-!     cross sections are a poor match to current best estimates above 80 eV.
-!     Changed continuum portion to cross sections recommended by Yan et al
-!     (ApJ 1977)   Autoionization resonances were
-!     retained as implemented by Jelinsky in the EUVE archive.
-!
-!
-!     Usage : FUNCTION HELYAN(E)
-!            E = Energy in eV
-!
-!     Common Blocks :
-!           none
-!
-!     Implicit :
-!           none
-!
-!     Functions called by HELYAN
-!           FANO
-!
-!------------------------------------------------------------------------------
    FUNCTION HELYAN(E)
+      !-----------------------------------------------------------------------------
+      !
+      !     Real Funcion : HELYAN
+      !     Source : Yan et al 1998, ApJ 496, 1044.
+      !             Oza, D. H., (1986), Phys. Rev. A, 33,  824.
+      !             Fernley, J. A., Taylor, K. T., and Seaton, M. J., (1987),
+      !                J. Phys. B., 20, 6457.
+      !
+      !     Description :
+      !     calculates mass absorption coefficient (mu/rho) in cm2/g for neutral
+      !     helium for the given energy in eV.
+      !     Cross sections come from a theoretical adjustment of experimental data
+      !     (from Samson et al 1994a and others) by Yan et al. (ApJ 1997).
+      !
+      !     The four strongest autoionization resonances are taken into account;
+      !     numbers come from Oza (Phys Rev A (1986), 33, 824), and Fernley et al.
+      !     (J. Phys B (1987) 20, 6457).
+      !
+      !     Deficiencies :
+      !     works in the energy range from 30 eV to 10,000 eV
 
-!    Type definitions :
-!     IMPLICIT NONE
-!    Global variables :
-!    Structure definitions :
-!    Function declarations :
+      !     Bugs :
+      !     if any are found please report to the authors
+      !
+      !     History :
+      !     1991: calculated mass absoprtion coefficients based on Henke's data
+      !     (Henke, B. L., et al., (1982), Atomic and Nuclear Data Tables, 27, 1).
+      !     1993: modified to include autoionization resonances.  The fortran-77
+      !     version of the subroutine was based on Pat Jelinsky's C program.
+      !     (obtained from EUVE Archive)
+      !     1997: realized Marr and West (1976:
+      !     cross sections are a poor match to current best estimates above 80 eV.
+      !     Changed continuum portion to cross sections recommended by Yan et al
+      !     (ApJ 1977)   Autoionization resonances were
+      !     retained as implemented by Jelinsky in the EUVE archive.
+      !
+      !
+      !     Usage : FUNCTION HELYAN(E)
+      !            E = Energy in eV
+      !
+      !     Common Blocks :
+      !           none
+      !
+      !     Implicit :
+      !           none
+      !
+      !     Functions called by HELYAN
+      !           FANO
+      !
+      !------------------------------------------------------------------------------
 
-!    Local constants :
+      !    Type definitions :
+      !     IMPLICIT NONE
+      !    Global variables :
+      !    Structure definitions :
+      !    Function declarations :
+
+      !    Local constants :
       INTEGER IP
-!         ( index through loop )
+      !         ( index through loop )
       PARAMETER(IP=6)
       INTEGER IF
-!         ( index through loop )
+      !         ( index through loop )
       PARAMETER(IF=4)
       REAL AV
-!         ( Avogadro's number )
+      !         ( Avogadro's number )
       PARAMETER(AV=6.022045E23)
       REAL AW
-!         ( atomic weight of hydrogen )
+      !         ( atomic weight of hydrogen )
       PARAMETER(AW=4.0026E0)
-!    Local variables :
+      !    Local variables :
       REAL LAMBDA
-!          ( wavelength in Angstroms)
+      !          ( wavelength in Angstroms)
       REAL X
       REAL Y
       REAL SIGMA
-!          ( cross section in cm2/atom)
+      !          ( cross section in cm2/atom)
       INTEGER I
-!          ( index trough loop)
-!     Import :
+      !          ( index trough loop)
+      !     Import :
       REAL E
-!          ( energy in eV)
-!     Export :
+      !          ( energy in eV)
+      !     Export :
       REAL HELYAN
-!          ( cross section in cm**2/g)
-!    Local data :
+      !          ( cross section in cm**2/g)
+      !    Local data :
       REAL C1(IP)
       REAL EION
       REAL Q(IF)
       REAL NU(IF)
       REAL GAMMA(IF)
 
-!          ( polynomial coefficients for Yan et al data)
+      !          ( polynomial coefficients for Yan et al data)
       DATA C1/-4.7416, 14.8200, -30.8678, 37.3584, -23.4585, 5.9133/
 
-!          ( ionization edge in eV:)
+      !          ( ionization edge in eV:)
       DATA EION/24.58/
 
-!          ( parameters Q for resonances (Fernley et al. 1987) )
+      !          ( parameters Q for resonances (Fernley et al. 1987) )
       DATA Q/2.81E0, 2.51E0, 2.45E0, 2.44E0/
 
-!          ( parameters NU for resonances (Oza 1986) )
+      !          ( parameters NU for resonances (Oza 1986) )
       DATA NU/1.610E0, 2.795E0, 3.817E0, 4.824E0/
 
-!          ( parameters GAMMA for resonances (Oza 1986) )
+      !          ( parameters GAMMA for resonances (Oza 1986) )
       DATA GAMMA/2.64061E-3, 6.20116E-4, 2.56061E-4, &
          1.320159E-4/
 
-!     Start :
+      !     Start :
 
       LAMBDA = 12398.54E0/E
 
@@ -3172,10 +3172,10 @@ CONTAINS
          DO 2 I = 1, IP
 2        Y = Y + C1(I)/(X**(I/2.))
 
-!        Yan et al. cross section in cm**2/atom:
+         !        Yan et al. cross section in cm**2/atom:
          SIGMA = 733.E-24/(1.E-3*E)**3.5*Y
 
-!        Add in autoionization resonances:
+         !        Add in autoionization resonances:
          DO 3 I = 1, IF
 3        SIGMA = SIGMA*FANO(Q(I), NU(I), GAMMA(I), LAMBDA)
 
@@ -3186,34 +3186,33 @@ CONTAINS
       RETURN
    END FUNCTION HELYAN
 
-!----------------------------------------------------------------------------
-!
+
    FUNCTION FANO(A, B, C, LAMBDA)
 
-!    Type definitions :
-!     IMPLICIT NONE
-!    Global variables :
-!    Structure definitions :
-!    Function declarations :
-!    Local constants :
-!    Local variables :
+      !    Type definitions :
+      !     IMPLICIT NONE
+      !    Global variables :
+      !    Structure definitions :
+      !    Function declarations :
+      !    Local constants :
+      !    Local variables :
       REAL EPS
-!          ( energy in Rydbergs )
+      !          ( energy in Rydbergs )
       REAL EPSI
       REAL X
-!          ( log_10 of wavelength in Angstroms )
-!     Import :
+      !          ( log_10 of wavelength in Angstroms )
+      !     Import :
       REAL A
-!          ( Q coefficient (Fernley et al. 1987) )
+      !          ( Q coefficient (Fernley et al. 1987) )
       REAL B
-!          ( NU coefficient (Oza 1986) )
+      !          ( NU coefficient (Oza 1986) )
       REAL C
-!          ( GAMMA coefficient (Oza 1986) )
+      !          ( GAMMA coefficient (Oza 1986) )
       REAL LAMBDA
-!          ( wavelength in Angstroms )
-!     Export :
+      !          ( wavelength in Angstroms )
+      !     Export :
       REAL FANO
-!    Start :
+      !    Start :
 
       EPS = 911.2671E0/LAMBDA
       EPSI = 3.0E0 - 1.E0/(B*B) + 1.807317
@@ -3221,7 +3220,7 @@ CONTAINS
       FANO = (X - A)*(X - A)/(1.0E0 + X*X)
    END FUNCTION FANO
 
-!=================================================================================================
+
    FUNCTION XraySintegrand(zz)
 
       IMPLICIT NONE
