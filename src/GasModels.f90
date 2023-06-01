@@ -67,8 +67,7 @@ CONTAINS
          ! Calculate gas mass at R200
          Mg200_DM = MT200_DM*fg200_DM     !M_sun
 
-         ! Sanity check
-         !null run
+         ! Sanity check - null run
          IF (Mg200_DM == 0.d0) THEN
             flag = 2
             RETURN
