@@ -45,6 +45,9 @@ CONTAINS
 !         truncated distributions)
 
       CALL CheckPars(Cube, flag)
+      if (flag > 0) then
+         write(*, *) 'Flag tripped', flag
+      end if
       IF (flag == 1) GOTO 999
 
 #ifdef MPI

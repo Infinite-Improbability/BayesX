@@ -227,51 +227,55 @@ CONTAINS
          ALLOCATE (Tgx(13), Kex(13), Pex(13))
          ALLOCATE (M_DMx(13), Mg_DMx(13), fg_DMx(13))
 
-         ! Starting radius, in units of R500
-         rx_incre = 0.03
+         ! ! Starting radius, in units of R500
+         ! rx_incre = 0.03
 
-         ! Calculate properties at points from 0.04 R500 to 1.0 R500
-         DO m = 1, 7
-            rx_incre = rx_incre + 0.01
-            rgx(m) = rx_incre*r500_DM
-            Rhogasx(m) = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* & !M_sunMpc^-3
-               calcneDM(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-            Tgx(m) = (4.d0*pi*0.61*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
-               ((DLOG(1.0 + (rgx(m)/rs_DM)) - (1.0/(1.0 + (rs_DM/rgx(m)))))/rgx(m))* &
-               (1.0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
-               (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
-               *(m_sun*Mpc2m*Mpc2m)*(J2keV)
-            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
-            n_ex(m) = n_ex(m)*1.d+6
-            Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
-            Pex(m) = n_ex(m)*Tgx(m)
-            M_DMx(m) = calcDMmass(rs_DM, rhos_DM, rgx(m))
-            Mg_DMx(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW_keV*Mpc2m/(rhos_DM*m_sun*J2keV))*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
-               DM_GNFWgasVol(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)         !M_sun
-            fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
-         END DO
+         ! ! Calculate properties at points from 0.04 R500 to 1.0 R500
+         ! DO m = 1, 7
+         !    rx_incre = rx_incre + 0.01
+         !    rgx(m) = rx_incre*r500_DM
+         !    Rhogasx(m) = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* & !M_sunMpc^-3
+         !       calcneDM(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+         !    Tgx(m) = (4.d0*pi*0.61*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
+         !       ((DLOG(1.0 + (rgx(m)/rs_DM)) - (1.0/(1.0 + (rs_DM/rgx(m)))))/rgx(m))* &
+         !       (1.0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
+         !       (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
+         !       *(m_sun*Mpc2m*Mpc2m)*(J2keV)
+         !    CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+         !    n_ex(m) = n_ex(m)*1.d+6
+         !    Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+         !    Pex(m) = n_ex(m)*Tgx(m)
+         !    M_DMx(m) = calcDMmass(rs_DM, rhos_DM, rgx(m))
+         !    Mg_DMx(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW_keV*Mpc2m/(rhos_DM*m_sun*J2keV))*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
+         !       DM_GNFWgasVol(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)         !M_sun
+         !    fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
+         ! END DO
 
-         ! Calculate properties at points from 1.05 R500 to 1.3 R500
-         rx_incre = 0.1
-         DO m = 8, 13
-            rx_incre = rx_incre + 0.05
-            rgx(m) = rx_incre*r500_DM
-            Rhogasx(m) = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* & !M_sunMpc^-3
-               calcneDM(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-            Tgx(m) = (4.d0*pi*0.61*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
-               ((DLOG(1.0 + (rgx(m)/rs_DM)) - (1.0/(1.0 + (rs_DM/rgx(m)))))/rgx(m))* &
-               (1.0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
-               (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
-               *(m_sun*Mpc2m*Mpc2m)*(J2keV)
-            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
-            n_ex(m) = n_ex(m)*1.d+6
-            Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
-            Pex(m) = n_ex(m)*Tgx(m)
-            Mg_DMx(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW_keV*Mpc2m/(rhos_DM*m_sun*J2keV))*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
-               DM_GNFWgasVol(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-            M_DMx(m) = calcDMmass(rs_DM, rhos_DM, rgx(m))
-            fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
-         END DO
+         ! ! Calculate properties at points from 1.05 R500 to 1.3 R500
+         ! rx_incre = 0.1
+         ! DO m = 8, 13
+         !    rx_incre = rx_incre + 0.05
+         !    rgx(m) = rx_incre*r500_DM
+         !    Rhogasx(m) = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* & !M_sunMpc^-3
+         !       calcneDM(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+         !    Tgx(m) = (4.d0*pi*0.61*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
+         !       ((DLOG(1.0 + (rgx(m)/rs_DM)) - (1.0/(1.0 + (rs_DM/rgx(m)))))/rgx(m))* &
+         !       (1.0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
+         !       (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
+         !       *(m_sun*Mpc2m*Mpc2m)*(J2keV)
+         !    CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+         !    n_ex(m) = n_ex(m)*1.d+6
+         !    Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+         !    Pex(m) = n_ex(m)*Tgx(m)
+         !    Mg_DMx(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW_keV*Mpc2m/(rhos_DM*m_sun*J2keV))*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
+         !       DM_GNFWgasVol(rgx(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+         !    M_DMx(m) = calcDMmass(rs_DM, rhos_DM, rgx(m))
+         !    fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
+         ! END DO
+
+         write(*,*) ''
+         write(*,*) '**********************************'
+         write(*,*) ''
 
          ! Recalculate gas density, temperature and Xray_flux_coeff at points determined by logr in like.f90
          ! The Xray_flux_coeff for each point is stored in a 2D array of (radius_index, energy_bin)
@@ -286,6 +290,8 @@ CONTAINS
 
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             X_emiss2D(m, 1:xrayNbin) = xrayFluxCoeff(1:xrayNbin)
+
+            write(*,*) m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
          END DO
 
          ! Clear up some memory
