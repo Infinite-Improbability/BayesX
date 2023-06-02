@@ -194,7 +194,6 @@ if args.model == 1:
 else:
     params["rauto"] = False
     params["rmin"] = 0.01
-    params["rmax"] = 0.3
     params["rlimit"] = 0.3
 
 # Priors
