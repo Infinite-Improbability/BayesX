@@ -52,7 +52,6 @@ CONTAINS
          c500_GNFW = GasPars(k, 6)
          rmin_fraction = GasPars(k, 11)
 
-
          ! Sanity check on priors
          IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0 .OR. rmin_fraction .LE. 0) THEN
             flag = 1
@@ -494,16 +493,34 @@ CONTAINS
          c_GNFW = GasPars(k, 5)
          c500_GNFW = GasPars(k, 6)
          alpha_Einasto = GasPars(k, 7)
+         rmin_fraction = GasPars(k, 11)
+
+         ! Sanity check on priors
+         IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0 .OR. rmin_fraction .LE. 0) THEN
+            flag = 1
+            RETURN
+         END IF
 
          c200_DM = 5.26d0*(((MT200_DM*h)/1.d14)**(-0.1d0))*(1.d0/(1.d0 + z(k)))
          Mg200_DM = MT200_DM*fg200_DM     !M_sun
+
          !          null run
          IF (Mg200_DM == 0.d0) THEN
             flag = 2
             RETURN
          END IF
+
          r200_DM = ((3.d0*MT200_DM)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)   !Mpc
          r_2_DM = r200_DM/c200_DM                   !Mpc
+
+         ! Adjust integration limits
+         r_min = r_2_DM * rmin_fraction
+
+         ! Sanity check
+         if (r_min < minval(r)) then
+            flag = 3
+            return
+         end if
 
          Gamma_coeff1 = 3.d0/alpha_Einasto
          Gamma_coeff2 = (2.0d0/alpha_Einasto)*((r200_DM/r_2_DM)**alpha_Einasto)
@@ -848,8 +865,15 @@ CONTAINS
          Gamma0 = GasPars(k, 8)  !dimensionless
          GammaR = GasPars(k, 9)  !dimensionless
          T0_poly = GasPars(k, 10)   !dimensionless
+         rmin_fraction = GasPars(k, 11)
 
          ! TODO: Unit comments
+
+         ! Sanity check on priors
+         IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0 .OR. rmin_fraction .LE. 0) THEN
+            flag = 1
+            RETURN
+         END IF
 
          !Neto et~al. 2007 for relaxed clusters
          c200_DM = 5.26d0*(((MT200_DM*h)/1.d14)**(-0.1d0))*(1.d0/(1.d0 + z(k)))
@@ -867,6 +891,15 @@ CONTAINS
          rs_DM = r200_DM/c200_DM ! Mpc
          r500_DM = r200_DM/1.5d0 ! Mpc
          c500_DM = r500_DM/rs_DM
+
+         ! Adjust integration limits
+         r_min = rs_DM * rmin_fraction
+
+         ! Sanity check
+         if (r_min < minval(r)) then
+            flag = 3
+            return
+         end if
 
          ! Also used by prior models
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &
