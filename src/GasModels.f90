@@ -252,6 +252,7 @@ CONTAINS
             fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
          END DO
 
+         ! Calculate properties at points from 1.05 R500 to 1.3 R500
          rx_incre = 0.1
          DO m = 8, 13
             rx_incre = rx_incre + 0.05
@@ -273,6 +274,8 @@ CONTAINS
             fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
          END DO
 
+         ! Recalculate gas density, temperature and Xray_flux_coeff at points determined by logr in like.f90
+         ! The Xray_flux_coeff for each point is stored in a 2D array of (radius_index, energy_bin)
          DO m = 1, n
             Rhogas(m) = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* & !M_sunMpc^-3
                calcneDM(r(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
@@ -286,28 +289,53 @@ CONTAINS
             X_emiss2D(m, 1:xrayNbin) = xrayFluxCoeff(1:xrayNbin)
          END DO
 
+         ! Clear up some memory
+         ! TODO: Can we deallocate more?
          DEALLOCATE (n_H, n_e, ne_nH)
 
+         ! For each energy bin E calculate S_x(s, E) (eq. 22)??
          DO i = 1, xrayNbin
+
+            ! Looping over points in radius
             DO m = 1, n
+               ! Why are we applying the cooling function coefficent now?
+               ! This array will be used by XraySintegrand via Xrayemissfunc1
                logX_emiss1D(m) = phlog10(X_emiss2D(m, i)*xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m)
             END DO
+
+            ! Looping over points in radius
             DO m = 1, n
+               ! We're finding the limits on our integration radius based on our current radius.
+               ! Given that the formula seems to just be Pythagorus, we must be treating the max
+               ! radius as the hypotenuse, which implies uu is either the radius in the sky plane
+               ! or the radius along the line of sight.
+               ! As rlimit1 is used as the limits of the surface brightness equation (eq 22)
+               ! which is integrated along the line of sight we can assume it must be LOS radius,
+               ! so uu is the sky-plane radius.
                uu = r(m)
                rlimit1 = sqrt(max(r_integration_max*r_integration_max - uu*uu, 0.d0))
+
+               ! Actually compute the integral for current sky-plane radius (index m)
+               ! and energy (index i)
                IF (rlimit1 > 0d0) THEN
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
+
+               ! Change the units and save
+               ! This is predicted count rate in some region (spatial, energy, time, more dimensions?)
+               ! TODO: Figure out the exact units
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
             END DO
          END DO
 
+         ! Apply coefficents and photoelectric absorption from foreground gases
          DO i = 1, xrayNbin
             DO m = 1, n
                X_S2D(m, i) = X_S2D(m, i)*xfluxsec1*xfluxsec5*photar(i)
             END DO
          END DO
 
+         ! Free up some memory
          DEALLOCATE (X_emiss2D, logX_emiss1D, X_S1D)
 
          !=======================================================================
@@ -315,6 +343,7 @@ CONTAINS
 
          ALLOCATE (predX_S2D(n, xrayNch))
 
+         ! Apply response function to update predicted count rate
          DO m = 1, n
             DO i = 1, xrayNch
                predX_S2D(m, i) = 0.0
@@ -324,14 +353,19 @@ CONTAINS
             END DO
          END DO
 
+         ! Free up memory
          DEALLOCATE (X_S2D)
 
+         ! Load up the details of positioning
          angfactor = sec2rad*D ! Physical Mpc per arcsec
-         xrayx0 = GeoPars(k, 1)
-         xrayy0 = GeoPars(k, 2)
-         xrayCmap = 0d0
-         xrayCpred = 0d0
+         xrayx0 = GeoPars(k, 1) ! x coordinate of cluster center in arcsec
+         xrayy0 = GeoPars(k, 2) ! y coordinate of cluster center in arcsec
 
+         ! Initalise array values
+         xrayCmap = 0d0 ! Predicted counts from source
+         xrayCpred = 0d0 ! Predicted counts from source and background
+
+         ! Iterate over every pixel (cell) in the observation
          DO xrayxpix = 1, xraynx
             DO xrayypix = 1, xrayny
 
@@ -343,31 +377,51 @@ CONTAINS
                ! xraytrans(5) = 0.0
                ! xraytrans(6) = xraycell
 
-               xrayxx = xraytrans(1) + xrayxpix*xraytrans(2)
-               xrayyy = xraytrans(4) + xrayypix*xraytrans(6)
-               xraydx(1) = xrayxx - xrayx0
-               xraydx(2) = xrayyy - xrayy0
-               xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor
+               ! Set position
+               xrayxx = xraytrans(1) + xrayxpix*xraytrans(2) ! x position in arcsecs
+               xrayyy = xraytrans(4) + xrayypix*xraytrans(6) ! y position in arcsecs
+               xraydx(1) = xrayxx - xrayx0 ! x position relative to center in arcsecs
+               xraydx(2) = xrayyy - xrayy0 ! y position relative to center in arcsecs
+               xrayr = SQRT(xraydx(1)*xraydx(1) + xraydx(2)*xraydx(2))*angfactor ! distance from center in arcsecs
+
+               ! For each energy channel get counts by interpolating over predicted count rate
                DO i = 1, xrayNch
                   IF (xrayr < r_min) THEN
+                     ! If radius is below the minimum, pretend we are at the minimum
                      call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr >= r_sky_max) then ! TODO: Is just > safe?
+                     ! If radius is outside the sky set counts to zero
+                     ! TODO: Is this even possible?
+                     ! Well yes, because of how we currently define r_sky_max as 1/2 min(width,height) of the image
+                     ! But can't we erase this totally because we're kept in the sky by the loop?
+                     ! Maybe this should be limiting by the integration radius instead, like below.
+                     ! That may have even been the original design intent.
+                     ! If r_sky_max < r_integration_max then this should still be impossible
+                     ! But if that doesn't hold...
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
-                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN ! TODO: this was added to deal with an error but maybe it'll be ok once we fix radius limits?
+                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN
+                     ! TODO: this was added to deal with an error but maybe it'll be ok once we fix radius limits?
+                     ! In theory this handles the case where the sky radius exceeds the integration radius
+                     ! The logs are used in an attempt to account for floating point errors.
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
+                     ! If we don't trigger any of the special cases just do the interpolation
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   END IF
+
+                  ! Turn predicted count rate into predicted count by applying exposure time and cell size
                   xrayCmap(i, xrayxpix, xrayypix) = (xrayCmap(i, xrayxpix, xrayypix))*(sexpotime)*(xraycell*xraycell*sec2min*sec2min)
                END DO
             END DO
          END DO
 
+         ! Free up more memory
          DEALLOCATE (predX_S2D)
          xLENi = 0
 
+         ! Add background counts to get total predicted counts
          DO xrayxpix = 1, xraynx
             DO xrayypix = 1, xrayny
                DO i = 1, xrayNch
@@ -376,6 +430,7 @@ CONTAINS
                END DO
             END DO
          END DO
+
          !Store derived parameters
          aux(k, 1) = D              !angular diameter distance in Mpc
          aux(k, 2) = rs_DM
@@ -410,6 +465,8 @@ CONTAINS
          aux(k, 31) = Ke200
          aux(k, 32) = Pe200
 
+         ! Write a bunch more parameters
+         ! Useful for debug
          !i = 0
          !DO m = 33, 129, 8
          !   i = i + 1
@@ -422,9 +479,12 @@ CONTAINS
          !   aux(k, m + 6) = Kex(i)
          !   aux(k, m + 7) = Pex(i)
          !END DO
+
+         ! Free up more memory
          DEALLOCATE (rgx, Tgx, n_ex, Kex, Pex)
          DEALLOCATE (rhogasx, n_Hx, ne_nHx)
          DEALLOCATE (M_DMx, Mg_DMx, fg_DMx)
+
          !-------------------------------------------------------------------
       ELSEIF (GasModel == 2) THEN
          MT200_DM = GasPars(k, 1)   !M_sun
@@ -1313,7 +1373,7 @@ CONTAINS
       ! Convert gas density to SI units
       Rhogas0_SI = Rhogas0*m_sun/(Mpc2m*Mpc2m*Mpc2m)      !this is central gas density in kgm^-3
 
-      ! Set abundances
+      ! Part of Eq 21 from the Bayes-X paper?
       sum_xenuctot = 0.
       DO i = 1, NOEL
          xe(i) = 10.**(abund(i) - 12.)
@@ -3170,14 +3230,16 @@ CONTAINS
       ELSE
          Y = 1.E0
          DO 2 I = 1, IP
-2        Y = Y + C1(I)/(X**(I/2.))
+            Y = Y + C1(I)/(X**(I/2.))
+2        CONTINUE
 
-         !        Yan et al. cross section in cm**2/atom:
+         ! Yan et al. cross section in cm**2/atom:
          SIGMA = 733.E-24/(1.E-3*E)**3.5*Y
 
-         !        Add in autoionization resonances:
+         ! Add in autoionization resonances:
          DO 3 I = 1, IF
-3        SIGMA = SIGMA*FANO(Q(I), NU(I), GAMMA(I), LAMBDA)
+            SIGMA = SIGMA*FANO(Q(I), NU(I), GAMMA(I), LAMBDA)
+3        CONTINUE
 
          HELYAN = SIGMA*AV/AW
 
