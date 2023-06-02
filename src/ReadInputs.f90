@@ -150,8 +150,6 @@ contains
             read (funit, *) rauto
          elseif (tag == '#rmin') then
             read (funit, *) r_min
-         elseif (tag == '#rmax') then
-            read (funit, *) r_sky_max
          elseif (tag == '#rlimit') then
             read (funit, *) r_integration_max
          end if

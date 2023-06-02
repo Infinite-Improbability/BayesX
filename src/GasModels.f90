@@ -392,11 +392,6 @@ CONTAINS
                      xrayCmap(i, xrayxpix, xrayypix) = result
                   ELSEIF (xrayr > r_integration_max) then ! TODO: Is just > safe?
                      ! If radius is outside the sky set counts to zero
-                     ! TODO: Is this even possible?
-                     ! Well yes, because of how we currently define r_sky_max as 1/2 min(width,height) of the image
-                     ! But can't we erase this totally because we're kept in the sky by the loop?
-                     ! Maybe this should be limiting by the integration radius instead, like below.
-                     ! That may have even been the original design intent.
                      ! If r_sky_max < r_integration_max then this should still be impossible
                      ! But if that doesn't hold...
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
@@ -1065,7 +1060,7 @@ CONTAINS
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr > r_sky_max) THEN
+                  ELSEIF (xrayr > r_integration_max) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)

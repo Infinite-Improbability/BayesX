@@ -74,8 +74,7 @@ Details of these tags are as follows.
 
 ### Radius limits_fraction
 #rauto:     Do dynamic limit calculation [T/F]. Overrides following options, default value T  
-#rmin:      real, Minimum radius for integration and in sky plane, Mpc  
-#rmax:      real, Maximum radius in sky plane, Mpc  
+#rmin:      real, Minimum radius for integration and in sky plane, Mpc
 #rlimit:    real, Maximum radius for integrals, Mpc  
 
 ### MEKAL

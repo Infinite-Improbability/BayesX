@@ -351,7 +351,6 @@ CONTAINS
 
          ! Init rmin, rlimit for fixed redshift
          angfactor = sec2rad*lookD(1, 2) ! Physical Mpc per arcsec
-         r_sky_max = dble(min(xraynx, xrayny))/2*xraycell*angfactor ! radius in Mpc
 
          ! Needs some additional information
          M200_max = Gas_Prior(1, 1, 2)
@@ -384,12 +383,7 @@ CONTAINS
          r_integration_max = maxval(r)
       end if
 
-      if (r_sky_max > r_integration_max) then
-         write(*, *) 'r_sky_max greater than integration radius. This may cause problems (unverified).'
-      end if
-
       write (*, *) 'r_min =', r_min
-      write (*, *) 'r_sky_max = ', r_sky_max
       write (*, *) 'r_los_max = ', r_integration_max
       write (*, *) 'r_min will be overriden for Model I based on rmin_fraction and r_s'
       write (*, *)
