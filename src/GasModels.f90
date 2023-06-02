@@ -390,7 +390,7 @@ CONTAINS
                      ! If radius is below the minimum, pretend we are at the minimum
                      call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr >= r_sky_max) then ! TODO: Is just > safe?
+                  ELSEIF (xrayr > r_integration_max) then ! TODO: Is just > safe?
                      ! If radius is outside the sky set counts to zero
                      ! TODO: Is this even possible?
                      ! Well yes, because of how we currently define r_sky_max as 1/2 min(width,height) of the image
@@ -399,11 +399,6 @@ CONTAINS
                      ! That may have even been the original design intent.
                      ! If r_sky_max < r_integration_max then this should still be impossible
                      ! But if that doesn't hold...
-                     xrayCmap(i, xrayxpix, xrayypix) = 0.
-                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN
-                     ! TODO: this was added to deal with an error but maybe it'll be ok once we fix radius limits?
-                     ! In theory this handles the case where the sky radius exceeds the integration radius
-                     ! The logs are used in an attempt to account for floating point errors.
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      ! If we don't trigger any of the special cases just do the interpolation
@@ -764,9 +759,7 @@ CONTAINS
                   IF (xrayr < r_min) THEN
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr >= r_sky_max) then
-                     xrayCmap(i, xrayxpix, xrayypix) = 0.
-                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN
+                  ELSEIF (xrayr > r_integration_max) then
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      !CALL interp1d(predX_S2D(1:n, i), r, n, xrayr, result)
@@ -1072,9 +1065,7 @@ CONTAINS
                      !CALL interp1d(predX_S2D(1:n, i), r, n, rmin, result)
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr >= r_sky_max) THEN
-                     xrayCmap(i, xrayxpix, xrayypix) = 0.
-                  ELSEIF (phlog10(xrayr) >= logr(n)) THEN
+                  ELSEIF (xrayr > r_sky_max) THEN
                      xrayCmap(i, xrayxpix, xrayypix) = 0.
                   ELSE
                      CALL interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(xrayr), result)

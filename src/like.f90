@@ -379,8 +379,13 @@ CONTAINS
       END DO
 
       if (maxval(r) < r_integration_max) then
+         ! This prevents trying to interpolate to points > maxval(r)
          write (*, *) 'Maximum discretised r is', maxval(r), 'less than r_los_max', r_integration_max, ', adjusting r_los_max to match'
          r_integration_max = maxval(r)
+      end if
+
+      if (r_sky_max > r_integration_max) then
+         write(*, *) 'r_sky_max greater than integration radius. This may cause problems (unverified).'
       end if
 
       write (*, *) 'r_min =', r_min
