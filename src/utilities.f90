@@ -102,10 +102,10 @@ CONTAINS
          write (*, *) 'Interpolation bounds reversed'
       end if
 
-      if (x0 < xMin .and. x0 / xmin < 1d-6) then
+      if (x0 < xMin .and. (1 - x0 / xmin) < 1d-6) then
          write (*, *) 'Interpolation value slightly low. Probably a floating point error, adjusting to limit'
          x0 = xmin
-      else if (x0 > xMax .and. x0 / xmax < 1d-6) then
+      else if (x0 > xMax .and. (x0 / xmax - 1) < 1d-6) then
          write (*, *) 'Interpolation value slightly high. Probably a floating point error, adjusting to limit'
          x0 = xmin
       end if
@@ -115,8 +115,9 @@ CONTAINS
          wx = (x0 - x(i1))/dx
          f0 = (1 - wx)*f(i1) + wx*f(i1 + 1)
       else
-         write (*, *) 'x = ', x0, '  is out of table range xmin: ', xmin, ' xmax: ', xmax
+         write (*, *) 'x0 = ', x0, '  is out of table range xmin: ', xmin, ' xmax: ', xmax
          write (*, *) '10**x:', 10**x0, 10**xmin, 10**xmax
+         write (*, *) 'x0/xMin', x0/xMin, 'x0/xMax', x0/xMax
          stop
       end if
       return

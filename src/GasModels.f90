@@ -304,7 +304,7 @@ CONTAINS
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             X_emiss2D(m, 1:xrayNbin) = xrayFluxCoeff(1:xrayNbin)
 
-            write(*,*) m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
+            write(*,'(I3,E16.8,E16.8,E16.8,E16.8)') m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
          END DO
 
          ! Clear up some memory
