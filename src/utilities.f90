@@ -103,11 +103,11 @@ CONTAINS
       end if
 
       if (x0 < xMin .and. (1 - x0 / xmin) < 1d-6) then
-         write (*, *) 'Interpolation value slightly low. Probably a floating point error, adjusting to limit'
+         ! write (*, *) 'Interpolation value slightly low. Probably a floating point error, adjusting to limit'
          x0 = xmin
       else if (x0 > xMax .and. (x0 / xmax - 1) < 1d-6) then
-         write (*, *) 'Interpolation value slightly high. Probably a floating point error, adjusting to limit'
-         x0 = xmin
+         ! write (*, *) 'Interpolation value slightly high. Probably a floating point error, adjusting to limit'
+         x0 = xmax
       end if
 
       if (x0 .ge. xmin .and. x0 .le. xmax) then

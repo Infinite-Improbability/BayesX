@@ -286,9 +286,9 @@ CONTAINS
          !    fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
          ! END DO
 
-         write(*,*) ''
-         write(*,*) '**********************************'
-         write(*,*) ''
+         ! write(*,*) ''
+         ! write(*,*) '**********************************'
+         ! write(*,*) ''
 
          ! Recalculate gas density, temperature and Xray_flux_coeff at points determined by logr in like.f90
          ! The Xray_flux_coeff for each point is stored in a 2D array of (radius_index, energy_bin)
@@ -304,7 +304,7 @@ CONTAINS
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             X_emiss2D(m, 1:xrayNbin) = xrayFluxCoeff(1:xrayNbin)
 
-            write(*,'(I3,E16.8,E16.8,E16.8,E16.8)') m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
+            ! write(*,'(I3,E16.8,E16.8,E16.8,E16.8)') m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
          END DO
 
          ! Clear up some memory
@@ -408,7 +408,7 @@ CONTAINS
                      ! If radius is below the minimum, pretend we are at the minimum
                      call interp1d_even(predX_S2D(1:n, i), logr, n, phlog10(r_min), result)
                      xrayCmap(i, xrayxpix, xrayypix) = result
-                  ELSEIF (xrayr > r_integration_max) then ! TODO: Is just > safe?
+                  ELSEIF (phlog10(xrayr) > phlog10(r_integration_max)) then ! TODO: Is just > safe?
                      ! If radius is outside the sky set counts to zero
                      ! If r_sky_max < r_integration_max then this should still be impossible
                      ! But if that doesn't hold...
