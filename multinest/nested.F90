@@ -599,6 +599,8 @@ contains
                      write(u_phys_birth,fmt1) phyP(:,m),l(m),logzero,1
                      write(u_phys,fmt2) phyP(:,m),l(m),1
                   enddo
+
+                  if (fback) write(*, *) 'Written live points', nstart, 'to', nend
                endif
             endif
          endif

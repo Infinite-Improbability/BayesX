@@ -52,11 +52,15 @@ CONTAINS
          c500_GNFW = GasPars(k, 6)
          rmin_fraction = GasPars(k, 11)
 
+         ! write(*, *) 'Gas model called'
+
          ! Sanity check on priors
          IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0 .OR. rmin_fraction .LE. 0) THEN
             flag = 1
             RETURN
          END IF
+
+         ! write(*, *) 'Gas model survived 1'
 
          ! Calculate c200 from mass
          ! This is based on N-body simulations
@@ -72,6 +76,8 @@ CONTAINS
             RETURN
          END IF
 
+         ! write(*, *) 'Gas model survived 2'
+
          ! Calculate radius from M200
          ! TODO: I think this is obtained from the NFW equation. Verify
          r200_DM = ((3.d0*MT200_DM)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)   !Mpc
@@ -83,11 +89,18 @@ CONTAINS
          ! This should, I hope, mask r_min in subsequent equations.
          r_min = rs_DM * rmin_fraction
 
+         DO i = 1, n
+            logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
+            r(i) = 10.d0**logr(i)
+         END DO
+
          ! Sanity check
          if (r_min < minval(r)) then
             flag = 3
             return
          end if
+
+         ! write(*, *) 'Gas model survived 3'
 
          ! Calculate the dark matter density at R200
          ! TODO: Where's this equation from exactly?
@@ -491,9 +504,13 @@ CONTAINS
          alpha_Einasto = GasPars(k, 7)
          rmin_fraction = GasPars(k, 11)
 
+         ! write(*, *) 'Model 2 called'
+
          ! Sanity check on priors
          IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0 .OR. rmin_fraction .LE. 0) THEN
             flag = 1
+            write(*, *) 'Model 2 tripped flag 1'
+            write(*, *) fg200_DM, MT200_DM, a_GNFW, c500_GNFW, b_GNFW-c_GNFW, rmin_fraction
             RETURN
          END IF
 
@@ -503,6 +520,7 @@ CONTAINS
          !          null run
          IF (Mg200_DM == 0.d0) THEN
             flag = 2
+            write(*, *) 'Model 2 tripped flag 2'
             RETURN
          END IF
 
@@ -512,11 +530,18 @@ CONTAINS
          ! Adjust integration limits
          r_min = r_2_DM * rmin_fraction
 
+         DO i = 1, n
+            logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
+            r(i) = 10.d0**logr(i)
+         END DO
+
          ! Sanity check
-         if (r_min < minval(r)) then
+         if (r_min < minval(r) .or. logr(1) > logr(n)) then
             flag = 3
+            ! write(*, *) 'Model 2 tripped flag 3'
             return
          end if
+
 
          Gamma_coeff1 = 3.d0/alpha_Einasto
          Gamma_coeff2 = (2.0d0/alpha_Einasto)*((r200_DM/r_2_DM)**alpha_Einasto)
@@ -646,61 +671,61 @@ CONTAINS
          ALLOCATE (Tgx(13), Kex(13), Pex(13))
          ALLOCATE (M_DMx(13), Mg_DMx(13), fg_DMx(13))
 
-         rx_incre = 0.03
-         DO m = 1, 7
-            rx_incre = rx_incre + 0.01
-            rgx(m) = rx_incre*r500_DM
-            Gamma_coeff2 = (2.0d0/alpha_Einasto)*((rgx(m)/r_2_DM)**alpha_Einasto)
-            Rhogasx(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-               (rgx(m)/INCOG(Gamma_coeff1, Gamma_coeff2))* &
-               ((rgx(m)/rp_GNFW)**(-1.0d0*c_GNFW))* &
-               ((1.0d0 + (rgx(m)/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-               ((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)
-            Tgx(m) = (0.6d0*m_p*G)*(mass_coeff_Einasto)* &
-               (INCOG(Gamma_coeff1, Gamma_coeff2)/rgx(m))* &
-               (1.0d0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
-               (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
-               (m_sun*Mpc2m*Mpc2m)*(J2keV)
-            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
-               ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, &
-               xrayDeltaE, xrayFluxCoeff)
-            n_ex(m) = n_ex(m)*1.d+6
-            Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
-            Pex(m) = n_ex(m)*Tgx(m)
-            Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-               EinastoDM_GNFWgasvol( &
-               rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-            M_DMx(m) = mass_coeff_Einasto*INCOG(Gamma_coeff1, Gamma_coeff2)
-            fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
-         END DO
+         ! rx_incre = 0.03
+         ! DO m = 1, 7
+         !    rx_incre = rx_incre + 0.01
+         !    rgx(m) = rx_incre*r500_DM
+         !    Gamma_coeff2 = (2.0d0/alpha_Einasto)*((rgx(m)/r_2_DM)**alpha_Einasto)
+         !    Rhogasx(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+         !       (rgx(m)/INCOG(Gamma_coeff1, Gamma_coeff2))* &
+         !       ((rgx(m)/rp_GNFW)**(-1.0d0*c_GNFW))* &
+         !       ((1.0d0 + (rgx(m)/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+         !       ((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)
+         !    Tgx(m) = (0.6d0*m_p*G)*(mass_coeff_Einasto)* &
+         !       (INCOG(Gamma_coeff1, Gamma_coeff2)/rgx(m))* &
+         !       (1.0d0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
+         !       (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
+         !       (m_sun*Mpc2m*Mpc2m)*(J2keV)
+         !    CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
+         !       ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, &
+         !       xrayDeltaE, xrayFluxCoeff)
+         !    n_ex(m) = n_ex(m)*1.d+6
+         !    Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+         !    Pex(m) = n_ex(m)*Tgx(m)
+         !    Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+         !       EinastoDM_GNFWgasvol( &
+         !       rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+         !    M_DMx(m) = mass_coeff_Einasto*INCOG(Gamma_coeff1, Gamma_coeff2)
+         !    fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
+         ! END DO
 
-         rx_incre = 0.1
-         DO m = 8, 13
-            rx_incre = rx_incre + 0.05
-            rgx(m) = rx_incre*r500_DM
-            Gamma_coeff2 = (2.0d0/alpha_Einasto)*((rgx(m)/r_2_DM)**alpha_Einasto)
-            Rhogasx(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-               (rgx(m)/INCOG(Gamma_coeff1, Gamma_coeff2))* &
-               ((rgx(m)/rp_GNFW)**(-1.0d0*c_GNFW))* &
-               ((1.0d0 + (rgx(m)/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-               ((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)
-            Tgx(m) = (0.6d0*m_p*G)*(mass_coeff_Einasto)* &
-               (INCOG(Gamma_coeff1, Gamma_coeff2)/rgx(m))* &
-               (1.0d0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
-               (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
-               (m_sun*Mpc2m*Mpc2m)*(J2keV)
-            CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
-               ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, &
-               xrayDeltaE, xrayFluxCoeff)
-            n_ex(m) = n_ex(m)*1.d+6
-            Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
-            Pex(m) = n_ex(m)*Tgx(m)
-            Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-               EinastoDM_GNFWgasvol( &
-               rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-            M_DMx(m) = mass_coeff_Einasto*INCOG(Gamma_coeff1, Gamma_coeff2)
-            fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
-         END DO
+         ! rx_incre = 0.1
+         ! DO m = 8, 13
+         !    rx_incre = rx_incre + 0.05
+         !    rgx(m) = rx_incre*r500_DM
+         !    Gamma_coeff2 = (2.0d0/alpha_Einasto)*((rgx(m)/r_2_DM)**alpha_Einasto)
+         !    Rhogasx(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+         !       (rgx(m)/INCOG(Gamma_coeff1, Gamma_coeff2))* &
+         !       ((rgx(m)/rp_GNFW)**(-1.0d0*c_GNFW))* &
+         !       ((1.0d0 + (rgx(m)/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+         !       ((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)
+         !    Tgx(m) = (0.6d0*m_p*G)*(mass_coeff_Einasto)* &
+         !       (INCOG(Gamma_coeff1, Gamma_coeff2)/rgx(m))* &
+         !       (1.0d0 + ((rgx(m)/rp_GNFW)**(a_GNFW)))* &
+         !       (((b_GNFW*((rgx(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
+         !       (m_sun*Mpc2m*Mpc2m)*(J2keV)
+         !    CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
+         !       ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, &
+         !       xrayDeltaE, xrayFluxCoeff)
+         !    n_ex(m) = n_ex(m)*1.d+6
+         !    Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
+         !    Pex(m) = n_ex(m)*Tgx(m)
+         !    Mg_DMx(m) = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
+         !       EinastoDM_GNFWgasvol( &
+         !       rgx(m), r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+         !    M_DMx(m) = mass_coeff_Einasto*INCOG(Gamma_coeff1, Gamma_coeff2)
+         !    fg_DMx(m) = Mg_DMx(m)/M_DMx(m)
+         ! END DO
 
          DO m = 1, n
             Gamma_coeff2 = (2.0d0/alpha_Einasto)*((r(m)/r_2_DM)**alpha_Einasto)
@@ -836,6 +861,8 @@ CONTAINS
          aux(k, 31) = Ke200
          aux(k, 32) = Pe200
 
+         ! write(*, *) 'Model 2 finished'
+
          !i = 0
          !DO m = 33, 129, 8
          !   i = i + 1
@@ -888,6 +915,11 @@ CONTAINS
 
          ! Adjust integration limits
          r_min = rs_DM * rmin_fraction
+
+         DO i = 1, n
+            logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
+            r(i) = 10.d0**logr(i)
+         END DO
 
          ! Sanity check
          if (r_min < minval(r)) then
