@@ -189,13 +189,6 @@ params["seed"] = -1
 # Set cluster model
 params["cluster_model"] = args.model
 
-if args.model == 1:
-    params["rauto"] = True
-else:
-    params["rauto"] = False
-    params["rmin"] = 0.01
-    params["rlimit"] = 0.3
-
 # Priors
 # Note that the automatic free prior detection at the end assumes
 # this specific set of prior types
@@ -212,9 +205,17 @@ priors["alpha_model2_prior"] = Prior(1, 0.5, 5)
 priors["gamma0_poly_prior"] = Prior(1, 0.1, 0.4, value=0.3)
 priors["gammaR_poly_prior"] = Prior(0, 0.3, 0.3)
 priors["t0_poly_prior"] = Prior(0, 3, 3)
-priors["rmin_fraction"] = Prior(1, 0.001, 1.0, name="r_{min}")
 
 priors["z_Prior"] = Prior(0, 0.5, 0.5)
+
+if args.model == 1:
+    params["rauto"] = True
+    priors["rmin_fraction"] = Prior(1, 0.001, 1, name="r_{min}")
+else:
+    params["rauto"] = False
+    params["rmin"] = 0.01
+    params["rlimit"] = 0.3
+    priors["rmin_fraction"] = Prior(0, 1, 1, name="r_{min}")
 
 # Start configuring for fixed priors
 fixed_path = Path(f"{chain_path}/infile-auto-fixed.inp")
