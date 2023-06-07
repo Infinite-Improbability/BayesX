@@ -382,12 +382,12 @@ CONTAINS
 
       if (maxval(r) < r_integration_max) then
          ! This prevents trying to interpolate to points > maxval(r)
-         write (*, *) 'Maximum discretised r is', maxval(r), 'less than r_los_max', r_integration_max, ', adjusting r_los_max to match'
+         write (*, *) 'Maximum discretised r is', maxval(r), 'less than r_integration_max', r_integration_max, ', adjusting r_integration_max to match'
          r_integration_max = maxval(r)
       end if
 
       write (*, *) 'r_min =', r_min
-      write (*, *) 'r_los_max = ', r_integration_max
+      write (*, *) 'r_integration_max = ', r_integration_max
       write (*, *) 'r_min will be overriden based on rmin_fraction and r_s'
       write (*, *)
 
