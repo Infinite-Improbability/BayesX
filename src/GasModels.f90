@@ -17,7 +17,7 @@ CONTAINS
 
       IMPLICIT NONE
 
-      INTEGER                       ::  i, j, k, m, flag
+      INTEGER                       ::  i, j, k, m, flag, io
 
       REAL*8                       ::  yc, index, index_g
       REAL*8                       ::  rs, ps, cc, T0, logT0, rlimit1, rmin_fraction
@@ -118,7 +118,7 @@ CONTAINS
 
          ! Calculate Pei, a normalisation coefficent for pressure profile
          ! TODO: Verify
-         ! In J m-3 I guess?
+         ! In Msun / Mpc / s^2 I think
          Pei_GNFW = ((mu_m/mu_e)*(G*rhos_DM*rs_DM*rs_DM*rs_DM)*Mg200_DM)/ &
             DM_GNFWgasVol(r200_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
 
@@ -182,12 +182,12 @@ CONTAINS
          ! Calculate more parmeters
          ! TODO: Verify correctness
          Rhogas500 = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
-            calcneDM(r500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+            calcneDM(r500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW) ! Msun / Mpc^3
          Tg500_DM = (4.d0*pi*0.6*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
             ((DLOG(1.0 + (r500_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/r500_DM))))/r500_DM)* &
             (1.0 + ((r500_DM/rp_GNFW)**(a_GNFW)))* &
             (((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
-            *(m_sun*Mpc2m*Mpc2m)*(J2keV)
+            *(m_sun*Mpc2m*Mpc2m)*(J2keV) ! keV
 
          ! TODO: What does this do exactly?
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
@@ -295,7 +295,7 @@ CONTAINS
          DO m = 1, n
             Rhogas(m) = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* & !M_sunMpc^-3
                calcneDM(r(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
-            T(m) = (4.d0*pi*0.61*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
+            T(m) = (4.d0*pi*0.6*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* & ! TODO: This wrongly used 0.61 instead of 0.6mp for mu. Fix elsewhere.
                ((DLOG(1.0 + (r(m)/rs_DM)) - (1.0/(1.0 + (rs_DM/r(m)))))/r(m))* &
                (1.0 + ((r(m)/rp_GNFW)**(a_GNFW)))* &
                (((b_GNFW*((r(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
@@ -306,6 +306,23 @@ CONTAINS
 
             ! write(*,'(I3,E16.8,E16.8,E16.8,E16.8)') m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
          END DO
+
+         open(newunit=io, file='log.txt', position="append", status="old", action="write")
+         write(io, *) '--------------------------------'
+         write(io, *) 'MT200_DM', MT200_DM
+         write(io, *) 'fg200_DM', fg200_DM
+         write(io, *) 'a_GNFW', a_GNFW
+         write(io, *) 'b_GNFW', b_GNFW
+         write(io, *) 'c_GNFW', c_GNFW
+         write(io, *) 'c500_GNFW', c500_GNFW
+         write(io, *) 'rmin_fraction', rmin_fraction
+
+         write(io, *) 'r', r
+         write(io, *) 'Rhogas', Rhogas
+         write(io, *) 'T', T
+         write(io, *) 'xrayFluxCoeff', xrayFluxCoeff
+         write(io, *) 'X_emiss2D', X_emiss2D
+
 
          ! Clear up some memory
          ! TODO: Can we deallocate more?
@@ -352,6 +369,8 @@ CONTAINS
                X_S2D(m, i) = X_S2D(m, i)*xfluxsec1*xfluxsec5*photar(i)
             END DO
          END DO
+
+         write(io, *) 'X_S2D', X_S2D
 
          ! Free up some memory
          DEALLOCATE (X_emiss2D, logX_emiss1D, X_S1D)
@@ -425,6 +444,8 @@ CONTAINS
             END DO
          END DO
 
+         write(io, *) 'xrayCmap', xrayCmap
+
          ! Free up more memory
          DEALLOCATE (predX_S2D)
          xLENi = 0
@@ -438,6 +459,8 @@ CONTAINS
                END DO
             END DO
          END DO
+
+         write(io, *) 'xrayCpred', xrayCpred
 
          !Store derived parameters
          aux(k, 1) = D              !angular diameter distance in Mpc
@@ -1407,6 +1430,8 @@ CONTAINS
 !======================================================
 
    SUBROUTINE Xray_flux_coeff(Rhogas0, KB_Tx, n_e0, n_H0, ne_nH0, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+
+      ! Calculates the Xray_flux_coefficent, whatever that is.
 
       IMPLICIT NONE
       INTEGER     :: i, k, flag, j, m, xrayNbin
