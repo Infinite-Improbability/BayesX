@@ -307,21 +307,21 @@ CONTAINS
             ! write(*,'(I3,E16.8,E16.8,E16.8,E16.8)') m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
          END DO
 
-         open(newunit=io, file='log.txt', position="append", status="old", action="write")
-         write(io, *) '--------------------------------'
-         write(io, *) 'MT200_DM', MT200_DM
-         write(io, *) 'fg200_DM', fg200_DM
-         write(io, *) 'a_GNFW', a_GNFW
-         write(io, *) 'b_GNFW', b_GNFW
-         write(io, *) 'c_GNFW', c_GNFW
-         write(io, *) 'c500_GNFW', c500_GNFW
-         write(io, *) 'rmin_fraction', rmin_fraction
+         ! open(newunit=io, file='log.txt', position="append", status="old", action="write")
+         ! write(io, *) '--------------------------------'
+         ! write(io, *) 'MT200_DM', MT200_DM
+         ! write(io, *) 'fg200_DM', fg200_DM
+         ! write(io, *) 'a_GNFW', a_GNFW
+         ! write(io, *) 'b_GNFW', b_GNFW
+         ! write(io, *) 'c_GNFW', c_GNFW
+         ! write(io, *) 'c500_GNFW', c500_GNFW
+         ! write(io, *) 'rmin_fraction', rmin_fraction
 
-         write(io, *) 'r', r
-         write(io, *) 'Rhogas', Rhogas
-         write(io, *) 'T', T
-         write(io, *) 'xrayFluxCoeff', xrayFluxCoeff
-         write(io, *) 'X_emiss2D', X_emiss2D
+         ! write(io, *) 'r', r
+         ! write(io, *) 'Rhogas', Rhogas
+         ! write(io, *) 'T', T
+         ! write(io, *) 'xrayFluxCoeff', xrayFluxCoeff
+         ! write(io, *) 'X_emiss2D', X_emiss2D
 
 
          ! Clear up some memory
