@@ -15,7 +15,7 @@ contains
 
       testsuite = [ &
          new_unittest("interp2d", test_interp2d), &
-      ! new_unittest("trapzd", test_trapzd), &
+         new_unittest("interp1d_even", test_interp2d), &
          new_unittest("qtrap", test_qtrap) &
       !  new_unittest("invalid", test_invalid, should_fail=.true.) &
          ]
@@ -56,6 +56,38 @@ contains
 
    end subroutine test_interp2d
 
+   subroutine test_interp1d_even(error)
+      implicit none
+      type(error_type), allocatable, intent(out) :: error
+
+      integer :: n=5
+      real*8 :: f(5), x(5), x0, value
+
+      f = [0.0, 3.0, 6.0, 9.0, 12.0]
+      x = [0.0, 1.0, 2.0, 3.0, 4.0]
+
+      call interp1d_even(f, x, n, 0.5d0, value)
+      call check(error, value, 1.5d0, thr=1.d-6, rel=.true.)
+      if (allocated(error)) return
+
+      call interp1d_even(f, x, n, 0.0d0, value)
+      call check(error, value, 0d0, thr=1.d-6, rel=.true.)
+      if (allocated(error)) return
+
+      call interp1d_even(f, x, n, 4.0d0, value)
+      call check(error, value, 12d0, thr=1.d-6, rel=.true.)
+      if (allocated(error)) return
+
+      call interp1d_even(f, x, n, 3.0d0, value)
+      call check(error, value, 9d0, thr=1.d-6, rel=.true.)
+      if (allocated(error)) return
+
+      call interp1d_even(f, x, n, 1.75d0, value)
+      call check(error, value, 5.25d0, thr=1.d-6, rel=.true.)
+      if (allocated(error)) return
+
+   end subroutine test_interp1d_even
+
    function integrand1(x)
       real*8 :: x
       real*8 :: integrand1
@@ -83,19 +115,23 @@ contains
       return
    end function integrand3
 
-   ! subroutine test_trapzd(error)
-   !    implicit none
-   !    type(error_type), allocatable, intent(out) :: error
+   function integrand4(x)
+      real*8 :: x
+      real*8 :: integrand4
 
-   !    real*8 :: sum_holder
+      integrand4 = cos(x)
 
-   !    sum_holder = 0
+      return
+   end function integrand4
 
-   !    call trapzd(integrand1, 0d0, 10d0, sum_holder, 23)
-   !    call check(error, sum_holder, 1050.d0, thr=1d-6)
-   !    if (allocated(error)) return
+   function integrand5(x)
+      real*8 :: x
+      real*8 :: integrand5
 
-   ! end subroutine test_trapzd
+      integrand5 = exp(x)
+
+      return
+   end function integrand5
 
    subroutine test_qtrap(error)
       implicit none
@@ -115,6 +151,14 @@ contains
 
       call qtrap(integrand3, 1d0, 10d0, 1.d-12, sum_holder)
       call check(error, sum_holder, log(10d0) - log(1d0), thr=1d-6)
+      if (allocated(error)) return
+
+      call qtrap(integrand4, 0d0, Pi/2d0, 1.d-6, sum_holder)
+      call check(error, sum_holder, 1d0, thr=1d-6)
+      if (allocated(error)) return
+
+      call qtrap(integrand5, 0d0, 10d0, 1.d-6, sum_holder)
+      call check(error, sum_holder, 1d0 - exp(-10d0), thr=1d-6)
       if (allocated(error)) return
 
    end subroutine test_qtrap

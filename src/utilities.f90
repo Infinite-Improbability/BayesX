@@ -86,10 +86,12 @@ CONTAINS
 
       implicit none
 
-      integer n
-      double precision f(n), x(n)
-      double precision x0, f0
-      double precision xmin, xmax, dx, wx
+      integer, intent(in) :: n
+      real*8, intent(in) :: f(n), x(n)
+      real*8 :: x0
+      real*8, intent(out) :: f0
+
+      real*8 xmin, xmax, dx, wx
       integer i1
 
       xmin = x(1)
