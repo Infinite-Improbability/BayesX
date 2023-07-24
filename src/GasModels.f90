@@ -79,7 +79,8 @@ CONTAINS
          ! write(*, *) 'Gas model survived 2'
 
          ! Calculate radius from M200
-         ! TODO: I think this is obtained from the NFW equation. Verify
+         ! This is simply obtained from the equation for the mass of a sphere
+         ! with radius R200
          r200_DM = ((3.d0*MT200_DM)/(4.d0*pi*200.d0*rhocritz))**(1.d0/3.d0)   !Mpc
 
          ! Calculate the NFW scale radius
@@ -102,13 +103,14 @@ CONTAINS
 
          ! write(*, *) 'Gas model survived 3'
 
-         ! Calculate the dark matter density at R200
-         ! TODO: Where's this equation from exactly?
+         ! Calculate the NFW characteristic overdensity
+         ! This equation comes from the NFW model paper
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &
             (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sun Mpc-3
 
          ! Approximate r500 from r200
-         ! Also get appropriate c500 (of dark matter, do not confuse with the c500 used in GNFW)
+         ! Also get appropriate c500
+         ! (of dark matter, do not confuse with the c500 used in GNFW)
          ! TODO: Try actually calculating it
          r500_DM = r200_DM/1.5d0                 !Mpc.
          c500_DM = r500_DM/rs_DM
@@ -117,7 +119,7 @@ CONTAINS
          rp_GNFW = r500_DM/c500_GNFW    !Mpc
 
          ! Calculate Pei, a normalisation coefficent for pressure profile
-         ! TODO: Verify
+         ! This is obtained by rearranging Olamaie eq 6
          ! In Msun / Mpc / s^2 I think
          Pei_GNFW = ((mu_m/mu_e)*(G*rhos_DM*rs_DM*rs_DM*rs_DM)*Mg200_DM)/ &
             DM_GNFWgasVol(r200_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
@@ -153,9 +155,10 @@ CONTAINS
          xfluxsec1 = 1.0/((4.0*pi)*((1.0 + z(k))**4))
 
          ! Coefficent of cooling function Lambda_c
+         ! TODO: Entirely different order of magnitude to in paper. Units?
          xfluxsec2 = (3.031d-15)
 
-         ! This shows up in eq 22 of Olamaie 2014
+         ! This shows up in eq 22 of Olamaie 2015
          ! Appears to be a coefficent of another form of the surface brightness
          xfluxsec5 = (pi*pi)/(60.0*60.0*180.0*180.0)
 
@@ -1273,12 +1276,8 @@ CONTAINS
 
    FUNCTION DM_GNFWsphVolInt(r)
 
-      ! This is proportional to the density of the gas at radius r
-      ! There is a constant coefficient not included here that makes
-      ! it equal to pressure.
-      !
-      ! The function seems mostly used to calculate mass in a radius,
-      ! by integrating over density
+      ! This is proportional to the density of the gas at radius r * r^2
+      ! Integrating this over radius, r, gives gas mass enclosed.
       !
       ! See Olamaie 2012, eq 6
 
@@ -1288,7 +1287,7 @@ CONTAINS
 
       ! Undefined at zero?
       IF (r < r_min) THEN
-         DM_GNFWsphVolInt = ((r_min*r_min*r_min)/((DLOG(1.0 + (r_min/rs_DM))) - (1.0/(1.0 + (rs_DM/r_min)))))* &
+         DM_GNFWsphVolInt = ((r_min**3)/((DLOG(1.0 + (r_min/rs_DM))) - (1.0/(1.0 + (rs_DM/r_min)))))* &
             ((r_min/rp_GNFW)**(-1.0*c_GNFW))* &
             ((1.0 + (r_min/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
             ((b_GNFW*((r_min/rp_GNFW)**(a_GNFW))) + c_GNFW)
@@ -1299,7 +1298,7 @@ CONTAINS
 
       ELSE
 
-         DM_GNFWsphVolInt = ((r*r*r)/((DLOG(1.0 + (r/rs_DM))) - (1.0/(1.0 + (rs_DM/r)))))* &
+         DM_GNFWsphVolInt = ((r**3)/((DLOG(1.0 + (r/rs_DM))) - (1.0/(1.0 + (rs_DM/r)))))* &
             ((r/rp_GNFW)**(-1.0*c_GNFW))* &
             ((1.0 + (r/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
             ((b_GNFW*((r/rp_GNFW)**(a_GNFW))) + c_GNFW)
