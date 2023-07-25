@@ -17,7 +17,7 @@ CONTAINS
 
       IMPLICIT NONE
 
-      INTEGER                       ::  i, j, k, m, flag, io
+      INTEGER                       ::  i, j, k, m, flag, io, iob
 
       REAL*8                       ::  yc, index, index_g
       REAL*8                       ::  rs, ps, cc, T0, logT0, rlimit1, rmin_fraction
@@ -192,6 +192,11 @@ CONTAINS
             (((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
             *(m_sun*Mpc2m*Mpc2m)*(J2keV) ! keV
 
+         open(newunit=io, file='log.txt', position="append", status="unknown", action="write")
+         open(newunit=iob, file='log.dat', form='unformatted')
+         write(io, *) "Rhogas500", Rhogas500
+         write(io, *) "Tg_500_DM", Tg500_DM
+
          ! TODO: What does this do exactly?
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
 
@@ -235,6 +240,9 @@ CONTAINS
          n_e200 = n_e200*1.d+6
          Ke200 = Tg200_DM/(n_e200**(2.0/3.0))
          Pe200 = n_e200*Tg200_DM
+
+         write(io, *) "Rhogas200", Rhogas200
+         write(io, *) "Tg_200_DM", Tg200_DM
 
          ! Allocate some more memory
          ALLOCATE (rgx(13))
@@ -485,7 +493,11 @@ CONTAINS
 
          ! write(io, *) 'xrayCpred', xrayCpred
 
+         ! write(iob) xrayCpred
+
          close(io)
+         close(iob)
+         stop
 
          !Store derived parameters
          aux(k, 1) = D              !angular diameter distance in Mpc

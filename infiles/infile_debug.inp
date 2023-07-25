@@ -51,10 +51,10 @@
 32
 
 #xrayEmin
-0.7
+0.3
 
 #xrayEmax
-7.0
+0.46
 
 #sexpotime
 300d3
@@ -67,6 +67,10 @@
 
 #xrayBG_model
 8.4d-6
+
+#nCdims
+0
+
 #x_prior
 0	0	0
 
@@ -77,10 +81,10 @@
 1
 
 #m200_prior
-2	1d14	6d15
+0	5d14	5d14
 
 #fgas200_prior
-3	0.13	0.02
+0	0.13	0.13
 
 #a_GNFW_prior
 0	1.062    1.062	
@@ -98,7 +102,7 @@
 1   0.05    0.5
 
 #rmin_fraction
-1   0.0001  1
+0   0.01  0.01
 
 #z_Prior
 0	0.5	0.5
@@ -119,7 +123,4 @@
 1234
 
 #root
-'chains/out_'
-
-#nCdims
-1
+'chains/out_temp'
