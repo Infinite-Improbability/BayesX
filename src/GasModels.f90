@@ -352,8 +352,8 @@ CONTAINS
 
             ! Looping over points in radius
             DO m = 1, n
-               ! Why are we applying the cooling function coefficent now?
-               ! And are we really taking a log at the right place?
+               ! Applying cooling function coefficent, giving volume emissivity in photons/cm^3/s
+               ! Then convert to photons/Mpc^3/s
                ! This array will be used by XraySintegrand via Xrayemissfunc1
                logX_emiss1D(m) = phlog10(X_emiss2D(m, i)*xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m)
             END DO
@@ -373,17 +373,21 @@ CONTAINS
                ! Actually compute the integral for current sky-plane radius (index m)
                ! and energy (index i)
                IF (rlimit1 > 0d0) THEN
+                  ! Returns count rate in photons/Mpc^2/s for a column per unit area on the column face
                   CALL qtrap(XraySintegrand, -rlimit1, rlimit1, eps, X_S1D(m))
                END IF
 
-               ! Change the units and save
-               ! This is predicted count rate in some region (spatial, energy, time, more dimensions?)
-               ! TODO: Figure out the exact units
+               ! Change the units to photons/cm^2/s and save
+               ! Indices are (radius, energy)
                X_S2D(m, i) = X_S1D(m)/(Mpc2m*Mpc2m*m2cm*m2cm)
             END DO
          END DO
 
          ! Apply coefficents and photoelectric absorption from foreground gases
+         ! xfluxsec1 converts to photons/cm^2/steradian/s
+         ! and applies redshift corrections
+         ! There are corrections for energy redshift, time dilation and observed angle
+         ! xfluxsec2 converts to photons/cm^2/arcminute^2/s
          DO i = 1, xrayNbin
             DO m = 1, n
                X_S2D(m, i) = X_S2D(m, i)*xfluxsec1*xfluxsec5*photar(i)
@@ -1464,7 +1468,8 @@ CONTAINS
 
    SUBROUTINE Xray_flux_coeff(Rhogas0, KB_Tx, n_e0, n_H0, ne_nH0, xrayE1, xrayE2, xrayNbin, xrayDeltaE, xrayFluxCoeff)
 
-      ! Calculates the Xray_flux_coefficent, whatever that is.
+      ! Calculates the Xray_flux_coefficent
+      ! xrayFluxCoeff * xfluxsec2 = volume emissivity in photons/cm^3/s
 
       IMPLICIT NONE
       INTEGER     :: i, k, flag, j, m, xrayNbin
