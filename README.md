@@ -69,7 +69,7 @@ Details of these tags are as follows.
 #xrayEmax:		Maximum value of the energy range in keV, e.g. xrayEmax = 7.0  
 #sexpotime:		Source exposure time in second, e.g.sexpotime = 300000  
 #bexpotime:		Background exposure time in second, e.g. bexpotime = 300000  
-#NHcol:			Hydrogen column density in cm^2, e.g. NHcol = 2.2d20  
+#NHcol:			Hydrogen column density in cm^-2, e.g. NHcol = 2.2d20  
 #xrayBG_model           Predicted background rate at each pixel in counts cm^-2 arcmin^-2s^-1, e.g. xrayBG_model=8.4d-6
 
 ### Radius limits_fraction

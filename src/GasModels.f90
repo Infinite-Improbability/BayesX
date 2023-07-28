@@ -88,7 +88,7 @@ CONTAINS
 
          ! Adjust integration limits
          ! This should, I hope, mask r_min in subsequent equations.
-         r_min = rs_DM * rmin_fraction
+         r_min = rs_DM*rmin_fraction
 
          DO i = 1, n
             logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
@@ -106,7 +106,7 @@ CONTAINS
          ! Calculate the NFW characteristic overdensity
          ! This equation comes from the NFW model paper
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &
-            (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sun Mpc-3
+                   (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sun Mpc-3
 
          ! Approximate r500 from r200
          ! Also get appropriate c500
@@ -122,7 +122,7 @@ CONTAINS
          ! This is obtained by rearranging Olamaie eq 6
          ! In Msun / Mpc / s^2 I think
          Pei_GNFW = ((mu_m/mu_e)*(G*rhos_DM*rs_DM*rs_DM*rs_DM)*Mg200_DM)/ &
-            DM_GNFWgasVol(r200_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                    DM_GNFWgasVol(r200_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
 
          ! Convert Pei to keV m-3
          Pei_GNFW_keV = Pei_GNFW*(m_sun/Mpc2m)*(J2keV)       !keVm-3
@@ -185,17 +185,17 @@ CONTAINS
          ! Calculate more parmeters
          ! TODO: Verify correctness
          Rhogas500 = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
-            calcneDM(r500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW) ! Msun / Mpc^3
+                     calcneDM(r500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW) ! Msun / Mpc^3
          Tg500_DM = (4.d0*pi*0.6*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
-            ((DLOG(1.0 + (r500_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/r500_DM))))/r500_DM)* &
-            (1.0 + ((r500_DM/rp_GNFW)**(a_GNFW)))* &
-            (((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
-            *(m_sun*Mpc2m*Mpc2m)*(J2keV) ! keV
+                    ((DLOG(1.0 + (r500_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/r500_DM))))/r500_DM)* &
+                    (1.0 + ((r500_DM/rp_GNFW)**(a_GNFW)))* &
+                    (((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
+                    *(m_sun*Mpc2m*Mpc2m)*(J2keV) ! keV
 
-         open(newunit=io, file='log.txt', position="append", status="unknown", action="write")
-         open(newunit=iob, file='log.dat', form='unformatted')
-         write(io, *) "Rhogas500", Rhogas500
-         write(io, *) "Tg_500_DM", Tg500_DM
+         open (newunit=io, file='log.txt', position="append", status="unknown", action="write")
+         open (newunit=iob, file='log.dat', form='unformatted')
+         write (io, *) "Rhogas500", Rhogas500
+         write (io, *) "Tg_500_DM", Tg500_DM
 
          ! TODO: What does this do exactly?
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
@@ -205,7 +205,7 @@ CONTAINS
          Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
          Pe500 = n_e500*Tg500_DM
          Mg500_DM = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
-            DM_GNFWgasVol(r500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                    DM_GNFWgasVol(r500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
          fg500_DM = Mg500_DM/MT500_DM
 
@@ -213,36 +213,36 @@ CONTAINS
          r2500_DM = r200_DM/3.5d0
          c2500_DM = r2500_DM/rs_DM
          Rhogas2500 = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
-            calcneDM(r2500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                      calcneDM(r2500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          Tg2500_DM = (4.d0*pi*0.6*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
-            ((DLOG(1.0 + (r2500_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/r2500_DM))))/r2500_DM)* &
-            (1.0 + ((r2500_DM/rp_GNFW)**(a_GNFW)))* &
-            (((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
-            *(m_sun*Mpc2m*Mpc2m)*(J2keV)
+                     ((DLOG(1.0 + (r2500_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/r2500_DM))))/r2500_DM)* &
+                     (1.0 + ((r2500_DM/rp_GNFW)**(a_GNFW)))* &
+                     (((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
+                     *(m_sun*Mpc2m*Mpc2m)*(J2keV)
          CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e2500 = n_e2500*1.d+6
          Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0))
          Pe2500 = n_e2500*Tg2500_DM
          Mg2500_DM = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
-            DM_GNFWgasVol(r2500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                     DM_GNFWgasVol(r2500_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          MT2500_DM = (4.d0*pi/3.d0)*(2500.d0*rhocritz)*(r2500_DM*r2500_DM*r2500_DM)
          fg2500_DM = Mg2500_DM/MT2500_DM
 
          ! R200
          Rhogas200 = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* &
-            calcneDM(r200_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                     calcneDM(r200_DM, rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          Tg200_DM = (4.d0*pi*0.6*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* &
-            ((DLOG(1.0 + (r200_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/r200_DM))))/r200_DM)* &
-            (1.0 + ((r200_DM/rp_GNFW)**(a_GNFW)))* &
-            (((b_GNFW*((r200_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
-            *(m_sun*Mpc2m*Mpc2m)*(J2keV)
+                    ((DLOG(1.0 + (r200_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/r200_DM))))/r200_DM)* &
+                    (1.0 + ((r200_DM/rp_GNFW)**(a_GNFW)))* &
+                    (((b_GNFW*((r200_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
+                    *(m_sun*Mpc2m*Mpc2m)*(J2keV)
          CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e200 = n_e200*1.d+6
          Ke200 = Tg200_DM/(n_e200**(2.0/3.0))
          Pe200 = n_e200*Tg200_DM
 
-         write(io, *) "Rhogas200", Rhogas200
-         write(io, *) "Tg_200_DM", Tg200_DM
+         write (io, *) "Rhogas200", Rhogas200
+         write (io, *) "Tg_200_DM", Tg200_DM
 
          ! Allocate some more memory
          ALLOCATE (rgx(13))
@@ -305,18 +305,22 @@ CONTAINS
          ! The Xray_flux_coeff for each point is stored in a 2D array of (radius_index, energy_bin)
          DO m = 1, n
             Rhogas(m) = (mu_e/mu_m)*(1.d0/(4.d0*Pi*G))*(Pei_GNFW/rhos_DM)*(1.0d0/(rs_DM*rs_DM*rs_DM))* & !M_sunMpc^-3
-               calcneDM(r(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                        calcneDM(r(m), rs_DM, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
             T(m) = (4.d0*pi*0.6*m_p*G*rhos_DM)*(rs_DM*rs_DM*rs_DM)* & ! TODO: This wrongly used 0.61 instead of 0.6mp for mu. Fix elsewhere.
-               ((DLOG(1.0 + (r(m)/rs_DM)) - (1.0/(1.0 + (rs_DM/r(m)))))/r(m))* &
-               (1.0 + ((r(m)/rp_GNFW)**(a_GNFW)))* &
-               (((b_GNFW*((r(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
-               *(m_sun*Mpc2m*Mpc2m)*(J2keV)
+                   ((DLOG(1.0 + (r(m)/rs_DM)) - (1.0/(1.0 + (rs_DM/r(m)))))/r(m))* &
+                   (1.0 + ((r(m)/rp_GNFW)**(a_GNFW)))* &
+                   (((b_GNFW*((r(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
+                   *(m_sun*Mpc2m*Mpc2m)*(J2keV)
 
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             X_emiss2D(m, 1:xrayNbin) = xrayFluxCoeff(1:xrayNbin)
 
             ! write(*,'(I3,E16.8,E16.8,E16.8,E16.8)') m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
          END DO
+
+         write (io, *) r
+         write (io, *) T
+         write (io, *) Rhogas
 
          ! open(newunit=io, file='log.txt', position="append", status="old", action="write")
          ! write(io, *) '--------------------------------'
@@ -341,7 +345,6 @@ CONTAINS
          !    end do
          ! end do
          ! write(io, *) '---'
-
 
          ! Clear up some memory
          ! TODO: Can we deallocate more?
@@ -480,7 +483,6 @@ CONTAINS
 
          ! write(io, *) 'xrayCmap', xrayCmap
 
-
          ! Free up more memory
          DEALLOCATE (predX_S2D)
          xLENi = 0
@@ -499,8 +501,8 @@ CONTAINS
 
          ! write(iob) xrayCpred
 
-         close(io)
-         close(iob)
+         close (io)
+         close (iob)
          stop
 
          !Store derived parameters
@@ -573,8 +575,8 @@ CONTAINS
          ! Sanity check on priors
          IF (fg200_DM .LT. 0.0 .OR. MT200_DM .LT. 0.0 .OR. a_GNFW .LE. 0.0 .OR. c500_GNFW .LE. 0.0 .OR. (b_GNFW - c_GNFW) .LE. 0.0 .OR. rmin_fraction .LE. 0) THEN
             flag = 1
-            write(*, *) 'Model 2 tripped flag 1'
-            write(*, *) fg200_DM, MT200_DM, a_GNFW, c500_GNFW, b_GNFW-c_GNFW, rmin_fraction
+            write (*, *) 'Model 2 tripped flag 1'
+            write (*, *) fg200_DM, MT200_DM, a_GNFW, c500_GNFW, b_GNFW - c_GNFW, rmin_fraction
             RETURN
          END IF
 
@@ -584,7 +586,7 @@ CONTAINS
          !          null run
          IF (Mg200_DM == 0.d0) THEN
             flag = 2
-            write(*, *) 'Model 2 tripped flag 2'
+            write (*, *) 'Model 2 tripped flag 2'
             RETURN
          END IF
 
@@ -592,7 +594,7 @@ CONTAINS
          r_2_DM = r200_DM/c200_DM                   !Mpc
 
          ! Adjust integration limits
-         r_min = r_2_DM * rmin_fraction
+         r_min = r_2_DM*rmin_fraction
 
          DO i = 1, n
             logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
@@ -606,26 +608,25 @@ CONTAINS
             return
          end if
 
-
          Gamma_coeff1 = 3.d0/alpha_Einasto
          Gamma_coeff2 = (2.0d0/alpha_Einasto)*((r200_DM/r_2_DM)**alpha_Einasto)
 
          rho_2_DM = MT200_DM/( &
-            4.d0*pi*DEXP(2.d0/alpha_Einasto)* &
-            r_2_DM*r_2_DM*r_2_DM* &
-            ((alpha_Einasto/2.0d0)**(3.d0/alpha_Einasto))* &
-            (1.d0/alpha_Einasto)* &
-            INCOG(Gamma_coeff1, Gamma_coeff2))
+                    4.d0*pi*DEXP(2.d0/alpha_Einasto)* &
+                    r_2_DM*r_2_DM*r_2_DM* &
+                    ((alpha_Einasto/2.0d0)**(3.d0/alpha_Einasto))* &
+                    (1.d0/alpha_Einasto)* &
+                    INCOG(Gamma_coeff1, Gamma_coeff2))
 
          mass_coeff_Einasto = 4.d0*pi*DEXP(2.d0/alpha_Einasto)* &
-            r_2_DM*r_2_DM*r_2_DM*rho_2_DM* &
-            ((alpha_Einasto/2.0d0)**(3.d0/alpha_Einasto))* &
-            (1.d0/alpha_Einasto)
+                              r_2_DM*r_2_DM*r_2_DM*rho_2_DM* &
+                              ((alpha_Einasto/2.0d0)**(3.d0/alpha_Einasto))* &
+                              (1.d0/alpha_Einasto)
          r500_DM = r200_DM/1.5
          c500_DM = r500_DM/r_2_DM
          rp_GNFW = r500_DM/c500_GNFW    !Mpc
          Pei_GNFW = (mu_m/mu_e)*G*(mass_coeff_Einasto/(4.d0*pi))*Mg200_DM/ &
-            EinastoDM_GNFWgasvol(r200_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                    EinastoDM_GNFWgasvol(r200_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          Pei_GNFW_keV = Pei_GNFW*(m_sun/Mpc2m)*(J2keV)       !keVm-3
 
          IF (Pei_GNFW .LE. 0d0) THEN
@@ -668,24 +669,24 @@ CONTAINS
 
          Gamma_coeff2 = (2.0d0/alpha_Einasto)*((r500_DM/r_2_DM)**alpha_Einasto)
          Rhogas500 = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-            (r500_DM/INCOG(Gamma_coeff1, Gamma_coeff2))* &
-            ((r500_DM/rp_GNFW)**(-1.0d0*c_GNFW))* &
-            ((1.0d0 + (r500_DM/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-            ((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)
+                     (r500_DM/INCOG(Gamma_coeff1, Gamma_coeff2))* &
+                     ((r500_DM/rp_GNFW)**(-1.0d0*c_GNFW))* &
+                     ((1.0d0 + (r500_DM/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+                     ((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)
          Tg500_DM = (0.6d0*m_p*G)*(mass_coeff_Einasto)* &
-            (INCOG(Gamma_coeff1, Gamma_coeff2)/r500_DM)* &
-            (1.0d0 + ((r500_DM/rp_GNFW)**(a_GNFW)))* &
-            (((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
-            (m_sun*Mpc2m*Mpc2m)*(J2keV)
+                    (INCOG(Gamma_coeff1, Gamma_coeff2)/r500_DM)* &
+                    (1.0d0 + ((r500_DM/rp_GNFW)**(a_GNFW)))* &
+                    (((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
+                    (m_sun*Mpc2m*Mpc2m)*(J2keV)
 
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayBinMin, xrayBinMax, &
-            xrayNbin, xrayDeltaE, xrayFluxCoeff)
+                              xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e500 = n_e500*1.d+6
          Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
          Pe500 = n_e500*Tg500_DM
          Mg500_DM = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-            EinastoDM_GNFWgasvol( &
-            r500_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                    EinastoDM_GNFWgasvol( &
+                    r500_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          MT500_DM = (4.d0*pi/3.d0)*(500.d0*rhocritz)*(r500_DM*r500_DM*r500_DM)
          fg500_DM = Mg500_DM/MT500_DM
 
@@ -693,37 +694,37 @@ CONTAINS
          c2500_DM = r2500_DM/r_2_DM
          Gamma_coeff2 = (2.0d0/alpha_Einasto)*((r2500_DM/r_2_DM)**alpha_Einasto)
          Rhogas2500 = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-            (r2500_DM/INCOG(Gamma_coeff1, Gamma_coeff2))* &
-            ((r2500_DM/rp_GNFW)**(-1.0d0*c_GNFW))* &
-            ((1.0d0 + (r2500_DM/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-            ((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)
+                      (r2500_DM/INCOG(Gamma_coeff1, Gamma_coeff2))* &
+                      ((r2500_DM/rp_GNFW)**(-1.0d0*c_GNFW))* &
+                      ((1.0d0 + (r2500_DM/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+                      ((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)
          Tg2500_DM = (0.6d0*m_p*G)*(mass_coeff_Einasto)* &
-            (INCOG(Gamma_coeff1, Gamma_coeff2)/r2500_DM)* &
-            (1.0d0 + ((r2500_DM/rp_GNFW)**(a_GNFW)))* &
-            (((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
-            (m_sun*Mpc2m*Mpc2m)*(J2keV)
+                     (INCOG(Gamma_coeff1, Gamma_coeff2)/r2500_DM)* &
+                     (1.0d0 + ((r2500_DM/rp_GNFW)**(a_GNFW)))* &
+                     (((b_GNFW*((r2500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
+                     (m_sun*Mpc2m*Mpc2m)*(J2keV)
          CALL Xray_flux_coeff(Rhogas2500, Tg2500_DM, n_e2500, n_H2500, ne_nH2500, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
 
          n_e2500 = n_e2500*1.d+6
          Ke2500 = Tg2500_DM/(n_e2500**(2.0/3.0))
          Pe2500 = n_e2500*Tg2500_DM
          Mg2500_DM = (4.d0*pi)*(mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-            EinastoDM_GNFWgasvol( &
-            r2500_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
+                     EinastoDM_GNFWgasvol( &
+                     r2500_DM, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, b_GNFW, c_GNFW)
          MT2500_DM = (4.d0*pi/3.d0)*(2500.d0*rhocritz)*(r2500_DM*r2500_DM*r2500_DM)
          fg2500_DM = Mg2500_DM/MT2500_DM
 
          Gamma_coeff2 = (2.0d0/alpha_Einasto)*((r200_DM/r_2_DM)**alpha_Einasto)
          Rhogas200 = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-            (r200_DM/INCOG(Gamma_coeff1, Gamma_coeff2))* &
-            ((r200_DM/rp_GNFW)**(-1.0d0*c_GNFW))* &
-            ((1.0d0 + (r200_DM/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-            ((b_GNFW*((r200_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)
+                     (r200_DM/INCOG(Gamma_coeff1, Gamma_coeff2))* &
+                     ((r200_DM/rp_GNFW)**(-1.0d0*c_GNFW))* &
+                     ((1.0d0 + (r200_DM/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+                     ((b_GNFW*((r200_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)
          Tg200_DM = (0.6d0*m_p*G)*(mass_coeff_Einasto)* &
-            (INCOG(Gamma_coeff1, Gamma_coeff2)/r200_DM)* &
-            (1.0d0 + ((r200_DM/rp_GNFW)**(a_GNFW)))* &
-            (((b_GNFW*((r200_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
-            (m_sun*Mpc2m*Mpc2m)*(J2keV)
+                    (INCOG(Gamma_coeff1, Gamma_coeff2)/r200_DM)* &
+                    (1.0d0 + ((r200_DM/rp_GNFW)**(a_GNFW)))* &
+                    (((b_GNFW*((r200_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
+                    (m_sun*Mpc2m*Mpc2m)*(J2keV)
          CALL Xray_flux_coeff(Rhogas200, Tg200_DM, n_e200, n_H200, ne_nH200, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e200 = n_e200*1.d+6
          Ke200 = Tg200_DM/(n_e200**(2.0/3.0))
@@ -794,17 +795,17 @@ CONTAINS
          DO m = 1, n
             Gamma_coeff2 = (2.0d0/alpha_Einasto)*((r(m)/r_2_DM)**alpha_Einasto)
             Rhogas(m) = (mu_e/mu_m)*(1.d0/G)*(Pei_GNFW/mass_coeff_Einasto)* &
-               (r(m)/INCOG(Gamma_coeff1, Gamma_coeff2))* &
-               ((r(m)/rp_GNFW)**(-1.0d0*c_GNFW))* &
-               ((1.0d0 + (r(m)/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-               ((b_GNFW*((r(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)
+                        (r(m)/INCOG(Gamma_coeff1, Gamma_coeff2))* &
+                        ((r(m)/rp_GNFW)**(-1.0d0*c_GNFW))* &
+                        ((1.0d0 + (r(m)/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+                        ((b_GNFW*((r(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)
             T(m) = (0.6d0*m_p*G)*(mass_coeff_Einasto)* &
-               (INCOG(Gamma_coeff1, Gamma_coeff2)/r(m))* &
-               (1.0d0 + ((r(m)/rp_GNFW)**(a_GNFW)))* &
-               (((b_GNFW*((r(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
-               (m_sun*Mpc2m*Mpc2m)*(J2keV)
+                   (INCOG(Gamma_coeff1, Gamma_coeff2)/r(m))* &
+                   (1.0d0 + ((r(m)/rp_GNFW)**(a_GNFW)))* &
+                   (((b_GNFW*((r(m)/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0))* &
+                   (m_sun*Mpc2m*Mpc2m)*(J2keV)
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), &
-               xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+                                 xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             X_emiss2D(m, 1:xrayNbin) = xrayFluxCoeff(1:xrayNbin)
          END DO
 
@@ -812,7 +813,7 @@ CONTAINS
          DO i = 1, xrayNbin
             DO m = 1, n
                logX_emiss1D(m) = phlog10(X_emiss2D(m, i)* &
-                  xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m)
+                                         xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m)
                !      write(*,*)logX_emiss1D(m)
             END DO
 
@@ -978,7 +979,7 @@ CONTAINS
          c500_DM = r500_DM/rs_DM
 
          ! Adjust integration limits
-         r_min = rs_DM * rmin_fraction
+         r_min = rs_DM*rmin_fraction
 
          DO i = 1, n
             logr(i) = log10(r_min) + (log10(r_integration_max) - log10(r_min))*(i - 1)/dble(n - 1)
@@ -993,7 +994,7 @@ CONTAINS
 
          ! Also used by prior models
          rhos_DM = (200.d0/3.d0)*((r200_DM/rs_DM)**3.d0)* &
-            (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sunMpc-3
+                   (rhocritz/(DLOG(1.d0 + r200_DM/rs_DM) - (1.d0/(1.d0 + rs_DM/r200_DM))))   !M_sunMpc-3
 
          ALLOCATE (n_H(n))
          ALLOCATE (ne_nH(n), n_e(n))
@@ -1036,7 +1037,7 @@ CONTAINS
 
          ! TODO: n_e500 values appear to get calculated by the following, which feels odd given we've calculated it already
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayBinMin, xrayBinMax, &
-            xrayNbin, xrayDeltaE, xrayFluxCoeff)
+                              xrayNbin, xrayDeltaE, xrayFluxCoeff)
          n_e500 = n_e500*1.d+6
          Ke500 = Tg500_DM/(n_e500**(2.0/3.0))
          Pe500 = n_e500*Tg500_DM
@@ -1092,8 +1093,8 @@ CONTAINS
             Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
-               ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, &
-               xrayDeltaE, xrayFluxCoeff)
+                                 ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, &
+                                 xrayDeltaE, xrayFluxCoeff)
             n_ex(m) = n_ex(m)*1.d+6
             Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
             Pex(m) = n_ex(m)*Tgx(m)
@@ -1114,8 +1115,8 @@ CONTAINS
             Tgx(m) = polyTemperature(rgx(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogasx(m), Tgx(m), n_ex(m), n_Hx(m), &
-               ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, &
-               xrayDeltaE, xrayFluxCoeff)
+                                 ne_nHx(m), xrayBinMin, xrayBinMax, xrayNbin, &
+                                 xrayDeltaE, xrayFluxCoeff)
             n_ex(m) = n_ex(m)*1.d+6
             Kex(m) = Tgx(m)/(n_ex(m)**(2.0/3.0))
             Pex(m) = n_ex(m)*Tgx(m)
@@ -1132,7 +1133,7 @@ CONTAINS
             T(m) = polyTemperature(r(m), ne_rx)
 
             CALL Xray_flux_coeff(Rhogas(m), T(m), n_e(m), n_H(m), ne_nH(m), &
-               xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
+                                 xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
             X_emiss2D(m, 1:xrayNbin) = xrayFluxCoeff(1:xrayNbin)
          END DO
 
@@ -1140,7 +1141,7 @@ CONTAINS
          DO i = 1, xrayNbin
             DO m = 1, n
                logX_emiss1D(m) = phlog10(X_emiss2D(m, i)* &
-                  xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m) ! per cm^3?
+                                         xfluxsec2*m2cm*m2cm*m2cm*Mpc2m*Mpc2m*Mpc2m) ! per cm^3?
                !      write(*,*)logX_emiss1D(m)
             END DO
 
@@ -1304,9 +1305,9 @@ CONTAINS
       ! Undefined at zero?
       IF (r < r_min) THEN
          DM_GNFWsphVolInt = ((r_min**3)/((DLOG(1.0 + (r_min/rs_DM))) - (1.0/(1.0 + (rs_DM/r_min)))))* &
-            ((r_min/rp_GNFW)**(-1.0*c_GNFW))* &
-            ((1.0 + (r_min/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-            ((b_GNFW*((r_min/rp_GNFW)**(a_GNFW))) + c_GNFW)
+                            ((r_min/rp_GNFW)**(-1.0*c_GNFW))* &
+                            ((1.0 + (r_min/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+                            ((b_GNFW*((r_min/rp_GNFW)**(a_GNFW))) + c_GNFW)
 
       ELSEIF (r > r_integration_max) THEN
 
@@ -1315,9 +1316,9 @@ CONTAINS
       ELSE
 
          DM_GNFWsphVolInt = ((r**3)/((DLOG(1.0 + (r/rs_DM))) - (1.0/(1.0 + (rs_DM/r)))))* &
-            ((r/rp_GNFW)**(-1.0*c_GNFW))* &
-            ((1.0 + (r/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-            ((b_GNFW*((r/rp_GNFW)**(a_GNFW))) + c_GNFW)
+                            ((r/rp_GNFW)**(-1.0*c_GNFW))* &
+                            ((1.0 + (r/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+                            ((b_GNFW*((r/rp_GNFW)**(a_GNFW))) + c_GNFW)
 
       END IF
 
@@ -1330,8 +1331,8 @@ CONTAINS
       REAL*8            :: GNFWmodel3D
 
       GNFWmodel3D = Pei/(((r/rp_GNFW)**(c_GNFW))* &
-         ((1.d0 + ((r/rp_GNFW)**(a_GNFW)))** &
-         ((b_GNFW - c_GNFW)/a_GNFW)))
+                         ((1.d0 + ((r/rp_GNFW)**(a_GNFW)))** &
+                          ((b_GNFW - c_GNFW)/a_GNFW)))
    END FUNCTION GNFWmodel3D
 
 !================================================================================================
@@ -1401,7 +1402,7 @@ CONTAINS
       REAL*8              :: calcDMmass
 
       calcDMmass = 4.0*Pi*rhos_DM*rs_DM*rs_DM*rs_DM* &
-         (DLOG(1.0 + (ri_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/ri_DM))))
+                   (DLOG(1.0 + (ri_DM/rs_DM)) - (1.0/(1.0 + (rs_DM/ri_DM))))
 
    END FUNCTION calcDMmass
 
@@ -1414,15 +1415,15 @@ CONTAINS
       REAL*8              ::calcneDM
 
       calcneDM = ((r)/((DLOG(1.0 + (r/rs_DM))) - (1.0/(1.0 + (rs_DM/r)))))* &
-         ((r/rp_GNFW)**(-1.0*c_GNFW))* &
-         ((1.0 + (r/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
-         ((b_GNFW*((r/rp_GNFW)**(a_GNFW))) + c_GNFW)
+                 ((r/rp_GNFW)**(-1.0*c_GNFW))* &
+                 ((1.0 + (r/rp_GNFW)**(a_GNFW))**(-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))* &
+                 ((b_GNFW*((r/rp_GNFW)**(a_GNFW))) + c_GNFW)
 
    END FUNCTION calcneDM
 
 !================================================================
    FUNCTION EinastoDM_GNFWgasvol(radius, r_2_DM, alpha_Einasto, rp_GNFW, a_GNFW, &
-      b_GNFW, c_GNFW)
+                                 b_GNFW, c_GNFW)
 
       IMPLICIT NONE
 
@@ -1446,20 +1447,20 @@ CONTAINS
 
       IF (r < r_min) THEN
          EinastoDM_GNFWsphVolInt = ((r_min*r_min*r_min)* &
-            ((b_GNFW*((r_min/rp_GNFW)**(a_GNFW))) + c_GNFW)* &
-            ((r_min/rp_GNFW)**(-1.0*c_GNFW))* &
-            (1.0d0 + (r_min/rp_GNFW)**(a_GNFW))** &
-            (-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))/ &
-            INCOG(Gamma_coeff1, ((2.d0/alpha_Einasto)*((r_min/r_2_DM)**alpha_Einasto)))
+                                    ((b_GNFW*((r_min/rp_GNFW)**(a_GNFW))) + c_GNFW)* &
+                                    ((r_min/rp_GNFW)**(-1.0*c_GNFW))* &
+                                    (1.0d0 + (r_min/rp_GNFW)**(a_GNFW))** &
+                                    (-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))/ &
+                                   INCOG(Gamma_coeff1, ((2.d0/alpha_Einasto)*((r_min/r_2_DM)**alpha_Einasto)))
       ELSEIF (r > r_integration_max) THEN
          EinastoDM_GNFWsphVolInt = 0.d0
       ELSE
          EinastoDM_GNFWsphVolInt = ((r*r*r)* &
-            ((b_GNFW*((r/rp_GNFW)**(a_GNFW))) + c_GNFW)* &
-            ((r/rp_GNFW)**(-1.0*c_GNFW))* &
-            (1.0d0 + (r/rp_GNFW)**(a_GNFW))** &
-            (-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))/ &
-            INCOG(Gamma_coeff1, ((2.d0/alpha_Einasto)*((r/r_2_DM)**alpha_Einasto)))
+                                    ((b_GNFW*((r/rp_GNFW)**(a_GNFW))) + c_GNFW)* &
+                                    ((r/rp_GNFW)**(-1.0*c_GNFW))* &
+                                    (1.0d0 + (r/rp_GNFW)**(a_GNFW))** &
+                                    (-1.0*(a_GNFW + b_GNFW - c_GNFW)/a_GNFW))/ &
+                                   INCOG(Gamma_coeff1, ((2.d0/alpha_Einasto)*((r/r_2_DM)**alpha_Einasto)))
       END IF
 
    END FUNCTION EinastoDM_GNFWsphVolInt
@@ -1614,7 +1615,7 @@ CONTAINS
                x = 1./y
                IF (x .GT. 0.055) THEN
                   f4 = (-5.725E-4 + x*(0.01345 + x*(0.8691 + 0.03404*x))) &
-                     /(1.+x*(2.197 + x*(0.2454 + 2.053E-3*x)))
+                       /(1.+x*(2.197 + x*(0.2454 + 2.053E-3*x)))
                ELSE
                   f4 = .7699*x**1.9496
                END IF
@@ -1625,9 +1626,9 @@ CONTAINS
                   CALL MEKAL12(y, fb)
                END IF
                IF (y .LT. YLIM) sa = sa + EXP(-y) &
-                  *((AIOn(ia + 2)*(1.-y*fuy) + AIOn(ia + 3) &
-                  *fb + AIOn(ia + 4)*fuy)/y + AIOn(ia + 5) &
-                  *f4)
+                                     *((AIOn(ia + 2)*(1.-y*fuy) + AIOn(ia + 3) &
+                                        *fb + AIOn(ia + 4)*fuy)/y + AIOn(ia + 5) &
+                                       *f4)
                ia = ia + 5
             END DO
             Sion(k) = sa/t15
@@ -1641,15 +1642,15 @@ CONTAINS
                fuy = FMEKAL13(y)
                yfuy = y*fuy
                sa = EXP(-y) &
-                  *(AIOn(ia + 2)*fuy + AIOn(ia + 3)*(1.0 - yfuy) + AIOn(ia + 4) &
-                  *yfuy + AIOn(ia + 5)*y*(1.0 - yfuy))
+                    *(AIOn(ia + 2)*fuy + AIOn(ia + 3)*(1.0 - yfuy) + AIOn(ia + 4) &
+                      *yfuy + AIOn(ia + 5)*y*(1.0 - yfuy))
                Sion(k) = Sion(k) + sa/tsq
             END IF
             ia = ia + 5
          ELSEIF (ind .EQ. 4) THEN
             y = AIOn(ia + 1)/T
             IF (y .LT. YLIM) Sion(k) = Sion(k) + AIOn(ia + 2)*EXP(-y) &
-               *(1.0 - y*FMEKAL13(y))/tsq
+                                       *(1.0 - y*FMEKAL13(y))/tsq
             ia = ia + 2
          ELSEIF (ind .EQ. 5) THEN
             sd = 0.
@@ -1659,8 +1660,8 @@ CONTAINS
                   yay = y*AIOn(ia + 2)
                   fuy = FMEKAL13(yay)
                   sd = sd + EXP(-y) &
-                     *(FMEKAL13(y)*AIOn(ia + 3) + AIOn(ia + 4) + y*(AIOn(ia + 5) &
-                     *fuy + AIOn(ia + 6)*(1.-yay*fuy)))
+                       *(FMEKAL13(y)*AIOn(ia + 3) + AIOn(ia + 4) + y*(AIOn(ia + 5) &
+                                                                      *fuy + AIOn(ia + 6)*(1.-yay*fuy)))
                END IF
                ia = ia + 6
             END DO
@@ -1694,7 +1695,7 @@ CONTAINS
          GOTO 200
 100      y = AIOn(ia + 1)/T
          g = FMEKAL10(y, AIOn(ia + 2), AIOn(ia + 3), AIOn(ia + 4), AIOn(ia + 5), &
-            AIOn(ia + 6))
+                      AIOn(ia + 6))
          IF (y .LT. YLIM) Sion(k) = Sion(k) + g*EXP(-y)/tsq
          ia = ia + 6
 200      OKOK = 0
@@ -1743,10 +1744,10 @@ CONTAINS
                   diel = AREc(5, k)*EXP(-y)/t15
                   y = AREc(6, k)/T
                   IF (y .LT. YLIM) diel = diel*(1.+AREc(7, k)*EXP(-y)) &
-                     **AREc(8, k)
+                                          **AREc(8, k)
                   y = AREc(9, k)/T
                   IF (y .LT. YLIM) diel = diel*(1.+AREc(10, k)*EXP(-y)) &
-                     **AREc(11, k)
+                                          **AREc(11, k)
                   Alfa(k) = Alfa(k) + diel
                END IF
             ELSEIF (ind .EQ. 4) THEN
@@ -1773,7 +1774,7 @@ CONTAINS
                ELSE
                   y = AREc(9, k)/T
                   IF (y .LT. YLIM) Alfa(k) = Alfa(k) + AREc(10, k) &
-                     /t15*EXP(-y)
+                                             /t15*EXP(-y)
                END IF
             ELSEIF (ind .EQ. 6) THEN
                y = AREc(4, k)/T
@@ -1786,8 +1787,8 @@ CONTAINS
                IF (T .LT. AREc(8, k)) THEN
                   y = AREc(9, k)/T
                   IF (y .LT. YLIM) Alfa(k) = Alfa(k) + AREc(10, k) &
-                     *EXP(-y) &
-                     /t25*(((T + AREc(11, k))*T + AREc(12, k))*T + AREc(13, k))
+                                             *EXP(-y) &
+                                             /t25*(((T + AREc(11, k))*T + AREc(12, k))*T + AREc(13, k))
                END IF
             ELSEIF (ind .EQ. 7) THEN
                y = AREc(4, k)/T
@@ -1805,13 +1806,13 @@ CONTAINS
                   IF (AREc(m + 1, k) .NE. 0.) THEN
                      y = AREc(m, k)/T
                      IF (y .LT. YLIM) Alfa(k) = Alfa(k) + AREc(m + 1, k) &
-                        /t15*EXP(-y)
+                                                /t15*EXP(-y)
                   END IF
                END DO
             ELSE
                y = AREc(4, k)/T
                IF (y .LT. YLIM) Alfa(k) = Alfa(k) + AREc(5, k) &
-                  /t15*EXP(-y)
+                                          /t15*EXP(-y)
             END IF
          ELSEIF (ind .EQ. 0) THEN
             Alfa(k) = (AREc(2, k) - AREc(3, k)*tlo + AREc(4, k)*t13)/tsq
@@ -1917,7 +1918,7 @@ CONTAINS
                      g = 0.05
                   ELSEIF (iel .EQ. 1) THEN
                      g = FMEKAL10((e2p(iel, i2)/T) &
-                        , 0.08d0, -0.16d0, 0.11d0, 0.0d0, 0.0d0)
+                                  , 0.08d0, -0.16d0, 0.11d0, 0.0d0, 0.0d0)
                   ELSE
                      g = 0.055
                   END IF
@@ -2006,7 +2007,7 @@ CONTAINS
                      IF (y .GE. 0.0 .AND. y .LT. UMAX) THEN
                         x = 1./(1.+SQRT(u/a(33 + in6, k)))
                         dgfbk = (((a(36 + in6, k)*x + a(35 + in6, k))*x + a(34 + in6 &
-                           , k))*x + 1.)*x*a(31 + in6, k)*EXP(-y)
+                                                                            , k))*x + 1.)*x*a(31 + in6, k)*EXP(-y)
                         gfbk = gfbk + dgfbk
                      END IF
                   END IF
@@ -2064,11 +2065,11 @@ CONTAINS
                   f = RP(2, i)
                   iaux = NRL(i)
                   CALL MEKAL6(f, g, a, fg, el, y, t, Xzin, nzz, RP(1, i), LP(1, i), &
-                     TRAns(i), Elden, iaux, IDNr, CDRcafe, NCAfe)
+                              TRAns(i), Elden, iaux, IDNr, CDRcafe, NCAfe)
                   fgc = EXP(-y)*xz*1.646E+5
                   IF (eta .GT. 1E-10) THEN
                      IF (ABS(RP(11, i)) .GT. 1E-10 .OR. ABS(RP(14, i)) &
-                        .GT. 1E-10) THEN
+                         .GT. 1E-10) THEN
                         lp3 = LP(3, i)
                         CALL MEKAL9(dcor, eta, tau, RP(1, i), lp3)
                         fgc = fgc*dcor
@@ -2085,7 +2086,7 @@ CONTAINS
    END SUBROUTINE MEKAL5
 !=================================================================
    SUBROUTINE MEKAL6(F, G, A, Fg, El, Y, T, Xzin, Nzz, Rp, Lp, Trans, Elden, Lnum, &
-      Idnr, Cdrcafe, Ncafe)
+                     Idnr, Cdrcafe, Ncafe)
       IMPLICIT NONE
 
       REAL*8 A, b6, bdr, bii, brf, bri, c1, c1f, cdr, Cdrcafe
@@ -2276,7 +2277,6 @@ CONTAINS
       RETURN
    END SUBROUTINE MEKAL9
 
-
    FUNCTION FMEKAL10(Y, A, B, C, D, E)
       IMPLICIT NONE
 
@@ -2286,12 +2286,12 @@ CONTAINS
       IF (Y .LT. 1.0) THEN
          IF (Y .LT. 0.3) THEN
             e1 = -.57731566 + Y*(.99999193 + Y*(-.24991055 + Y*.05519968)) &
-               - DLOG(Y)
+                 - DLOG(Y)
             f5 = e1*DEXP(Y)
             f2 = Y*f5
          ELSE
             f2 = (.06225196 + Y*(1.646421 + Y*1.040425)) &
-               /(.85539 + Y*(2.754082 + Y))
+                 /(.85539 + Y*(2.754082 + Y))
             f5 = f2/Y
          END IF
          f3 = Y*(1.-f2)
@@ -2312,7 +2312,6 @@ CONTAINS
       RETURN
    END FUNCTION FMEKAL10
 
-
    FUNCTION FMEKAL11(X)
       IMPLICIT NONE
 
@@ -2328,7 +2327,6 @@ CONTAINS
       END IF
       RETURN
    END FUNCTION FMEKAL11
-
 
    SUBROUTINE MEKAL12(Y, Fb)
       IMPLICIT NONE
@@ -3351,107 +3349,105 @@ CONTAINS
          Y = 1.E0
          DO 2 I = 1, IP
             Y = Y + C1(I)/(X**(I/2.))
-2        CONTINUE
+2           CONTINUE
 
-         ! Yan et al. cross section in cm**2/atom:
-         SIGMA = 733.E-24/(1.E-3*E)**3.5*Y
+            ! Yan et al. cross section in cm**2/atom:
+            SIGMA = 733.E-24/(1.E-3*E)**3.5*Y
 
-         ! Add in autoionization resonances:
-         DO 3 I = 1, IF
-            SIGMA = SIGMA*FANO(Q(I), NU(I), GAMMA(I), LAMBDA)
-3        CONTINUE
+            ! Add in autoionization resonances:
+            DO 3 I = 1, IF
+               SIGMA = SIGMA*FANO(Q(I), NU(I), GAMMA(I), LAMBDA)
+3              CONTINUE
 
-         HELYAN = SIGMA*AV/AW
+               HELYAN = SIGMA*AV/AW
 
-      END IF
+               END IF
 
-      RETURN
-   END FUNCTION HELYAN
+               RETURN
+               END FUNCTION HELYAN
 
+               FUNCTION FANO(A, B, C, LAMBDA)
 
-   FUNCTION FANO(A, B, C, LAMBDA)
+                  !    Type definitions :
+                  !     IMPLICIT NONE
+                  !    Global variables :
+                  !    Structure definitions :
+                  !    Function declarations :
+                  !    Local constants :
+                  !    Local variables :
+                  REAL EPS
+                  !          ( energy in Rydbergs )
+                  REAL EPSI
+                  REAL X
+                  !          ( log_10 of wavelength in Angstroms )
+                  !     Import :
+                  REAL A
+                  !          ( Q coefficient (Fernley et al. 1987) )
+                  REAL B
+                  !          ( NU coefficient (Oza 1986) )
+                  REAL C
+                  !          ( GAMMA coefficient (Oza 1986) )
+                  REAL LAMBDA
+                  !          ( wavelength in Angstroms )
+                  !     Export :
+                  REAL FANO
+                  !    Start :
 
-      !    Type definitions :
-      !     IMPLICIT NONE
-      !    Global variables :
-      !    Structure definitions :
-      !    Function declarations :
-      !    Local constants :
-      !    Local variables :
-      REAL EPS
-      !          ( energy in Rydbergs )
-      REAL EPSI
-      REAL X
-      !          ( log_10 of wavelength in Angstroms )
-      !     Import :
-      REAL A
-      !          ( Q coefficient (Fernley et al. 1987) )
-      REAL B
-      !          ( NU coefficient (Oza 1986) )
-      REAL C
-      !          ( GAMMA coefficient (Oza 1986) )
-      REAL LAMBDA
-      !          ( wavelength in Angstroms )
-      !     Export :
-      REAL FANO
-      !    Start :
+                  EPS = 911.2671E0/LAMBDA
+                  EPSI = 3.0E0 - 1.E0/(B*B) + 1.807317
+                  X = 2.0*(EPS - EPSI)/C
+                  FANO = (X - A)*(X - A)/(1.0E0 + X*X)
+               END FUNCTION FANO
 
-      EPS = 911.2671E0/LAMBDA
-      EPSI = 3.0E0 - 1.E0/(B*B) + 1.807317
-      X = 2.0*(EPS - EPSI)/C
-      FANO = (X - A)*(X - A)/(1.0E0 + X*X)
-   END FUNCTION FANO
+               FUNCTION XraySintegrand(zz)
 
+                  IMPLICIT NONE
 
-   FUNCTION XraySintegrand(zz)
+                  REAL*8               :: zz, rr
+                  REAL*8               ::  XraySintegrand
 
-      IMPLICIT NONE
+                  ! uu is the projected distance from the cluster center on the sky
+                  ! zz is the distance along the line of sight.
+                  rr = SQRT(uu*uu + zz*zz)
 
-      REAL*8               :: zz, rr
-      REAL*8               ::  XraySintegrand
+                  ! We compare to rr because we want to match the spherical shape of the cluster
 
-      ! uu is the projected distance from the cluster center on the sky
-      ! zz is the distance along the line of sight.
-      rr = SQRT(uu*uu + zz*zz)
+                  IF (rr < r_min) THEN
+                     rr = r_min
+                     XraySintegrand = Xrayemissfunc1(rr)
+                  ELSEIF (rr >= r_integration_max) THEN
+                     XraySintegrand = 0.d0
+                  ELSE
+                     XraySintegrand = Xrayemissfunc1(rr)
+                  END IF
 
-      ! We compare to rr because we want to match the spherical shape of the cluster
-
-      IF (rr < r_min) THEN
-         rr = r_min
-         XraySintegrand = Xrayemissfunc1(rr)
-      ELSEIF (rr >= r_integration_max) THEN
-         XraySintegrand = 0.d0
-      ELSE
-         XraySintegrand = Xrayemissfunc1(rr)
-      END IF
-
-   END FUNCTION XraySintegrand
+               END FUNCTION XraySintegrand
 !=================================================================================================
 
-   FUNCTION Xrayemissfunc1(rr)
+               FUNCTION Xrayemissfunc1(rr)
 
-      IMPLICIT NONE
+                  IMPLICIT NONE
 
-      REAL*8               ::rr
-      REAL*8               :: Xrayemissfunc1
-      REAL*8               :: result
+                  REAL*8               ::rr
+                  REAL*8               :: Xrayemissfunc1
+                  REAL*8               :: result
 
-      ! TODO: We're nesting checks in a way that may be unnecessary
+                  ! TODO: We're nesting checks in a way that may be unnecessary
 
-      IF (rr < r_min) THEN
-         CALL interp1d_even(logX_emiss1D, logr, n, phlog10(r_min), result)
+                  IF (rr < r_min) THEN
+                     CALL interp1d_even(logX_emiss1D, logr, n, phlog10(r_min), result)
 
-      ELSEIF (rr >= r_integration_max) THEN
-         Xrayemissfunc1 = 0.d0
-         RETURN
-      ELSE
-         CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rr), result)
-      END IF
+                  ELSEIF (rr >= r_integration_max) THEN
+                     Xrayemissfunc1 = 0.d0
+                     RETURN
+                  ELSE
+                     CALL interp1d_even(logX_emiss1D, logr, n, phlog10(rr), result)
+                  END IF
 
-      Xrayemissfunc1 = 10.0**result
+                  Xrayemissfunc1 = 10.0**result
 
-   END FUNCTION Xrayemissfunc1
+               END FUNCTION Xrayemissfunc1
 
 !================================================================================================
 
-end MODULE GasModels
+               end MODULE GasModels
