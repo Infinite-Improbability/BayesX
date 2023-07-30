@@ -192,10 +192,10 @@ CONTAINS
                     (((b_GNFW*((r500_DM/rp_GNFW)**(a_GNFW))) + c_GNFW)**(-1.0)) &
                     *(m_sun*Mpc2m*Mpc2m)*(J2keV) ! keV
 
-         open (newunit=io, file='log.txt', position="append", status="unknown", action="write")
-         open (newunit=iob, file='log.dat', form='unformatted')
-         write (io, *) "Rhogas500", Rhogas500
-         write (io, *) "Tg_500_DM", Tg500_DM
+         ! open (newunit=io, file='log.txt', position="append", status="unknown", action="write")
+         ! open (newunit=iob, file='log.dat', form='unformatted')
+         ! write (io, *) "Rhogas500", Rhogas500
+         ! write (io, *) "Tg_500_DM", Tg500_DM
 
          ! TODO: What does this do exactly?
          CALL Xray_flux_coeff(Rhogas500, Tg500_DM, n_e500, n_H500, ne_nH500, xrayBinMin, xrayBinMax, xrayNbin, xrayDeltaE, xrayFluxCoeff)
@@ -241,8 +241,8 @@ CONTAINS
          Ke200 = Tg200_DM/(n_e200**(2.0/3.0))
          Pe200 = n_e200*Tg200_DM
 
-         write (io, *) "Rhogas200", Rhogas200
-         write (io, *) "Tg_200_DM", Tg200_DM
+         ! write (io, *) "Rhogas200", Rhogas200
+         ! write (io, *) "Tg_200_DM", Tg200_DM
 
          ! Allocate some more memory
          ALLOCATE (rgx(13))
@@ -318,9 +318,9 @@ CONTAINS
             ! write(*,'(I3,E16.8,E16.8,E16.8,E16.8)') m, r(m), Rhogas(m), T(m),  xrayFluxCoeff(m)
          END DO
 
-         write (io, *) r
-         write (io, *) T
-         write (io, *) Rhogas
+         ! write (io, *) r
+         ! write (io, *) T
+         ! write (io, *) Rhogas
 
          ! open(newunit=io, file='log.txt', position="append", status="old", action="write")
          ! write(io, *) '--------------------------------'
@@ -499,11 +499,11 @@ CONTAINS
 
          ! write(io, *) 'xrayCpred', xrayCpred
 
-         ! write(iob) xrayCpred
+         ! write (iob) xrayCmap
 
-         close (io)
-         close (iob)
-         stop
+         ! close (io)
+         ! close (iob)
+         ! stop
 
          !Store derived parameters
          aux(k, 1) = D              !angular diameter distance in Mpc
